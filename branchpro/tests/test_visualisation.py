@@ -7,4 +7,5 @@ class TestVisualisationClass(unittest.TestCase):
     Test the 'Visualisation' class.
     """
     def test_output(self):
-        self.assertEqual(bp.Visualisation, 3)
+        visualisation = bp.Visualisation()
+        self.assertEqual(visualisation.value, 3)
