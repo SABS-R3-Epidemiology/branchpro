@@ -17,4 +17,4 @@ class TestBranchProModelClass(unittest.TestCase):
     """
     def test_output(self):
         branchProModel = bp.BranchProModel()
-        self.assertEqual(branchProModel.value, 0)
+        self.assertEqual(branchProModel.value, 5)

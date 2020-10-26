@@ -29,5 +29,5 @@ class BranchProModel:
         example of value
     """
 
-    def __init__(self, value=0):
+    def __init__(self, value=5):
         self.value = value
