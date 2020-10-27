@@ -80,6 +80,12 @@ if __name__ == '__main__':
         action='store_true',
         help='Run all unit tests using `python` interpretor.',
     )
+    
+    parser.add_argument(
+        '--copyright',
+        action='store_true',
+        help='Check that copyright license info is up to date.',
+    )
 
     # Parse!
     args = parser.parse_args()
@@ -90,6 +96,9 @@ if __name__ == '__main__':
     if args.unit:
         has_run = True
         run_unit_tests()
+    if args.copyright:
+        has_run = True
+        run_copyright_checks()
 
     if not has_run:
         parser.print_help()
