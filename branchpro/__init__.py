@@ -1,6 +1,6 @@
 #
 # Root of the branchpro module.
-# Provides access to all shared functionality (models, simu;ation, etc.).
+# Provides access to all shared functionality (models, simulation, etc.).
 #
 # This file is part of BRANCHPRO
 # (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is released
