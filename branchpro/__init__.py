@@ -2,9 +2,10 @@
 # Root of the branchpro module.
 # Provides access to all shared functionality (models, simu;ation, etc.).
 #
-# This file is part of BRANCHPRO (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is  # noqa
-# released under the BSD 3-clause license. See accompanying LICENSE.md for
-# copyright notice and full license details.
+# This file is part of BRANCHPRO
+# (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is released
+# under the BSD 3-clause license. See accompanying LICENSE.md for copyright
+# notice and full license details.
 #
 """branchpro is a Branching Processes modelling library.
 It contains functionality for modelling, simulating, and visualising the
@@ -15,4 +16,4 @@ number of cases of infections by day during an outbreak of the influenza virus.
 from .version_info import VERSION_INT, VERSION  # noqa
 
 # Import main classes
-from .dummy import Dummy    # noqa
+from .models import ForwardModel    # noqa
