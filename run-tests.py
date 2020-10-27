@@ -9,6 +9,7 @@ import unittest
 import os
 import sys
 import argparse
+import datetime
 
 
 def run_unit_tests():
@@ -20,6 +21,7 @@ def run_unit_tests():
                                                       pattern='test*.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests_suite)
     sys.exit(0 if result.wasSuccessful() else 1)
+
 
 # This function is from the Pints library
 # https://github.com/pints-team/pints/blob/master/run-tests.py
@@ -35,7 +37,7 @@ def run_copyright_checks():
 
     with open('LICENSE.md', 'r') as license_file:
         license_text = license_file.read()
-        if 'Copyright (c) 2017-' + current_year in license_text:
+        if 'Copyright (c) ' + current_year in license_text:
             print("Copyright notice in LICENSE.md is up-to-date.")
         else:
             print('Copyright notice in LICENSE.md is NOT up-to-date.')
@@ -46,7 +48,7 @@ def run_copyright_checks():
     header_check = True
     checked_file_types = ['.py']
     copyright_header = """#
-# This file is part of branchpro (https://github.com/SABS-R3-Epidemiology/branchpro/)
+# This file is part of branchpro (https://github.com/SABS-R3-Epidemiology/branchpro/) # noqa
 # which is released under the BSD 3-clause license. See accompanying LICENSE.md
 # for copyright notice and full license details.
 #"""
@@ -67,6 +69,7 @@ def run_copyright_checks():
         print('FAILED')
         sys.exit(1)
 
+
 if __name__ == '__main__':
     # Set up argument parsing
     parser = argparse.ArgumentParser(
@@ -80,7 +83,7 @@ if __name__ == '__main__':
         action='store_true',
         help='Run all unit tests using `python` interpretor.',
     )
-    
+
     parser.add_argument(
         '--copyright',
         action='store_true',
