@@ -1,8 +1,9 @@
 # This file contains code for running all tests.
 #
-# This file is part of BRANCHPRO (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is  # noqa
-# released under the BSD 3-clause license. See accompanying LICENSE.md for
-# copyright notice and full license details.
+# This file is part of BRANCHPRO
+# (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is released
+# under the BSD 3-clause license. See accompanying LICENSE.md for copyright
+# notice and full license details.
 #
 
 import unittest
@@ -48,12 +49,13 @@ def run_copyright_checks():
     header_check = True
     checked_file_types = ['.py']
     copyright_header = """#
-# This file is part of branchpro (https://github.com/SABS-R3-Epidemiology/branchpro/) # noqa
-# which is released under the BSD 3-clause license. See accompanying LICENSE.md
-# for copyright notice and full license details.
+# This file is part of BRANCHPRO
+# (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is released
+# under the BSD 3-clause license. See accompanying LICENSE.md for copyright
+# notice and full license details.
 #"""
 
-    for dirname, subdir_list, file_list in os.walk('pints'):
+    for dirname, subdir_list, file_list in os.walk('branchpro'):
         for f_name in file_list:
             if any([f_name.endswith(x) for x in checked_file_types]):
                 path = os.path.join(dirname, f_name)
