@@ -10,9 +10,9 @@ class TestForwardModelClass(unittest.TestCase):
         bp.ForwardModel()
 
     def test_simulate(self):
-        forwardModel = bp.ForwardModel()
+        forward_model = bp.ForwardModel()
         with self.assertRaises(NotImplementedError):
-            forwardModel.simulate()
+            forward_model.simulate()
 
 
 class TestBranchProModelClass(unittest.TestCase):
