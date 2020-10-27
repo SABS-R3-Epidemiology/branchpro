@@ -6,9 +6,13 @@ class TestForwardModelClass(unittest.TestCase):
     """
     Test the 'ForwardModel' class.
     """
-    def test_output(self):
+    def test__init__(self):
+        bp.ForwardModel()
+
+    def test_simulate(self):
         forwardModel = bp.ForwardModel()
-        self.assertEqual(forwardModel.value, 1)
+        with self.assertRaises(NotImplementedError):
+            forwardModel.simulate()
 
 
 class TestBranchProModelClass(unittest.TestCase):
