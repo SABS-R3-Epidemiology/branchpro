@@ -12,13 +12,4 @@ class TestForwardModelClass(unittest.TestCase):
     def test_simulate(self):
         forward_model = bp.ForwardModel()
         with self.assertRaises(NotImplementedError):
-            forward_model.simulate()
-
-
-class TestBranchProModelClass(unittest.TestCase):
-    """
-    Test the 'BranchProModel' class.
-    """
-    def test_output(self):
-        branchProModel = bp.BranchProModel()
-        self.assertEqual(branchProModel.value, 5)
+            forward_model.simulate(0, 1)
