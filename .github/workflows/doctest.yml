@@ -1,6 +1,6 @@
-# This runs copyright testing.
+# This runs documentation testing.
 
-name: Check copyright license
+name: Check documentation
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .
-    - name: Checks copyright license info
+        python -m pip install .[docs]
+    - name: Checks documentation
       run: |
-        python run-tests.py --copyright
+        python run-tests.py --doctest
