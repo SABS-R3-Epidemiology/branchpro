@@ -50,14 +50,25 @@ class ForwardModel(object):
 
 
 class BranchProModel(ForwardModel):
-    """BranchProModel Class:
+    r"""BranchProModel Class:
     Class for the models following a Branching Processes behaviour.
     It inherits from the `ForwardModel`` class.
+
+    In the branching process model, we track the number of cases
+    registered each day, I_t, also known as the "incidence" at time t.
+
+    The incidence at time t is a random variable distributed according to
+    a Poisson distribution with a mean that depends on previous number of
+    cases, according to the following formula:
+
+    .. math::
+        E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
+            R_{t}\sum_{s=1}^{t}I_{t-s}w_{s}
 
     Parameters
     ----------
     initial_r
-        (numeric) Value of the recombination number at the beginning
+        (numeric) Value of the reproduction number at the beginning
         of the epidemic
     serial_interval:
         (list) Unnormalised probability distribution of that the recipient
@@ -88,14 +99,13 @@ class BranchProModel(ForwardModel):
     def _normalised_daily_mean(
             self, t, incidences):
         """
-        Computes xpected number of new cases at time t, using previous
-        incidences data and serial intevals.
+        Computes expected number of new cases at time t, using previous
+        incidences and serial intevals.
 
         Parameters
         ----------
         t: time at which we wish to compute the expected number of cases
-        incidences: the matrix of all number of cases per time unit recorded
-            by time t
+        incidences: sequence of incidence numbers
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
@@ -112,7 +122,8 @@ class BranchProModel(ForwardModel):
     def simulate(self, parameters, times):
         """
         Runs a forward simulation with the given ``parameters`` and returns a
-        time-series with data points corresponding to the given ``times``.
+        time-series with incidence numbers corresponding to the given ``times``
+        .
 
         Parameters
         ----------

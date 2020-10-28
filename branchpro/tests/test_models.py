@@ -46,12 +46,12 @@ class TestBrachProModelClass(unittest.TestCase):
         branch_model_1 = bp.BranchProModel(2, [1, 2, 3, 2, 1])
         simulated_sample_model_1 = branch_model_1.simulate(1, [2, 4])
         new_simulated_sample_model_1 = branch_model_1.simulate(1, [0, 2, 4])
-        self.assertEqual(len(simulated_sample_model_1), 2)
-        self.assertEqual(len(new_simulated_sample_model_1), 3)
+        self.assertEqual(simulated_sample_model_1.shape, (2,))
+        self.assertEqual(new_simulated_sample_model_1.shape, (3,))
 
         branch_model_2 = bp.BranchProModel(2, [1, 2, 3, 2, 1])
         simulated_sample_model_2 = branch_model_2.simulate(1, [2, 4, 7])
-        self.assertEqual(len(simulated_sample_model_2), 3)
+        self.assertEqual(simulated_sample_model_2.shape, (3,))
 
         with self.assertRaises(TypeError):
             branch_model_1.simulate(2, (1))
