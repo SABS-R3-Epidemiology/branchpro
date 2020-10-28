@@ -60,10 +60,23 @@ class BranchProModel(ForwardModel):
             raise ValueError('Sum of serial interval values must be > 0')
 
         self._serial_interval = np.asarray(serial_interval)
-        self._initial_r = initial_r
+        self._present_r_profile = np.asarray(initial_r)
 
-    def __normalised_daily_mean__(self, t, incidences, reproduction_num, serial_interval):  # noqa
+    def __normalised_daily_mean(self, t, incidences, reproduction_num, serial_interval):  # noqa
         return reproduction_num * sum([incidences[t - s] * serial_interval[s - 1] for s in range(t)]) / np.sum(serial_interval)  # noqa
+
+    def add_r_step(self, new_r, starting_time: int, ending_time: int = None):
+        # Read most recent profile and its final known value of R_t
+        present_r_profile = np.asarray(self._present_r_profile)
+        most_recent_r = present_r_profile[-1]
+
+        # Autofill the R_t profile until the time when new value is introduced
+        time_to_new_r = starting_time - present_r_profile.ndim
+        up_until_new_r_profile = np.append(self._present_r_profile, np.full(time_to_new_r, most_recent_r))  # noqa
+
+        # Update the R_t profile with the latest value introduced
+        new_r_profile = np.append(up_until_new_r_profile, np.asarray(new_r))
+        self._present_r_profile = new_r_profile
 
     def simulate(self, parameters, times):
         initial_cond = parameters
@@ -81,7 +94,7 @@ class BranchProModel(ForwardModel):
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            norm_daily_mean = self.__normalised_daily_mean__(t, incidences, reproduction_num, serial_interval)  # noqa
+            norm_daily_mean = self.__normalised_daily_mean(t, incidences, reproduction_num, serial_interval)  # noqa
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
 
         return incidences[np.in1d(np.append(np.asarray(0), simulation_times), times)]  # noqa
