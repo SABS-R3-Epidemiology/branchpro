@@ -51,11 +51,24 @@ class ForwardModel(object):
 
 class BranchProModel(ForwardModel):
     """BranchProModel Class:
+    Class for the models following a Branching Processes behaviour.
+    It inherits from the `ForwardModel`` class.
 
     Parameters
     ----------
-    value: numeric, optional
-        example of value
+    initial_r
+        (numeric) Value of the recombination number at the beginning
+        of the epidemic
+    serial_interval:
+        (list) Unnormalised probability distribution of that the recipient
+        first displays symptoms s days after the infector first displays
+        symptoms
+
+    Methods
+    -------
+    simulate: return model output for specified parameters and times.
+    _normalised_daily_mean: (Private) returns the expected number of new cases
+        at time t
     """
 
     def __init__(self, initial_r, serial_interval):
@@ -74,6 +87,16 @@ class BranchProModel(ForwardModel):
 
     def _normalised_daily_mean(
             self, t, incidences):
+        """
+        Computes xpected number of new cases at time t, using previous
+        incidences data and serial intevals.
+
+        Parameters
+        ----------
+        t: time at which we wish to compute the expected number of cases
+        incidences: the matrix of all number of cases per time unit recorded
+            by time t
+        """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
             mean = self._initial_r * (
@@ -87,6 +110,20 @@ class BranchProModel(ForwardModel):
         return mean
 
     def simulate(self, parameters, times):
+        """
+        Runs a forward simulation with the given ``parameters`` and returns a
+        time-series with data points corresponding to the given ``times``.
+
+        Parameters
+        ----------
+        parameters
+            Initial number of cases.
+        times
+            The times at which to evaluate. Must be an ordered sequence,
+            without duplicates, and without negative values.
+            All simulations are started at time 0, regardless of whether this
+            value appears in ``times``.
+        """
         if not isinstance(times, list):
             raise TypeError('Chosen times must be in a list format')
 
