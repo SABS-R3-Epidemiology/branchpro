@@ -103,8 +103,8 @@ def doctest_sphinx():
     print('Checking if docs can be built.')
     p = subprocess.Popen([
         'sphinx-build',
-        '-b',
-        'doctest',
+        # '-b',
+        # 'doctest',
         'docs/source',
         'docs/build/html',
         '-W',
@@ -139,8 +139,8 @@ def doctest_rst_and_public_interface():
 
     # If any modules other than these are exposed it may indicate that a module
     # has been inadvertently exposed in a public context, or that a new module
-    # has been added to branchpro and should be imported above and included in this
-    # list.
+    # has been added to branchpro and should be imported above and included in
+    # this list.
     branchpro_submodules = ['branchpro.models', 'branchpro.version_info']
 
     doc_symbols = get_all_documented_symbols()
@@ -176,7 +176,7 @@ def check_exposed_symbols(module, submodule_names, doc_symbols):
     exposed_modules = [x for x in symbols if inspect.ismodule(x)]
     unexpected_modules = [m for m in exposed_modules if
                           m.__name__ not in submodule_names]
-    
+
     if len(unexpected_modules) > 0:
         print('The following modules are unexpectedly exposed in the public '
               'interface of %s:' % module.__name__)
@@ -184,8 +184,9 @@ def check_exposed_symbols(module, submodule_names, doc_symbols):
             print('  unexpected module: ' + m.__name__)
 
         print('For python modules such as numpy you may need to confine the '
-              'import to the function scope. If you have created a new branchpro '
-              'submodule, you will need to make %s (doctest) aware of this.'
+              'import to the function scope. If you have created a new'
+              'branchpro submodule, you will need to make %s (doctest) aware'
+              'of this.'
               % __file__)
         print('FAILED')
         sys.exit(1)
