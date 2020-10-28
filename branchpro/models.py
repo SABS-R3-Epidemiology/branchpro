@@ -66,30 +66,58 @@ class BranchProModel(ForwardModel):
 
         self._serial_interval = np.asarray(serial_interval)
         self._present_r_profile = np.asarray(initial_r)
+        self._present_t_profile = np.asarray(1)
 
     def __normalised_daily_mean(self, t, incidences, reproduction_num, serial_interval):  # noqa
-        return reproduction_num * sum([incidences[t - s] * serial_interval[s - 1] for s in range(t)]) / np.sum(serial_interval)  # noqa
+        return reproduction_num[t-1] * sum([incidences[t - s - 1] * serial_interval[s] for s in range(t)]) / np.sum(serial_interval)  # noqa
 
-    def add_r_step(self, new_r, starting_time: int, ending_time: int = None):
-        # Read most recent profile and its final known value of R_t
+    def add_r_steps(self, new_rs, start_times):
+        # Raise error if inputs do not have same dimensions
+        if np.asarray(new_rs).ndim != np.asarray(start_times).ndim:
+            raise ValueError('Both inputs need to have same dimension')
+
+        # Read most recent R_t and time profile
         present_r_profile = np.asarray(self._present_r_profile)
-        most_recent_r = present_r_profile[-1]
+        present_t_profile = np.asarray(self._present_t_profile)
 
-        # Autofill the R_t profile until the time when new value is introduced
-        time_to_new_r = starting_time - present_r_profile.ndim
-        up_until_new_r_profile = np.append(self._present_r_profile, np.full(time_to_new_r, most_recent_r))  # noqa
+        # Add new R_t values and the corresponding first time at which
+        # this particular R_t had started to be used
+        new_r_profile = np.append(present_r_profile, np.asarray(new_rs))
+        new_t_profile = np.append(present_t_profile, np.asarray(start_times))
 
         # Update the R_t profile with the latest value introduced
-        new_r_profile = np.append(up_until_new_r_profile, np.asarray(new_r))
         self._present_r_profile = new_r_profile
+        self._present_t_profile = new_t_profile
+
+    def reproduction_num(self, last_time):
+        # Read current R_t profile and their emerging times
+        present_r_profile = np.asarray(self._present_r_profile)
+        present_t_profile = np.asarray(self._present_t_profile)
+
+        # Initialise the matrix which we will fill with the R_t per unit time
+        reproduction_num = np.empty(shape=last_time)
+
+        # Create an array of the reproduction numbers in each unit of time
+        # Each element is in the R_t profile is used between
+        # Their corresponding limits as expressed in the time profile
+        for r in present_r_profile:
+            change_in_r_num = np.where(present_r_profile == r)
+            start_time_for_r = present_t_profile[change_in_r_num] - 1
+            end_time_for_r = present_t_profile[change_in_r_num + 1] - 1
+            time_spend_at_current_r = end_time_for_r - start_time_for_r
+            reproduction_num[start_time_for_r:end_time_for_r] = np.full(time_spend_at_current_r, r)  # noqa
+
+        # Return the filled matrix or R_t values
+        return reproduction_num
 
     def simulate(self, parameters, times):
         initial_cond = parameters
-        reproduction_num = self._initial_r
 
         # Initialise list of number of cases per unit time
-        # with initial condition I0
+        # with initial condition I0 and vector or R_t
         last_time_point = np.max(times)
+
+        reproduction_num = self.reproduction_num(last_time=last_time_point)
         incidences = np.empty(shape=last_time_point + 1)
         incidences[0] = initial_cond
 
