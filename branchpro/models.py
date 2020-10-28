@@ -58,32 +58,55 @@ class BranchProModel(ForwardModel):
     ----------
     initial_r
         (numeric) Value of the recombination number at the beginning
-        of the epidemic
+        of the epidemic.
     serial_interval:
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
-        symptoms
+        symptoms.
 
     Methods
     -------
     simulate: return model output for specified parameters and times.
     _normalised_daily_mean: (Private) returns the expected number of new cases
-        at time t
+        at time t.
     """
 
     def __init__(self, initial_r, serial_interval):
         super(BranchProModel, self).__init__()
 
         if not isinstance(serial_interval, list):
-            raise TypeError('Serial interval values must be in a list format')
+            raise TypeError('Serial interval values must be in a list format.')
         if np.sum(serial_interval) <= 0:
-            raise ValueError('Sum of serial interval values must be > 0')
+            raise ValueError('Sum of serial interval values must be > 0.')
         if not isinstance(initial_r, (int, float)):
-            raise TypeError('Value of R must be integer or float')
+            raise TypeError('Value of R must be integer or float.')
 
         self._serial_interval = np.asarray(serial_interval)[::-1]
         self._initial_r = initial_r
         self._normalizing_const = np.sum(self._serial_interval)
+
+    @property
+    def get_serial_intevals(self):
+        """
+        Returns serial intevals for the model.
+        """
+        return self._serial_interval[::-1]
+
+    def update_serial_intevals(self, new_serial_intevals):
+        """
+        Updates serial intevals for the model.
+
+        Parameters
+        ----------
+        new_serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms.
+        """
+        if not isinstance(new_serial_intevals, list):
+            raise TypeError('Serial interval values must be in a list format.')
+
+        self._serial_interval = np.asarray(new_serial_intevals)[::-1]
 
     def _normalised_daily_mean(
             self, t, incidences):
@@ -93,9 +116,9 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        t: time at which we wish to compute the expected number of cases
+        t: time at which we wish to compute the expected number of cases.
         incidences: the matrix of all number of cases per time unit recorded
-            by time t
+            by time t.
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
@@ -125,7 +148,7 @@ class BranchProModel(ForwardModel):
             value appears in ``times``.
         """
         if not isinstance(times, list):
-            raise TypeError('Chosen times must be in a list format')
+            raise TypeError('Chosen times must be in a list format.')
 
         initial_cond = parameters
 

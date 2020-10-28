@@ -8,6 +8,7 @@
 import unittest
 import branchpro as bp
 import numpy as np
+import numpy.testing as npt
 
 
 class TestForwardModelClass(unittest.TestCase):
@@ -41,6 +42,21 @@ class TestBrachProModelClass(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             bp.BranchProModel(0, 1)
+
+    def test_get_serial_intevals(self):
+        br_model = bp.BranchProModel(0, [1, 2])
+        npt.assert_array_equal(br_model.get_serial_intevals, np.array([1, 2]))
+
+    def test_update_serial_intevals(self):
+        br_model = bp.BranchProModel(0, [1, 2])
+        br_model.update_serial_intevals([1, 3, 2])
+        npt.assert_array_equal(
+                                br_model.get_serial_intevals,
+                                np.array([1, 3, 2])
+                                )
+
+        with self.assertRaises(TypeError):
+            br_model.update_serial_intevals((1, 3, 2))
 
     def test_simulate(self):
         branch_model_1 = bp.BranchProModel(2, [1, 2, 3, 2, 1])
