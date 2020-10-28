@@ -28,11 +28,6 @@ class TestBrachProModelClass(unittest.TestCase):
     Test the 'BranchProModel' class.
     """
     def test__init__(self):
-        branch_model = bp.BranchProModel(0, [1])
-        self.assertEqual(branch_model._serial_interval, np.array([1]))
-        self.assertEqual(branch_model._initial_r, 0)
-        self.assertEqual(branch_model._normalizing_const, 1)
-
         with self.assertRaises(ValueError):
             bp.BranchProModel(0, [0])
 
