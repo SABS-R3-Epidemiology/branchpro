@@ -61,73 +61,51 @@ class BranchProModel(ForwardModel):
     def __init__(self, initial_r, serial_interval):
         super(BranchProModel, self).__init__()
 
+        if not isinstance(serial_interval, list):
+            raise TypeError('Serial interval values must be in a list format')
         if np.sum(serial_interval) <= 0:
             raise ValueError('Sum of serial interval values must be > 0')
+        if not isinstance(initial_r, (int, float)):
+            raise TypeError('Value of R must be integer or float')
 
-        self._serial_interval = np.asarray(serial_interval)
-        self._present_r_profile = np.asarray(initial_r)
-        self._present_t_profile = np.asarray(1)
+        self._serial_interval = np.asarray(serial_interval)[::-1]
+        self._initial_r = initial_r
+        self._normalizing_const = np.sum(self._serial_interval)
 
-    def __normalised_daily_mean(self, t, incidences, reproduction_num, serial_interval):  # noqa
-        return reproduction_num[t-1] * sum([incidences[t - s - 1] * serial_interval[s] for s in range(t)]) / np.sum(serial_interval)  # noqa
+    def _normalised_daily_mean(
+            self, t, incidences):
+        if t > len(self._serial_interval):
+            start_date = t - len(self._serial_interval)
+            mean = self._initial_r * (
+                np.sum(incidences[start_date:t] * self._serial_interval) /
+                self._normalizing_const)
+            return mean
 
-    def add_r_steps(self, new_rs, start_times):
-        # Raise error if inputs do not have same dimensions
-        if np.asarray(new_rs).ndim != np.asarray(start_times).ndim:
-            raise ValueError('Both inputs need to have same dimension')
-
-        # Read most recent R_t and time profile
-        present_r_profile = np.asarray(self._present_r_profile)
-        present_t_profile = np.asarray(self._present_t_profile)
-
-        # Add new R_t values and the corresponding first time at which
-        # this particular R_t had started to be used
-        new_r_profile = np.append(present_r_profile, np.asarray(new_rs))
-        new_t_profile = np.append(present_t_profile, np.asarray(start_times))
-
-        # Update the R_t profile with the latest value introduced
-        self._present_r_profile = new_r_profile
-        self._present_t_profile = new_t_profile
-
-    def reproduction_num(self, last_time):
-        # Read current R_t profile and their emerging times
-        present_r_profile = np.asarray(self._present_r_profile)
-        present_t_profile = np.asarray(self._present_t_profile)
-
-        # Initialise the matrix which we will fill with the R_t per unit time
-        reproduction_num = np.empty(shape=last_time)
-
-        # Create an array of the reproduction numbers in each unit of time
-        # Each element is in the R_t profile is used between
-        # Their corresponding limits as expressed in the time profile
-        for r in present_r_profile:
-            change_in_r_num = np.where(present_r_profile == r)
-            start_time_for_r = present_t_profile[change_in_r_num] - 1
-            end_time_for_r = present_t_profile[change_in_r_num + 1] - 1
-            time_spend_at_current_r = end_time_for_r - start_time_for_r
-            reproduction_num[start_time_for_r:end_time_for_r] = np.full(time_spend_at_current_r, r)  # noqa
-
-        # Return the filled matrix or R_t values
-        return reproduction_num
+        mean = self._initial_r * (
+            np.sum(incidences[:t] * self._serial_interval[-t:]) /
+            self._normalizing_const)
+        return mean
 
     def simulate(self, parameters, times):
+        if not isinstance(times, list):
+            raise TypeError('Chosen times must be in a list format')
+
         initial_cond = parameters
 
         # Initialise list of number of cases per unit time
-        # with initial condition I0 and vector or R_t
+        # with initial condition I0
         last_time_point = np.max(times)
-
-        reproduction_num = self.reproduction_num(last_time=last_time_point)
         incidences = np.empty(shape=last_time_point + 1)
         incidences[0] = initial_cond
 
         # Construct simulation times in steps of 1 unit time each
-        simulation_times = np.arange(start=1, stop=last_time_point, step=1)
+        simulation_times = np.arange(start=1, stop=last_time_point+1, step=1)
 
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            norm_daily_mean = self.__normalised_daily_mean(t, incidences, reproduction_num, serial_interval)  # noqa
+            norm_daily_mean = self._normalised_daily_mean(t, incidences)
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
 
-        return incidences[np.in1d(np.append(np.asarray(0), simulation_times), times)]  # noqa
+        mask = np.in1d(np.append(np.asarray(0), simulation_times), times)
+        return incidences[mask]
