@@ -103,8 +103,8 @@ def doctest_sphinx():
     print('Checking if docs can be built.')
     p = subprocess.Popen([
         'sphinx-build',
-        # '-b',
-        # 'doctest',
+        '-b',
+        'doctest',
         'docs/source',
         'docs/build/html',
         '-W',
