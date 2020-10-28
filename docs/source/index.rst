@@ -6,15 +6,15 @@
 
 Welcome to branchpro's documentation!
 =====================================
+The branchpro source code is hosted on GitHub_.
+
 
 .. toctree::
+
    core_classes_and_methods
    models
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
+Search
+======
 * :ref:`search`
