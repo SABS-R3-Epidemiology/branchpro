@@ -6,8 +6,8 @@
 #
 
 import unittest
-import branchpro as bp
 import numpy as np
+import branchpro as bp
 
 
 class TestForwardModelClass(unittest.TestCase):

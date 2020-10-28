@@ -57,9 +57,9 @@ class BranchProModel(ForwardModel):
     In the branching process model, we track the number of cases
     registered each day, I_t, also known as the "incidence" at time t.
 
-    The incidence at time t is a random variable distributed according to
-    a Poisson distribution with a mean that depends on previous number of
-    cases, according to the following formula:
+    The incidence at time t is modelled by a random variable distributed
+    according to a Poisson distribution with a mean that depends on previous
+    number of cases, according to the following formula:
 
     .. math::
         E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
@@ -105,7 +105,7 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        t: time at which we wish to compute the expected number of cases
+        t: evaluation time
         incidences: sequence of incidence numbers
         """
         if t > len(self._serial_interval):
