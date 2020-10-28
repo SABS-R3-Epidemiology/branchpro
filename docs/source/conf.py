@@ -17,7 +17,6 @@ sys.path.insert(0, os.path.abspath('../../branchpro'))
 # import branchpro
 
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'branchpro'
