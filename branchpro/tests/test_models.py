@@ -38,6 +38,8 @@ class TestBrachProModelClass(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             bp.BranchProModel('0', [1])
+
+        with self.assertRaises(TypeError):
             bp.BranchProModel(0, 1)
 
     def test_simulate(self):
