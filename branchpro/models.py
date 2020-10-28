@@ -85,8 +85,9 @@ class BranchProModel(ForwardModel):
     def __init__(self, initial_r, serial_interval):
         super(BranchProModel, self).__init__()
 
-        if not isinstance(serial_interval, list):
-            raise TypeError('Serial interval values must be in a list format')
+        if not isinstance(serial_interval, (list, np.ndarray)):
+            raise TypeError('Serial interval values must be in a list or numpy \
+                array format')
         if np.sum(serial_interval) <= 0:
             raise ValueError('Sum of serial interval values must be > 0')
         if not isinstance(initial_r, (int, float)):
@@ -135,8 +136,9 @@ class BranchProModel(ForwardModel):
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
         """
-        if not isinstance(times, list):
-            raise TypeError('Chosen times must be in a list format')
+        if not isinstance(times, (list, np.ndarray)):
+            raise TypeError('Chosen times must be in a list or \
+                numpy array format')
 
         initial_cond = parameters
 

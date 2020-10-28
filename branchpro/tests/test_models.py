@@ -43,8 +43,8 @@ class TestBrachProModelClass(unittest.TestCase):
             bp.BranchProModel(0, 1)
 
     def test_simulate(self):
-        branch_model_1 = bp.BranchProModel(2, [1, 2, 3, 2, 1])
-        simulated_sample_model_1 = branch_model_1.simulate(1, [2, 4])
+        branch_model_1 = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
+        simulated_sample_model_1 = branch_model_1.simulate(1, np.array([2, 4]))
         new_simulated_sample_model_1 = branch_model_1.simulate(1, [0, 2, 4])
         self.assertEqual(simulated_sample_model_1.shape, (2,))
         self.assertEqual(new_simulated_sample_model_1.shape, (3,))
