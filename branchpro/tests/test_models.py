@@ -6,7 +6,9 @@
 #
 
 import unittest
+
 import numpy as np
+
 import branchpro as bp
 
 
@@ -47,6 +49,3 @@ class TestBrachProModelClass(unittest.TestCase):
         branch_model_2 = bp.BranchProModel(2, [1, 2, 3, 2, 1])
         simulated_sample_model_2 = branch_model_2.simulate(1, [2, 4, 7])
         self.assertEqual(simulated_sample_model_2.shape, (3,))
-
-        with self.assertRaises(ValueError):
-            branch_model_1.simulate(2, (1))
