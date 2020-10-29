@@ -35,7 +35,7 @@ class TestBrachProModelClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             bp.BranchProModel('0', [1])
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             bp.BranchProModel(0, 1)
 
     def test_get_serial_intevals(self):
@@ -50,8 +50,8 @@ class TestBrachProModelClass(unittest.TestCase):
                                 np.array([1, 3, 2])
                                 )
 
-        with self.assertRaises(TypeError):
-            br_model.update_serial_intevals((1, 3, 2))
+        with self.assertRaises(ValueError):
+            br_model.update_serial_intevals((1))
 
     def test_simulate(self):
         branch_model_1 = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
@@ -64,5 +64,5 @@ class TestBrachProModelClass(unittest.TestCase):
         simulated_sample_model_2 = branch_model_2.simulate(1, [2, 4, 7])
         self.assertEqual(simulated_sample_model_2.shape, (3,))
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             branch_model_1.simulate(2, (1))

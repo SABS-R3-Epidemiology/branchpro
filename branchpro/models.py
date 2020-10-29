@@ -87,9 +87,9 @@ class BranchProModel(ForwardModel):
     def __init__(self, initial_r, serial_interval):
         super(BranchProModel, self).__init__()
 
-        if not isinstance(serial_interval, (list, np.ndarray)):
-            raise TypeError('Serial interval values must be in a list or numpy \
-                array format')
+        if np.asarray(serial_interval).ndim != 1:
+            raise ValueError('Serial interval values storage format \
+                must be 1-dimensional')
         if np.sum(serial_interval) <= 0:
             raise ValueError('Sum of serial interval values must be > 0.')
         if not isinstance(initial_r, (int, float)):
@@ -117,8 +117,9 @@ class BranchProModel(ForwardModel):
             first displays symptoms s days after the infector first displays
             symptoms.
         """
-        if not isinstance(new_serial_intevals, list):
-            raise TypeError('Serial interval values must be in a list format.')
+        if np.asarray(new_serial_intevals).ndim != 1:
+            raise ValueError('Chosen times storage format \
+                must be 1-dimensional')
 
         self._serial_interval = np.asarray(new_serial_intevals)[::-1]
 
@@ -161,9 +162,9 @@ class BranchProModel(ForwardModel):
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
         """
-        if not isinstance(times, (list, np.ndarray)):
-            raise TypeError('Chosen times must be in a list or \
-                numpy array format')
+        if np.asarray(times).ndim != 1:
+            raise ValueError('Chosen times storage format \
+                must be 1-dimensional')
 
         initial_cond = parameters
 
