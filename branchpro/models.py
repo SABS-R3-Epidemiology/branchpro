@@ -59,9 +59,9 @@ class BranchProModel(ForwardModel):
     In the branching process model, we track the number of cases
     registered each day, I_t, also known as the "incidence" at time t.
 
-    The incidence at time t is a random variable distributed according to
-    a Poisson distribution with a mean that depends on previous number of
-    cases, according to the following formula:
+    The incidence at time t is modelled by a random variable distributed
+    according to a Poisson distribution with a mean that depends on previous
+    number of cases, according to the following formula:
 
     .. math::
         E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
@@ -97,8 +97,8 @@ class BranchProModel(ForwardModel):
         super(BranchProModel, self).__init__()
 
         if np.asarray(serial_interval).ndim != 1:
-            raise ValueError('Serial interval values storage format \
-                must be 1-dimensional')
+            raise ValueError(
+                'Serial interval values storage format must be 1-dimensional')
         if np.sum(serial_interval) <= 0:
             raise ValueError('Sum of serial interval values must be > 0.')
         if not isinstance(initial_r, (int, float)):
@@ -222,7 +222,7 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        t: time at which we wish to compute the expected number of cases
+        t: evaluation time
         incidences: sequence of incidence numbers
         last_time: total evaluation and simulation time for the R_t profile.
 
@@ -256,14 +256,6 @@ class BranchProModel(ForwardModel):
             value appears in ``times``.
 
         """
-        if np.asarray(times).ndim != 1:
-            raise ValueError('Chosen times storage format \
-                must be 1-dimensional')
-        if np.any(np.asarray(times) < 0):
-            raise ValueError('Times can not be negative.')
-        if np.any(np.asarray(times)[:-1] >= np.asarray(times)[1:]):
-            raise ValueError('Times must be increasing.')
-
         initial_cond = parameters
 
         # Initialise list of number of cases per unit time
