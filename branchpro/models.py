@@ -67,6 +67,9 @@ class BranchProModel(ForwardModel):
         E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
             R_{t}\sum_{s=1}^{t}I_{t-s}w_{s}
 
+    Always apply method :meth:`set_r_profile` before calling
+    :meth:`BranchProModel.simulate` for a change of R_t profile!
+
     Parameters
     ----------
     initial_r
@@ -84,9 +87,6 @@ class BranchProModel(ForwardModel):
     get_serial_intervals: returns serial intervals for the model.
     update_serial_intervals: updates serial intervals for the model.
     set_r_profile: creates a new R_t profile for the model.
-
-    *Always apply method `set_r_profile` before calling
-    :meth:`BranchProModel.simulate` for a change of R_t profile!*
 
     """
 
