@@ -80,6 +80,8 @@ class BranchProModel(ForwardModel):
     simulate: return model output for specified parameters and times.
     _normalised_daily_mean: (Private) returns the expected number of new cases
         at time t.
+    get_serial_intervals: returns serial intevals for the model.
+    update_serial_intevals: updates serial intevals for the model.
     """
 
     def __init__(self, initial_r, serial_interval):
