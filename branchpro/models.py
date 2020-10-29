@@ -111,12 +111,15 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        new_rs: sequence of new time-dependent values of the reproduction
+        new_rs
+            sequence of new time-dependent values of the reproduction
             numbers.
-        start_times: sequence of the first time unit when the corresponding
+        start_times
+            sequence of the first time unit when the corresponding
             indexed value of R_t in new_rs is used. Must be an ordered sequence
              and without duplicates or negative values.
-        last_time: total evaluation time; optional.
+        last_time
+            total evaluation time; optional.
 
         """
         # Raise error if not correct dimensionality of inputs
@@ -171,6 +174,13 @@ class BranchProModel(ForwardModel):
         # Reverse inverting of order of serial intervals
         return self._serial_interval[::-1]
 
+    def get_r_profile(self):
+        """
+        Returns R_t profile for the model.
+
+        """
+        return self._r_profile
+
     def set_serial_intevals(self, serial_intevals):
         """
         Updates serial intevals for the model.
@@ -198,9 +208,12 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        t: evaluation time
-        incidences: sequence of incidence numbers
-        last_time: total evaluation and simulation time for the R_t profile.
+        t
+            evaluation time
+        incidences
+            sequence of incidence numbers
+        last_time
+            total evaluation and simulation time for the R_t profile.
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
