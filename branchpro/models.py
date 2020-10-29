@@ -80,6 +80,8 @@ class BranchProModel(ForwardModel):
     simulate: return model output for specified parameters and times.
     _normalised_daily_mean: (Private) returns the expected number of new cases
         at time t.
+    get_serial_intervals: returns serial intevals for the model.
+     update_serial_intevals: updates serial intevals for the model.
     """
 
     def __init__(self, initial_r, serial_interval):
@@ -95,7 +97,58 @@ class BranchProModel(ForwardModel):
 
         self._serial_interval = np.asarray(serial_interval)[::-1]
         self._initial_r = initial_r
+        self._present_r_profile = initial_r
+        self._present_t_profile = np.array([0])
         self._normalizing_const = np.sum(self._serial_interval)
+
+    def add_r_steps(self, new_rs, start_times):
+        """
+        Creates creates an extended R_t profile for the model.
+
+        Parameters
+        ----------
+        new_rs: sequence of new time-dependent vlaues of the reproduction
+            numbers.
+        start_times: sequence of the first time unit when the corresponding
+            indexed value of R_t in new_rs is used.
+        """
+        # Raise error if inputs do not have same dimensions
+        if np.asarray(new_rs).ndim != np.asarray(start_times).ndim:
+            raise ValueError('Both inputs need to have same dimension')
+
+        # Read most recent R_t and time profile
+        present_r_profile = np.asarray(self._present_r_profile)
+        present_t_profile = np.asarray(self._present_t_profile)
+
+        # Add new R_t values and the corresponding first time at which
+        # this particular R_t had started to be used
+        new_r_profile = np.append(present_r_profile, np.asarray(new_rs))
+        new_t_profile = np.append(present_t_profile, np.asarray(start_times))
+
+        # Update the R_t profile with the latest value introduced
+        self._present_r_profile = new_r_profile
+        self._present_t_profile = new_t_profile
+
+    def reproduction_num(self, last_time):
+        # Read current R_t profile and their emerging times
+        present_r_profile = np.asarray(self._present_r_profile)
+        present_t_profile = np.asarray(self._present_t_profile)
+
+        # Initialise the matrix which we will fill with the R_t per unit time
+        reproduction_num = np.empty(shape=last_time)
+
+        # Create an array of the reproduction numbers in each unit of time
+        # Each element is in the R_t profile is used between
+        # Their corresponding limits as expressed in the time profile
+        for r in present_r_profile:
+            change_in_r_num = np.where(present_r_profile == r)
+            start_time_for_r = present_t_profile[change_in_r_num] - 1
+            end_time_for_r = present_t_profile[change_in_r_num + 1] - 1
+            time_spend_at_current_r = end_time_for_r - start_time_for_r
+            reproduction_num[start_time_for_r:end_time_for_r] = np.full(time_spend_at_current_r, r)  # noqa
+
+        # Return the filled matrix or R_t values
+        return reproduction_num
 
     @property
     def get_serial_intevals(self):
