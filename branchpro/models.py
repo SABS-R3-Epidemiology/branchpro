@@ -18,6 +18,7 @@ class ForwardModel(object):
     Methods
     -------
     simulate: return model output for specified parameters and times.
+
     """
 
     def __init__(self):
@@ -41,6 +42,7 @@ class ForwardModel(object):
             without duplicates, and without negative values.
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
+
         """
         raise NotImplementedError
 
@@ -78,10 +80,13 @@ class BranchProModel(ForwardModel):
     Methods
     -------
     simulate: return model output for specified parameters and times.
-    _normalised_daily_mean: (Private) returns the expected number of new cases
-        at time t.
     get_serial_intervals: returns serial intevals for the model.
     update_serial_intevals: updates serial intevals for the model.
+    set_r_profile: creates a new R_t profile for the model.
+
+    *Always apply method set_r_profile before simulation for a change of R_t
+    profile!*
+
     """
 
     def __init__(self, initial_r, serial_interval):
@@ -97,15 +102,84 @@ class BranchProModel(ForwardModel):
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_interval)[::-1]
-        self._initial_r = initial_r
+        self._r_profile = np.array([initial_r])
         self._normalizing_const = np.sum(self._serial_interval)
+
+    def set_r_profile(self, new_rs, start_times, last_time=None):
+        """
+        Creates a new R_t profile for the model.
+
+        Parameters
+        ----------
+        new_rs
+            sequence of new time-dependent values of the reproduction
+            numbers.
+        start_times
+            sequence of the first time unit when the corresponding
+            indexed value of R_t in new_rs is used. Must be an ordered sequence
+            and without duplicates or negative values.
+        last_time
+            total evaluation time; optional.
+
+        """
+        # Raise error if not correct dimensionality of inputs
+        if np.asarray(new_rs).ndim != 1:
+            raise ValueError(
+                'New reproduction numbers storage format must be 1-dimensional'
+                )
+        if np.asarray(start_times).ndim != 1:
+            raise ValueError(
+                'Starting times values storage format must be 1-dimensional')
+
+        # Raise error if inputs do not have same shape
+        if np.asarray(new_rs).shape != np.asarray(start_times).shape:
+            raise ValueError('Both inputs should have same number of elements')
+
+        # Raise error if start times are not non-negative and increasing
+        if np.any(np.asarray(start_times) < 0):
+            raise ValueError('Times can not be negative.')
+        if np.any(np.asarray(start_times)[:-1] >= np.asarray(start_times)[1:]):
+            raise ValueError('Times must be increasing.')
+
+        # Ceil times to integer numbers a
+        times = np.ceil(start_times).astype(int)
+
+        # Create r profile
+        r_profile = []
+
+        # Fill in initial r from day 1 up to start time
+        initial_r = self._r_profile[0]
+        r_profile += [initial_r] * (times[0] - 1)
+
+        # Fill in later r's
+        time_intervals = times[1:] - times[:-1]
+        for time_id, time_interval in enumerate(time_intervals):
+            # Append r for each time unit
+            r_profile += [new_rs[time_id]] * time_interval
+
+        # Add final r
+        if last_time:
+            final_interval = last_time - start_times[-1] + 1
+            r_profile += [new_rs[-1]] * final_interval
+        else:
+            r_profile += [new_rs[-1]]
+
+        self._r_profile = np.asarray(r_profile)
 
     def get_serial_intevals(self):
         """
         Returns serial intevals for the model.
+
         """
         # Reverse inverting of order of serial intervals
         return self._serial_interval[::-1]
+
+    def get_r_profile(self):
+        """
+        Returns R_t profile for the model.
+
+        """
+        return self._r_profile
 
     def set_serial_intevals(self, serial_intevals):
         """
@@ -117,6 +191,7 @@ class BranchProModel(ForwardModel):
             New unnormalised probability distribution of that the recipient
             first displays symptoms s days after the infector first displays
             symptoms.
+
         """
         if np.asarray(serial_intevals).ndim != 1:
             raise ValueError(
@@ -124,6 +199,7 @@ class BranchProModel(ForwardModel):
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_intevals)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
 
     def _normalised_daily_mean(self, t, incidences):
         """
@@ -132,17 +208,21 @@ class BranchProModel(ForwardModel):
 
         Parameters
         ----------
-        t: evaluation time
-        incidences: sequence of incidence numbers
+        t
+            evaluation time
+        incidences
+            sequence of incidence numbers
+        last_time
+            total evaluation and simulation time for the R_t profile.
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            mean = self._initial_r * (
+            mean = self._r_profile[t-1] * (
                 np.sum(incidences[start_date:t] * self._serial_interval) /
                 self._normalizing_const)
             return mean
 
-        mean = self._initial_r * (
+        mean = self._r_profile[t-1] * (
             np.sum(incidences[:t] * self._serial_interval[-t:]) /
             self._normalizing_const)
         return mean
@@ -162,12 +242,19 @@ class BranchProModel(ForwardModel):
             without duplicates, and without negative values.
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
+
         """
         initial_cond = parameters
-
-        # Initialise list of number of cases per unit time
-        # with initial condition I0
         last_time_point = np.max(times)
+
+        # Repeat final r if necessary
+        # (r_1, r_2, ..., r_t)
+        if len(self._r_profile) < last_time_point:
+            missing_days = last_time_point - len(self._r_profile)
+            last_r = self._r_profile[-1]
+            repeated_r = np.full(shape=missing_days, fill_value=last_r)
+            self._r_profile = np.append(self._r_profile, repeated_r)
+
         incidences = np.empty(shape=last_time_point + 1)
         incidences[0] = initial_cond
 
