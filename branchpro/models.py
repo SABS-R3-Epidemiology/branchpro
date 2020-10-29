@@ -73,13 +73,15 @@ class BranchProModel(ForwardModel):
     serial_interval:
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
-        symptoms
+        symptoms.
 
     Methods
     -------
     simulate: return model output for specified parameters and times.
     _normalised_daily_mean: (Private) returns the expected number of new cases
-        at time t
+        at time t.
+    get_serial_intervals: returns serial intevals for the model.
+    update_serial_intevals: updates serial intevals for the model.
     """
 
     def __init__(self, initial_r, serial_interval):
@@ -89,16 +91,41 @@ class BranchProModel(ForwardModel):
             raise ValueError(
                 'Serial interval values storage format must be 1-dimensional')
         if np.sum(serial_interval) <= 0:
-            raise ValueError('Sum of serial interval values must be > 0')
+            raise ValueError('Sum of serial interval values must be > 0.')
         if not isinstance(initial_r, (int, float)):
-            raise TypeError('Value of R must be integer or float')
+            raise TypeError('Value of R must be integer or float.')
 
+        # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_interval)[::-1]
         self._initial_r = initial_r
         self._normalizing_const = np.sum(self._serial_interval)
 
-    def _normalised_daily_mean(
-            self, t, incidences):
+    def get_serial_intevals(self):
+        """
+        Returns serial intevals for the model.
+        """
+        # Reverse inverting of order of serial intervals
+        return self._serial_interval[::-1]
+
+    def set_serial_intevals(self, serial_intevals):
+        """
+        Updates serial intevals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms.
+        """
+        if np.asarray(serial_intevals).ndim != 1:
+            raise ValueError(
+                'Chosen times storage format must be 1-dimensional')
+
+        # Invert order of serial intervals for ease in _normalised_daily_mean
+        self._serial_interval = np.asarray(serial_intevals)[::-1]
+
+    def _normalised_daily_mean(self, t, incidences):
         """
         Computes expected number of new cases at time t, using previous
         incidences and serial intevals.

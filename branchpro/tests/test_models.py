@@ -8,6 +8,7 @@
 import unittest
 
 import numpy as np
+import numpy.testing as npt
 
 import branchpro as bp
 
@@ -38,6 +39,22 @@ class TestBrachProModelClass(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             bp.BranchProModel(0, 1)
+
+    def test_get_serial_intevals(self):
+        br_model = bp.BranchProModel(0, [1, 2])
+        npt.assert_array_equal(
+            br_model.get_serial_intevals(), np.array([1, 2]))
+
+    def test_set_serial_intevals(self):
+        br_model = bp.BranchProModel(0, [1, 2])
+        br_model.set_serial_intevals([1, 3, 2])
+        npt.assert_array_equal(
+                                br_model.get_serial_intevals(),
+                                np.array([1, 3, 2])
+                                )
+
+        with self.assertRaises(ValueError):
+            br_model.set_serial_intevals((1))
 
     def test_simulate(self):
         branch_model_1 = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
