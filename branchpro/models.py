@@ -80,20 +80,13 @@ class BranchProModel(ForwardModel):
     Methods
     -------
     simulate: return model output for specified parameters and times.
-    _normalised_daily_mean: (Private) returns the expected number of new cases
-        at time t.
     get_serial_intervals: returns serial intevals for the model.
     update_serial_intevals: updates serial intevals for the model.
-<<<<<<< HEAD
     set_r_profile: creates a new R_t profile for the model.
-    _reproduction_num: (Private) creates extended reproduction numbers profile,
-        taking into account multiplicities according to the time profile.
 
     *Always apply method set_r_profile before simulation for a change of R_t
     profile!*
 
-=======
->>>>>>> main
     """
 
     def __init__(self, initial_r, serial_interval):
@@ -109,12 +102,10 @@ class BranchProModel(ForwardModel):
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_interval)[::-1]
-        self._initial_r = initial_r
-        self._present_r_profile = np.array([initial_r])
-        self._present_t_profile = np.array([1])
+        self._r_profile = np.array([initial_r])
         self._normalizing_const = np.sum(self._serial_interval)
 
-    def set_r_profile(self, new_rs, start_times):
+    def set_r_profile(self, new_rs, start_times, last_time=None):
         """
         Creates a new R_t profile for the model.
 
@@ -125,15 +116,17 @@ class BranchProModel(ForwardModel):
         start_times: sequence of the first time unit when the corresponding
             indexed value of R_t in new_rs is used. Must be an ordered sequence
              and without duplicates or negative values.
+        last_time: total evaluation time; optional.
 
         """
         # Raise error if not correct dimensionality of inputs
         if np.asarray(new_rs).ndim != 1:
-            raise ValueError('New reproduction numbers storage format \
-                must be 1-dimensional')
+            raise ValueError(
+                'New reproduction numbers storage format must be 1-dimensional'
+                )
         if np.asarray(start_times).ndim != 1:
-            raise ValueError('Starting times values storage format \
-                must be 1-dimensional')
+            raise ValueError(
+                'Starting times values storage format must be 1-dimensional')
 
         # Raise error if inputs do not have same shape
         if np.asarray(new_rs).shape != np.asarray(start_times).shape:
@@ -146,9 +139,7 @@ class BranchProModel(ForwardModel):
             raise ValueError('Times must be increasing.')
 
         # Update the R_t and time profiles with the new values introduced
-        self._present_r_profile = np.asarray(new_rs)
-        self._initial_r = np.asarray(new_rs)[0]
-        self._present_t_profile = np.asarray(start_times)
+        self._r_profile = np.asarray(new_rs)
 
     def _reproduction_num(self, last_time):
         """
@@ -218,6 +209,7 @@ class BranchProModel(ForwardModel):
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_intevals)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
 
     def _normalised_daily_mean(self, t, incidences, last_time):
         """
@@ -280,7 +272,3 @@ class BranchProModel(ForwardModel):
 
         mask = np.in1d(np.append(np.asarray(0), simulation_times), times)
         return incidences[mask]
-
-
-branch_model_1 = BranchProModel(2, np.array([1, 2, 3, 2, 1]))
-print(branch_model_1._reproduction_num(1))
