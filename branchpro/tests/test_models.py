@@ -34,7 +34,7 @@ class TestBrachProModelClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             bp.BranchProModel('0', [1])
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             bp.BranchProModel(0, 1)
 
     def test_simulate(self):
@@ -48,5 +48,5 @@ class TestBrachProModelClass(unittest.TestCase):
         simulated_sample_model_2 = branch_model_2.simulate(1, [2, 4, 7])
         self.assertEqual(simulated_sample_model_2.shape, (3,))
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             branch_model_1.simulate(2, (1))
