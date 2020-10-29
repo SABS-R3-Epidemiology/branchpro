@@ -10,9 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+import sphinx
+sys.path.insert(0, os.path.abspath('../../branchpro'))
+# import branchpro
 
 
 # -- Project information -----------------------------------------------------
@@ -37,6 +39,19 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
 ]
+
+# Autodoc defaults
+if int(sphinx.__version__.split('.')[1]) < 8:
+    autodoc_default_flags = [
+        'members',
+        'inherited-members',
+        # 'show-inheritance',
+    ]
+else:
+    autodoc_default_options = {
+        'members': None,
+        'inherited-members': None,
+    }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
