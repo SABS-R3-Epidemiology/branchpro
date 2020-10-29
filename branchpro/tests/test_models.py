@@ -45,6 +45,30 @@ class TestBrachProModelClass(unittest.TestCase):
         npt.assert_array_equal(
             br_model.get_serial_intevals(), np.array([1, 2]))
 
+    def test_set_r_profile(self):
+        br_model1 = bp.BranchProModel(0, [1, 2])
+        br_model1.set_r_profile([1], [2])
+        npt.assert_array_equal(br_model1._r_profile, np.array([0, 1]))
+
+        br_model2 = bp.BranchProModel(0, [1, 2])
+        br_model2.set_r_profile([1], [2], 3)
+        npt.assert_array_equal(br_model2._r_profile, np.array([0, 1, 1]))
+
+        with self.assertRaises(ValueError):
+            br_model1.set_r_profile(1, [1])
+
+        with self.assertRaises(ValueError):
+            br_model1.set_r_profile([1], 1)
+
+        with self.assertRaises(ValueError):
+            br_model1.set_r_profile([0.5, 1], [1])
+
+        with self.assertRaises(ValueError):
+            br_model1.set_r_profile([1], [-1])
+
+        with self.assertRaises(ValueError):
+            br_model1.set_r_profile([1, 2], [2, 1])
+
     def test_set_serial_intevals(self):
         br_model = bp.BranchProModel(0, [1, 2])
         br_model.set_serial_intevals([1, 3, 2])

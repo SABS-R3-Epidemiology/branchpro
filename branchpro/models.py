@@ -156,7 +156,7 @@ class BranchProModel(ForwardModel):
 
         # Add final r
         if last_time:
-            final_interval = last_time - start_times[-1]
+            final_interval = last_time - start_times[-1] + 1
             r_profile += [new_rs[-1]] * final_interval
         else:
             r_profile += [new_rs[-1]]
@@ -204,12 +204,12 @@ class BranchProModel(ForwardModel):
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            mean = self._r_profile[t] * (
+            mean = self._r_profile[t-1] * (
                 np.sum(incidences[start_date:t] * self._serial_interval) /
                 self._normalizing_const)
             return mean
 
-        mean = self._r_profile[t] * (
+        mean = self._r_profile[t-1] * (
             np.sum(incidences[:t] * self._serial_interval[-t:]) /
             self._normalizing_const)
         return mean
