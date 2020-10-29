@@ -117,7 +117,7 @@ class BranchProModel(ForwardModel):
         start_times
             sequence of the first time unit when the corresponding
             indexed value of R_t in new_rs is used. Must be an ordered sequence
-             and without duplicates or negative values.
+            and without duplicates or negative values.
         last_time
             total evaluation time; optional.
 
