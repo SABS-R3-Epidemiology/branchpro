@@ -51,8 +51,8 @@ class TestBrachProModelClass(unittest.TestCase):
         npt.assert_array_equal(br_model1._r_profile, np.array([0, 1]))
 
         br_model2 = bp.BranchProModel(0, [1, 2])
-        br_model2.set_r_profile([1], [2], 3)
-        npt.assert_array_equal(br_model2._r_profile, np.array([0, 1, 1]))
+        br_model2.set_r_profile([3, 1], [1, 2], 3)
+        npt.assert_array_equal(br_model2._r_profile, np.array([3, 1, 1]))
 
         with self.assertRaises(ValueError):
             br_model1.set_r_profile(1, [1])
