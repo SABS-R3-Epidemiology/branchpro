@@ -138,50 +138,30 @@ class BranchProModel(ForwardModel):
         if np.any(np.asarray(start_times)[:-1] >= np.asarray(start_times)[1:]):
             raise ValueError('Times must be increasing.')
 
-        # Update the R_t and time profiles with the new values introduced
-        self._r_profile = np.asarray(new_rs)
+        # Ceil times to integer numbers a
+        times = np.ceil(start_times).astype(int)
 
-    def _reproduction_num(self, last_time):
-        """
-        Creates extended reproduction numbers profile, taking into
-        account multiplicities according to the time profile.
+        # Create r profile
+        r_profile = []
 
-        Used to compute the normalized mean in the simulation method.
+        # Fill in initial r from day 1 up to start time
+        initial_r = self._r_profile[0]
+        r_profile += [initial_r] * (times[0] - 1)
 
-        Parameters
-        ---------
-        last_time: Total evaluation and simulation time for the R_t profile.
+        # Fill in later r's
+        time_intervals = times[1:] - times[:-1]
+        for time_id, time_interval in enumerate(time_intervals):
+            # Append r for each time unit
+            r_profile += [new_rs[time_id]] * time_interval
 
-        """
-        # Read current R_t profile and their emerging times
-        present_r_profile = np.asarray(self._present_r_profile)
-        present_t_profile = np.asarray(self._present_t_profile)
+        # Add final r
+        if last_time:
+            final_interval = last_time - start_times[-1]
+            r_profile += [new_rs[-1]] * final_interval
+        else:
+            r_profile += [new_rs[-1]]
 
-        # Initialise the matrix which we will fill with the R_t per unit time
-        reproduction_num = np.empty(shape=last_time+1)
-        reproduction_num[0] = self._initial_r
-
-        # Create an array of the reproduction numbers in each unit of time
-        # Each element is in the R_t profile is used between
-        # Their corresponding limits as expressed in the time profile
-        for t in present_t_profile:
-            # Compute index where t is in t_profile
-            change_in_t_num = np.where(present_t_profile == t)[0][0]
-
-            # Compute the start and finishing date of the time interval
-            # beginning at t
-            start_time_for_r = t
-            end_time_for_r = present_t_profile[change_in_t_num + 1]
-            time_spend_at_current_r = end_time_for_r - start_time_for_r
-
-            # Compute value of R_t in this time interval
-            r_for_t = present_r_profile[change_in_t_num]
-
-            reproduction_num[start_time_for_r:end_time_for_r] = np.full(
-                time_spend_at_current_r, r_for_t)
-
-        # Return the filled matrix or R_t values
-        return reproduction_num
+        self._r_profile = np.asarray(r_profile)
 
     def get_serial_intevals(self):
         """
@@ -211,7 +191,7 @@ class BranchProModel(ForwardModel):
         self._serial_interval = np.asarray(serial_intevals)[::-1]
         self._normalizing_const = np.sum(self._serial_interval)
 
-    def _normalised_daily_mean(self, t, incidences, last_time):
+    def _normalised_daily_mean(self, t, incidences):
         """
         Computes expected number of new cases at time t, using previous
         incidences and serial intevals.
@@ -221,16 +201,15 @@ class BranchProModel(ForwardModel):
         t: evaluation time
         incidences: sequence of incidence numbers
         last_time: total evaluation and simulation time for the R_t profile.
-
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            mean = self._reproduction_num(last_time)[t] * (
+            mean = self._r_profile[t] * (
                 np.sum(incidences[start_date:t] * self._serial_interval) /
                 self._normalizing_const)
             return mean
 
-        mean = self._reproduction_num(last_time)[t] * (
+        mean = self._r_profile[t] * (
             np.sum(incidences[:t] * self._serial_interval[-t:]) /
             self._normalizing_const)
         return mean
@@ -253,10 +232,16 @@ class BranchProModel(ForwardModel):
 
         """
         initial_cond = parameters
-
-        # Initialise list of number of cases per unit time
-        # with initial condition I0
         last_time_point = np.max(times)
+
+        # Repeat final r if necessary
+        # (r_1, r_2, ..., r_t)
+        if len(self._r_profile) < last_time_point:
+            missing_days = last_time_point - len(self._r_profile)
+            last_r = self._r_profile[-1]
+            repeated_r = np.full(shape=missing_days, fill_value=last_r)
+            self._r_profile = np.append(self._r_profile, repeated_r)
+
         incidences = np.empty(shape=last_time_point + 1)
         incidences[0] = initial_cond
 
@@ -266,8 +251,7 @@ class BranchProModel(ForwardModel):
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            norm_daily_mean = self._normalised_daily_mean(
-                t, incidences, last_time_point)
+            norm_daily_mean = self._normalised_daily_mean(t, incidences)
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
 
         mask = np.in1d(np.append(np.asarray(0), simulation_times), times)
