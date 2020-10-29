@@ -80,11 +80,12 @@ class BranchProModel(ForwardModel):
     Methods
     -------
     simulate: return model output for specified parameters and times.
+    get_r_profile: returns R_t profile for the model.
     get_serial_intervals: returns serial intervals for the model.
     update_serial_intervals: updates serial intervals for the model.
     set_r_profile: creates a new R_t profile for the model.
 
-    *Always apply method set_r_profile before simulation for a change of R_t
+    *Always apply method set_r_profile before simulate for a change of R_t
     profile!*
 
     """
