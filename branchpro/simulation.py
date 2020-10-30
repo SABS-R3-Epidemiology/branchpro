@@ -40,7 +40,7 @@ class SimulationController:
     """
 
     def __init__(self, model, start_sim_time, end_sim_time):
-        if not issubclass(model, ForwardModel):
+        if not isinstance(model, ForwardModel):
             raise TypeError(
                 'Model needs to be a subclass of the branchpro.ForwardModel')
 
@@ -48,7 +48,8 @@ class SimulationController:
         self._sim_end_points = (start_sim_time, end_sim_time)
 
         # Set default regime 'simulate in full'
-        self._regime = np.linspace(start=start_sim_time, stop=end_sim_time)
+        default_regime = np.linspace(start=start_sim_time, stop=end_sim_time)
+        self._regime = np.ceil(default_regime).astype(int)
 
     def switch_resolution(self, num_points):
         """
@@ -63,8 +64,11 @@ class SimulationController:
 
         """
         start_sim_time, end_sim_time = self._sim_end_points
-        self._regime = np.linspace(
+        new_regime = np.linspace(
             start=start_sim_time, stop=end_sim_time, num=num_points)
+
+        # Transform evaluation points into integers
+        self._regime = np.ceil(new_regime).astype(int)
 
     def run(self, parameters):
         """
@@ -77,4 +81,4 @@ class SimulationController:
             An ordered sequence of parameter values.
 
         """
-        self._model.simulate(parameters, self._regime)
+        return self._model.simulate(parameters, self._regime)
