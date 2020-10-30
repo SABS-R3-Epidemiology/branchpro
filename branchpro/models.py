@@ -67,6 +67,9 @@ class BranchProModel(ForwardModel):
         E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
             R_{t}\sum_{s=1}^{t}I_{t-s}w_{s}
 
+    Always apply method :meth:`set_r_profile` before calling
+    :meth:`BranchProModel.simulate` for a change of R_t profile!
+
     Parameters
     ----------
     initial_r
@@ -80,12 +83,10 @@ class BranchProModel(ForwardModel):
     Methods
     -------
     simulate: return model output for specified parameters and times.
-    get_serial_intervals: returns serial intevals for the model.
-    update_serial_intevals: updates serial intevals for the model.
+    get_r_profile: returns R_t profile for the model.
+    get_serial_intervals: returns serial intervals for the model.
+    update_serial_intervals: updates serial intervals for the model.
     set_r_profile: creates a new R_t profile for the model.
-
-    Always apply method set_r_profile before calling
-    :meth:`BranchProModel.simulate` for a change of R_t profile!
 
     """
 
@@ -166,9 +167,9 @@ class BranchProModel(ForwardModel):
 
         self._r_profile = np.asarray(r_profile)
 
-    def get_serial_intevals(self):
+    def get_serial_intervals(self):
         """
-        Returns serial intevals for the model.
+        Returns serial intervals for the model.
 
         """
         # Reverse inverting of order of serial intervals
@@ -181,9 +182,9 @@ class BranchProModel(ForwardModel):
         """
         return self._r_profile
 
-    def set_serial_intevals(self, serial_intevals):
+    def set_serial_intervals(self, serial_intervals):
         """
-        Updates serial intevals for the model.
+        Updates serial intervals for the model.
 
         Parameters
         ----------
@@ -193,18 +194,18 @@ class BranchProModel(ForwardModel):
             symptoms.
 
         """
-        if np.asarray(serial_intevals).ndim != 1:
+        if np.asarray(serial_intervals).ndim != 1:
             raise ValueError(
                 'Chosen times storage format must be 1-dimensional')
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
-        self._serial_interval = np.asarray(serial_intevals)[::-1]
+        self._serial_interval = np.asarray(serial_intervals)[::-1]
         self._normalizing_const = np.sum(self._serial_interval)
 
     def _normalised_daily_mean(self, t, incidences):
         """
         Computes expected number of new cases at time t, using previous
-        incidences and serial intevals.
+        incidences and serial intervals.
 
         Parameters
         ----------

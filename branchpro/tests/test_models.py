@@ -40,10 +40,10 @@ class TestBrachProModelClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             bp.BranchProModel(0, 1)
 
-    def test_get_serial_intevals(self):
+    def test_get_serial_intervals(self):
         br_model = bp.BranchProModel(0, [1, 2])
         npt.assert_array_equal(
-            br_model.get_serial_intevals(), np.array([1, 2]))
+            br_model.get_serial_intervals(), np.array([1, 2]))
 
     def test_get_r_profile(self):
         br_model1 = bp.BranchProModel(0, [1, 2])
@@ -74,16 +74,16 @@ class TestBrachProModelClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             br_model1.set_r_profile([1, 2], [2, 1])
 
-    def test_set_serial_intevals(self):
+    def test_set_serial_intervals(self):
         br_model = bp.BranchProModel(0, [1, 2])
-        br_model.set_serial_intevals([1, 3, 2])
+        br_model.set_serial_intervals([1, 3, 2])
         npt.assert_array_equal(
-                                br_model.get_serial_intevals(),
+                                br_model.get_serial_intervals(),
                                 np.array([1, 3, 2])
                                 )
 
         with self.assertRaises(ValueError):
-            br_model.set_serial_intevals((1))
+            br_model.set_serial_intervals((1))
 
     def test_simulate(self):
         branch_model_1 = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
