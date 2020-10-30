@@ -13,6 +13,7 @@ The branchpro source code is hosted on GitHub_.
 
    core_classes_and_methods
    models
+   simulation
 
 
 Search
