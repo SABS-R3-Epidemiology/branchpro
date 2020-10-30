@@ -72,7 +72,7 @@ class BranchProModel(ForwardModel):
     initial_r
         (numeric) Value of the reproduction number at the beginning
         of the epidemic
-    serial_interval:
+    serial_interval
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
         symptoms.
@@ -84,8 +84,8 @@ class BranchProModel(ForwardModel):
     update_serial_intevals: updates serial intevals for the model.
     set_r_profile: creates a new R_t profile for the model.
 
-    *Always apply method set_r_profile before simulation for a change of R_t
-    profile!*
+    Always apply method set_r_profile before calling
+    :meth:`BranchProModel.simulate` for a change of R_t profile!
 
     """
 
