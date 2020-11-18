@@ -80,14 +80,6 @@ class BranchProModel(ForwardModel):
         first displays symptoms s days after the infector first displays
         symptoms.
 
-    Methods
-    -------
-    simulate: return model output for specified parameters and times.
-    get_r_profile: returns R_t profile for the model.
-    get_serial_intervals: returns serial intervals for the model.
-    update_serial_intervals: updates serial intervals for the model.
-    set_r_profile: creates a new R_t profile for the model.
-
     """
 
     def __init__(self, initial_r, serial_interval):

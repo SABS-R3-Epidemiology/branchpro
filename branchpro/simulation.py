@@ -27,16 +27,10 @@ class SimulationController:
     end_sim_time
         (integer) Time at which we stop running the SimulationController.
 
-    Methods
-    -------
-    switch_resolution
-        change the number of points we wish to keep from our simulated sample
-        of incidences.
-        Always apply method switch_resolution before calling
-        meth:`SimulationController.run` for a change of resolution!
-    run
-        operates the ``simulate`` method present in any subclass of the
-        ``ForwardModel``.
+    Notes
+    -----
+    Always apply method switch_resolution before calling
+    :meth:`SimulationController.run` for a change of resolution!
 
     """
 
