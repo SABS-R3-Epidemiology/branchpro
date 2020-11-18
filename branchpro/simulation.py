@@ -15,7 +15,7 @@ from branchpro import ForwardModel
 class SimulationController:
     """SimulationController Class:
     Class for the simulation of models in any of the subclasses in the
-    :class:`ForwardModel`.
+    ``ForwardModel``.
 
     Parameters
     ----------
