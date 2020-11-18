@@ -17,3 +17,4 @@ from .version_info import VERSION_INT, VERSION  # noqa
 
 # Import main classes
 from .models import ForwardModel, BranchProModel    # noqa
+from .simulation import SimulationController  # noqa

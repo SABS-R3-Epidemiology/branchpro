@@ -141,7 +141,8 @@ def doctest_rst_and_public_interface():
     # has been inadvertently exposed in a public context, or that a new module
     # has been added to branchpro and should be imported above and included in
     # this list.
-    branchpro_submodules = ['branchpro.models', 'branchpro.version_info']
+    branchpro_submodules = [
+        'branchpro.models', 'branchpro.version_info', 'branchpro.simulation']
 
     doc_symbols = get_all_documented_symbols()
 
