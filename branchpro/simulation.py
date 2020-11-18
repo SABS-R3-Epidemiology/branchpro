@@ -14,14 +14,14 @@ from branchpro import ForwardModel
 
 class SimulationController:
     """SimulationController Class:
-    Class for the simulation of models in any of
-    the subclasses in the ``ForwardModel`` class.
+    Class for the simulation of models in any of the subclasses in the
+    :class:``ForwardModel``.
 
     Parameters
     ----------
     model
-        (ForwardModel) Instance of the ``ForwardModel`` class used for the
-        simulation.
+        (ForwardModel) Instance of the :class:`ForwardModel` class used for
+        the simulation.
     start_sim_time
         (integer) Time from which we start running the SimulationController.
     end_sim_time
@@ -29,11 +29,15 @@ class SimulationController:
 
     Methods
     -------
-    switch_resolution: change the number of points we wish to keep from our
-        simulated sample of incidences.
-    run: operates the ``simulate`` method present in any subclass of the
+    switch_resolution
+        change the number of points we wish to keep from our simulated sample
+        of incidences.
+    run
+        operates the ``simulate`` method present in any subclass of the
         ``ForwardModel``.
 
+    Notes
+    -----
     Always apply method switch_resolution before calling
     :meth:`SimulationController.run` for a change of resolution!
 
@@ -48,8 +52,8 @@ class SimulationController:
         self._sim_end_points = (start_sim_time, end_sim_time)
 
         # Set default regime 'simulate in full'
-        default_regime = np.linspace(start=start_sim_time, stop=end_sim_time)
-        self._regime = np.ceil(default_regime).astype(int)
+        self._regime = np.arange(
+            start=start_sim_time, stop=end_sim_time+1).astype(int)
 
     def switch_resolution(self, num_points):
         """
@@ -64,11 +68,8 @@ class SimulationController:
 
         """
         start_sim_time, end_sim_time = self._sim_end_points
-        new_regime = np.linspace(
-            start=start_sim_time, stop=end_sim_time, num=num_points)
-
-        # Transform evaluation points into integers
-        self._regime = np.ceil(new_regime).astype(int)
+        self._regime = np.rint(np.linspace(
+            start_sim_time, end_sim_time, num=num_points)).astype(int)
 
     def run(self, parameters):
         """
