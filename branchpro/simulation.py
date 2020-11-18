@@ -39,7 +39,7 @@ class SimulationController:
     Notes
     -----
     Always apply method switch_resolution before calling
-    :meth:`SimulationController.run` for a change of resolution!
+    ``SimulationController.run`` for a change of resolution!
 
     """
 
