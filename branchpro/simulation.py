@@ -49,6 +49,8 @@ class SimulationController:
                 'Model needs to be a subclass of the branchpro.ForwardModel')
 
         self._model = model
+        start_sim_time = int(start_sim_time)
+        end_sim_time = int(end_sim_time)
         self._sim_end_points = (start_sim_time, end_sim_time)
 
         # Set default regime 'simulate in full'
