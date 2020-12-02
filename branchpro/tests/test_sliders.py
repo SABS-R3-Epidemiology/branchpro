@@ -63,4 +63,4 @@ class Test_SliderComponent(unittest.TestCase):
         sliders = bp._SliderComponent()
         sliders.add_slider('param1', '1', 0, 0, 1, 0.5)
         sliders.add_slider('param2', '2', 0.5, 0, 1, 0.25)
-        self.assertEqual(sliders._slider_ids, ['1', '2'])
+        self.assertEqual(sliders.slider_ids(), ['1', '2'])
