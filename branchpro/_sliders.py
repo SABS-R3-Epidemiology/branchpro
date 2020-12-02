@@ -14,13 +14,32 @@ import numpy as np
 
 
 class _SliderComponent():
-    """
+    """_SliderComponent Class
+    Stores slider information for sliders in branchpro Dash app.
     """
     def __init__(self):
         self._sliders = []
         self._slider_ids = []
 
     def add_slider(self, label, new_id, init_val, min_val, max_val, step_size):
+        """
+        Creates a new slider with label for the Dash app plot.
+
+        Parameters
+        ----------
+        label
+            Title text shown above slider.
+        new_id
+            ID of slider (internal, not shown in app).
+        init_val
+            Initial slider value (default position).
+        min_val
+            Minimum (leftmost) slider value.
+        max_val
+            Maximum (rightmost) slider value.
+        step_size
+            Incremement between slider values.
+        """
         new_slider = [
                         html.Label(label),
                         dcc.Slider(
@@ -41,7 +60,13 @@ class _SliderComponent():
         self._slider_ids.append(new_id)
 
     def group_sliders(self):
+        """
+        Combines all sliders into a html.Div object.
+        """
         return html.Div(self._sliders)
 
     def slider_ids(self):
+        """
+        Returns list of all slider IDs.
+        """
         return self._slider_ids
