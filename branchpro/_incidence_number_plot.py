@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 
+import pandas as pd
 import plotly.graph_objs as go
 
 
@@ -17,6 +18,9 @@ class IncidenceNumberPlot():
         self._figure = go.Figure()
 
     def add_data(self, df, time_key='Time', inc_key='Incidence Number'):
+        if type(df) != pd.DataFrame:
+            raise TypeError('Data needs to be a dataframe')
+
         trace = go.Bar(
             y=df[inc_key],
             x=df[time_key],
@@ -29,6 +33,9 @@ class IncidenceNumberPlot():
             yaxis_title=inc_key)
 
     def add_simulation(self, df, time_key='Time', inc_key='Incidence Number'):
+        if type(df) != pd.DataFrame:
+            raise TypeError('Simulation needs to be a dataframe')
+
         trace = go.Scatter(
             y=df[inc_key],
             x=df[time_key],
