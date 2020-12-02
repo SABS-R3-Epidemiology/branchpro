@@ -11,7 +11,6 @@ from unittest.mock import patch
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
-import plotly.graph_objs as go
 
 import branchpro as bp
 
@@ -76,15 +75,15 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             bp.IncidenceNumberPlot().add_simulation(0)
 
-    @patch("%s.bp.go.Figure" % __name__)
-    def test_show_figure(self, mock_plt):
-        df = pd.DataFrame({
-            "Time": [1, 2, 3, 5, 6],
-            "Incidence Number": [10, 3, 4, 6, 9]
-        })
-        my_plot = bp.IncidenceNumberPlot()
-        my_plot.add_data(df)
-        my_plot.show_figure()
+    def test_show_figure(self):
+        with patch('plotly.graph_objs.Figure.show') as show_patch:
+            df = pd.DataFrame({
+                "Time": [1, 2, 3, 5, 6],
+                "Incidence Number": [10, 3, 4, 6, 9]
+            })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(df)
+            my_plot.show_figure()
 
         # Assert show_figure is called once
-        mock_plt.figure.assert_called_once()
+        assert show_patch.called
