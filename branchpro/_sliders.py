@@ -18,7 +18,7 @@ class _SliderComponent():
         self._sliders = []
         self._slider_ids = []
 
-    def add_slider(self, new_id, label, init_val, min_val, max_val, step_size):
+    def add_slider(self, label, new_id, init_val, min_val, max_val, step_size):
         new_slider = [
                         html.Label(label),
                         dcc.Slider(
@@ -35,7 +35,7 @@ class _SliderComponent():
                             step=step_size
                         )
                     ]
-        self._sliders.append(new_slider)
+        self._sliders += new_slider
         self._slider_ids.append(new_id)
 
     def group_sliders(self):
