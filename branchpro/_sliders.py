@@ -14,6 +14,8 @@ import numpy as np
 
 
 class _SliderComponent():
+    """
+    """
     def __init__(self):
         self._sliders = []
         self._slider_ids = []
