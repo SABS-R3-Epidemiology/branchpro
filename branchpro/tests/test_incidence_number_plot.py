@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
-import branchpro.plots as bpp
+import branchpro as bp
 
 
 class TestIncidenceNumberPlotClass(unittest.TestCase):
@@ -18,14 +18,14 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
     Test the 'IncidenceNumberPlot' class.
     """
     def test__init__(self):
-        bpp.IncidenceNumberPlot()
+        bp.IncidenceNumberPlot()
 
     def test_add_data(self):
         df = pd.DataFrame({
             "Time": [1, 2, 3, 5, 6],
             "Incidence Number": [10, 3, 4, 6, 9]
         })
-        my_plot = bpp.IncidenceNumberPlot()
+        my_plot = bp.IncidenceNumberPlot()
         my_plot.add_data(df)
 
     def test_add_simulation(self):
@@ -33,7 +33,7 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
             "Time": [1, 2, 3, 5, 6],
             "Incidence Number": [10, 3, 4, 6, 9]
         })
-        my_plot = bpp.IncidenceNumberPlot()
+        my_plot = bp.IncidenceNumberPlot()
         my_plot.add_data(df)
 
         dfs = pd.DataFrame({
@@ -43,13 +43,13 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
         my_plot.add_simulation(dfs)
 
-    @patch("%s.bpp.plt" % __name__)
+    @patch("%s.bp.plt" % __name__)
     def test_show_figure(self, mock_plt):
         df = pd.DataFrame({
             "Time": [1, 2, 3, 5, 6],
             "Incidence Number": [10, 3, 4, 6, 9]
         })
-        my_plot = bpp.IncidenceNumberPlot()
+        my_plot = bp.IncidenceNumberPlot()
         my_plot.add_data(df)
         my_plot.show_figure()
 
