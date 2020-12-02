@@ -65,6 +65,9 @@ setup(
     install_requires=[
         # Dependencies go here!
         'numpy>=1.8',
+        'pandas',
+        'dash',
+        'plotly'
     ],
     extras_require={
         'docs': [
