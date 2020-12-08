@@ -24,8 +24,8 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
     def test_add_data(self):
         df = pd.DataFrame({
-            "Time": [1, 2, 3, 5, 6],
-            "Incidence Number": [10, 3, 4, 6, 9]
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         my_plot = bp.IncidenceNumberPlot()
         my_plot.add_data(df)
@@ -47,28 +47,34 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
     def test_add_simulation(self):
         df = pd.DataFrame({
-            "Time": [1, 2, 3, 5, 6],
-            "Incidence Number": [10, 3, 4, 6, 9]
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         my_plot = bp.IncidenceNumberPlot()
         my_plot.add_data(df)
 
         dfs = pd.DataFrame({
-            "Time": [1, 2, 4, 5, 6],
-            "Incidence Number": [2, 3, 8, 10, 5]
+            'Time': [1, 2, 4, 5, 6],
+            'Incidence Number': [2, 3, 8, 10, 5]
         })
 
         my_plot.add_simulation(dfs)
 
         npt.assert_array_equal(
             np.array(
-                [
-                    my_plot._figure['data'][1]['x'],
-                    my_plot._figure['data'][1]['y']
-                ]
+                [my_plot._figure['data'][1]['x']]
                 ),
             np.array(
-                [np.array([1, 2, 4, 5, 6]), np.array([2, 3, 8, 10, 5])]
+                [np.array([1, 2, 4, 5, 6])]
+                )
+        )
+
+        npt.assert_array_equal(
+            np.array(
+                [my_plot._figure['data'][1]['y']]
+                ),
+            np.array(
+                [np.array([2, 3, 8, 10, 5])]
                 )
         )
 
@@ -78,8 +84,8 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
             df = pd.DataFrame({
-                "Time": [1, 2, 3, 5, 6],
-                "Incidence Number": [10, 3, 4, 6, 9]
+                'Time': [1, 2, 3, 5, 6],
+                'Incidence Number': [10, 3, 4, 6, 9]
             })
             my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(df)

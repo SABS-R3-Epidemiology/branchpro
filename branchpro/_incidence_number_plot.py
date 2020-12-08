@@ -16,7 +16,7 @@ class IncidenceNumberPlot():
     Stores the main figure for the Dash app.
     """
     def __init__(self):
-        self._figure = go.Figure()
+        self.figure = go.Figure()
 
     def add_data(self, df, time_key='Time', inc_key='Incidence Number'):
         """
@@ -26,22 +26,23 @@ class IncidenceNumberPlot():
         ----------
         df
             (pandas DataFrame) contains numbers of new cases by days.
+            Data stored in columns 'Time' and 'Incidence Number', respectively.
         time_key
             x-axis label for the bar plot.
         inc_key
             y-axis label for the bar plot.
         """
-        if type(df) != pd.DataFrame:
-            raise TypeError('Data needs to be a dataframe')
+        if not issubclass(type(df), pd.DataFrame):
+            raise TypeError('df needs to be a dataframe')
 
         trace = go.Bar(
             y=df[inc_key],
             x=df[time_key],
-            name='cases'
+            name='Cases'
         )
 
-        self._figure.add_trace(trace)
-        self._figure.update_layout(
+        self.figure.add_trace(trace)
+        self.figure.update_layout(
             xaxis_title=time_key,
             yaxis_title=inc_key)
 
@@ -54,28 +55,30 @@ class IncidenceNumberPlot():
         ----------
         df
             (pandas DataFrame) contains numbers of new cases by days.
+            Data stored in columns 'Time' and 'Incidence Number', respectively.
         time_key
             x-axis label for the bar plot.
         inc_key
             y-axis label for the bar plot.
         """
-        if type(df) != pd.DataFrame:
+        if not issubclass(type(df), pd.DataFrame):
             raise TypeError('Simulation needs to be a dataframe')
 
         trace = go.Scatter(
             y=df[inc_key],
             x=df[time_key],
             mode='lines',
-            name='simulation'
+            name='Simulation'
         )
 
-        self._figure.add_trace(trace)
-        self._figure.update_layout(
+        self.figure.add_trace(trace)
+        self.figure.update_layout(
             xaxis_title=time_key,
-            yaxis_title=inc_key)
+            yaxis_title=inc_key,
+            hovermode='x unified')
 
     def show_figure(self):
         """
-        Shows current figure object in the Dash app.
+        Shows current figure.
         """
-        self._figure.show()
+        self.figure.show()
