@@ -33,8 +33,8 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
         npt.assert_array_equal(
             np.array(
                 [
-                    my_plot._figure['data'][0]['x'],
-                    my_plot._figure['data'][0]['y']
+                    my_plot.figure['data'][0]['x'],
+                    my_plot.figure['data'][0]['y']
                 ]
                 ),
             np.array(
@@ -62,7 +62,7 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
         npt.assert_array_equal(
             np.array(
-                [my_plot._figure['data'][1]['x']]
+                [my_plot.figure['data'][1]['x']]
                 ),
             np.array(
                 [np.array([1, 2, 4, 5, 6])]
@@ -71,7 +71,7 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
         npt.assert_array_equal(
             np.array(
-                [my_plot._figure['data'][1]['y']]
+                [my_plot.figure['data'][1]['y']]
                 ),
             np.array(
                 [np.array([2, 3, 8, 10, 5])]
