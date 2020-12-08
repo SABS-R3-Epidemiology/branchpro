@@ -59,7 +59,7 @@ class _SliderComponent():
         self._sliders += new_slider
         self._slider_ids.append(new_id)
 
-    def group_sliders(self):
+    def get_sliders_div(self):
         """
         Combines all sliders into a html.Div object.
         """

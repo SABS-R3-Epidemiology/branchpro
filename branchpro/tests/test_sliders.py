@@ -31,11 +31,11 @@ class Test_SliderComponent(unittest.TestCase):
             )
         self.assertEqual(sliders._sliders[1].step, 0.5)
 
-    def test_group_sliders(self):
+    def test_get_sliders_div(self):
         sliders = bp._SliderComponent()
         sliders.add_slider('param1', '1', 0, 0, 1, 0.5)
         sliders.add_slider('param2', '2', 0.5, 0, 1, 0.25)
-        sliders.group_sliders()
+        sliders.get_sliders_div()
 
         self.assertEqual(sliders._sliders[0].children, 'param1')
         self.assertEqual(sliders._sliders[1].id, '1')
