@@ -22,7 +22,7 @@ class IncidenceNumberPlot():
     def _label_warning(self, time_key, inc_key):
         if (self.figure['layout']['xaxis']['title']['text'] != time_key) or (
                 self.figure['layout']['yaxis']['title']['text'] != inc_key):
-            return warnings.warn('Labels do not match. They will be updated.')
+            warnings.warn('Labels do not match. They will be updated.')
 
     def add_data(self, df, time_key='Time', inc_key='Incidence Number'):
         """
