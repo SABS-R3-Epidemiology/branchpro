@@ -52,6 +52,9 @@ class _SliderComponent():
                                         num=11
                                         )
 
+        keys = [int(r) if r.is_integer() else r for r in mark_list]
+        locks = ['{:.2f}'.format(r) for r in mark_list]
+
         new_slider = [
                         html.Label(label),
                         dcc.Slider(
@@ -59,9 +62,7 @@ class _SliderComponent():
                             min=min_val,
                             max=max_val,
                             value=init_val,
-                            marks={
-                                str(r): '{:.2f}'.format(r) for r in mark_list
-                                },
+                            marks=dict(zip(keys, locks)),
                             step=step_size
                         )
                     ]
