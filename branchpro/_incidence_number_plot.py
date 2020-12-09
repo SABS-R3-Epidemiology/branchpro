@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 
+import warnings
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -34,6 +35,9 @@ class IncidenceNumberPlot():
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
+        if (self.figure['layout']['xaxis']['title'] != time_key) or (
+                self.figure['layout']['yaxis']['title'] != inc_key):
+            warnings.warn('Labels do not match. They will be updated.')
 
         trace = go.Bar(
             y=df[inc_key],
@@ -63,6 +67,9 @@ class IncidenceNumberPlot():
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
+        if (self.figure['layout']['xaxis']['title'] != time_key) or (
+                self.figure['layout']['yaxis']['title'] != inc_key):
+            warnings.warn('Labels do not match. They will be updated.')
 
         trace = go.Scatter(
             y=df[inc_key],

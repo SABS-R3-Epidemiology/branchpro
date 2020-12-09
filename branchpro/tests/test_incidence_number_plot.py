@@ -8,6 +8,7 @@
 import unittest
 from unittest.mock import patch
 
+import warnings
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
@@ -51,6 +52,24 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             bp.IncidenceNumberPlot().add_data(0)
 
+        with self.assertWarns(UserWarning):
+            df = pd.DataFrame({
+                't': [1, 2, 3, 5, 6],
+                'Incidence Number': [10, 3, 4, 6, 9]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(df, time_key='t')
+            warnings.warn('Labels do not match. They will be updated.')
+
+        with self.assertWarns(UserWarning):
+            df = pd.DataFrame({
+                'Time': [1, 2, 4, 5, 6],
+                'i': [2, 3, 8, 10, 5]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(df, inc_key='i')
+            warnings.warn('Labels do not match. They will be updated.')
+
     def test_add_simulation(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -86,6 +105,38 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             bp.IncidenceNumberPlot().add_simulation(0)
+
+        with self.assertWarns(UserWarning):
+            df = pd.DataFrame({
+                'Time': [1, 2, 3, 5, 6],
+                'Incidence Number': [10, 3, 4, 6, 9]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(df)
+
+            dfs1 = pd.DataFrame({
+                't': [1, 2, 4, 5, 6],
+                'Incidence Number': [2, 3, 8, 10, 5]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(dfs1, time_key='t')
+            warnings.warn('Labels do not match. They will be updated.')
+
+        with self.assertWarns(UserWarning):
+            df = pd.DataFrame({
+                'Time': [1, 2, 3, 5, 6],
+                'Incidence Number': [10, 3, 4, 6, 9]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(df)
+
+            dfs2 = pd.DataFrame({
+                'Time': [1, 2, 4, 5, 6],
+                'i': [2, 3, 8, 10, 5]
+                })
+            my_plot = bp.IncidenceNumberPlot()
+            my_plot.add_data(dfs2, inc_key='i')
+            warnings.warn('Labels do not match. They will be updated.')
 
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
