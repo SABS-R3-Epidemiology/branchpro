@@ -142,7 +142,11 @@ def doctest_rst_and_public_interface():
     # has been added to branchpro and should be imported above and included in
     # this list.
     branchpro_submodules = [
-        'branchpro.models', 'branchpro.version_info', 'branchpro.simulation']
+        'branchpro.models',
+        'branchpro.version_info',
+        'branchpro.simulation',
+        'branchpro.apps'
+        ]
 
     doc_symbols = get_all_documented_symbols()
 
