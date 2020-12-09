@@ -8,7 +8,6 @@
 import unittest
 from unittest.mock import patch
 
-import warnings
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
@@ -59,7 +58,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 })
             my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(df, time_key='t')
-            warnings.warn('Labels do not match. They will be updated.')
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
@@ -68,7 +66,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 })
             my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(df, inc_key='i')
-            warnings.warn('Labels do not match. They will be updated.')
 
     def test_add_simulation(self):
         df = pd.DataFrame({
@@ -120,7 +117,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 })
             my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(dfs1, time_key='t')
-            warnings.warn('Labels do not match. They will be updated.')
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
@@ -136,7 +132,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 })
             my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(dfs2, inc_key='i')
-            warnings.warn('Labels do not match. They will be updated.')
 
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
