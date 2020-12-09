@@ -62,7 +62,7 @@ class IncidenceNumberPlot():
             y-axis label for the bar plot.
         """
         if not issubclass(type(df), pd.DataFrame):
-            raise TypeError('Simulation needs to be a dataframe')
+            raise TypeError('df needs to be a dataframe')
 
         trace = go.Scatter(
             y=df[inc_key],
