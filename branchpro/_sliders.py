@@ -45,7 +45,7 @@ class _SliderComponent():
                                 stop=max_val+step_size,
                                 step=step_size
                                 )
-        if marks_list.size > 10:
+        if marks_list.size > 11:
             marks_list = np.linspace(
                                         start=min_val,
                                         stop=max_val,
