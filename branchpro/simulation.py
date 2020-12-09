@@ -64,6 +64,12 @@ class SimulationController:
         self._regime = np.rint(np.linspace(
             start_sim_time, end_sim_time, num=num_points)).astype(int)
 
+    def get_time_bounds(self):
+        """
+        Gets time bounds of the simulation.
+        """
+        return self._sim_end_points
+
     def run(self, parameters):
         """
         Operates the ``simulate`` method present in any subclass of the

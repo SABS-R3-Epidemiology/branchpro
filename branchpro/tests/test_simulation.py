@@ -28,6 +28,12 @@ class TestSimulationControllerClass(unittest.TestCase):
         one_run_of_simulator = simulationController.run(1)
         self.assertEqual(one_run_of_simulator.shape, (3,))
 
+    def test_get_time_bounds(self):
+        br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
+        simulationController = bp.SimulationController(br_pro_model, 2, 7)
+        bounds = simulationController.get_time_bounds()
+        self.assertEqual(bounds, (2, 7))
+
     def test_run(self):
         br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
         simulationController = bp.SimulationController(br_pro_model, 2, 7)
