@@ -7,24 +7,25 @@
 # notice and full license details.
 #
 
-import pandas
+import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
- 
+
 import dash_core_components as dcc
 import dash_html_components as html
- 
+
 from dash.dependencies import Input, Output
 import branchpro as bp
- 
-import scipy.stats
+
 import numpy as np
 
+
 class IncidenceNumberSimulationApp:
- 
+
     def __init__(self):
- 
-        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+        self.app = dash.Dash(
+            __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         self.plot = bp.IncidenceNumberPlot()
         self.sliders = bp._SliderComponent()
 
@@ -32,14 +33,17 @@ class IncidenceNumberSimulationApp:
             [
                 html.H1('Example Title'),
                 dbc.Row(
-                    [dbc.Col(dcc.Graph(figure=self.plot.figure, id='myfig')),
-                    dbc.Col(self.sliders.get_sliders_div())],
+                    [
+                        dbc.Col(dcc.Graph(
+                            figure=self.plot.figure, id='myfig')),
+                        dbc.Col(self.sliders.get_sliders_div())
+                    ],
                     align='center',
                 ),
             ],
             fluid=True,
         )
-    
+
     def add_data(self, df):
         self.plot.add_data(df)
 
@@ -51,18 +55,73 @@ class IncidenceNumberSimulationApp:
 
         if not issubclass(type(model), bp.BranchProModel):
             raise TypeError('Models needs to be a BranchPro')
-    
 
- 
-        self.sliders.add_slider('Initial R', 'init_r', 2.0, 0.1, 10.0, 0.01)
-        self.sliders.add_slider('second R', 'two_r', 2.0, 0.1, 10.0, 0.01)
-        self.sliders.add_slider('Time of change', 't', 2.5, 0.1, 5.0, 0.01)
- 
-        num_timepoints = 30
-        data = model.simulate(1, np.arange(1, num_timepoints+1))
-        df = pandas.DataFrame({'Time': np.arange(1, num_timepoints+1),
-                               'Incidence Number': data})
- 
+        bounds = simulator.get_time_bounds()
+        mid_point = sum(bounds)/2
+
+        self.sliders.add_slider(
+            'Initial Cases', 'init_cond', 10.0, 0.0, 100.0, 10.0)
+        self.sliders.add_slider('Initial R', 'r0', 2.0, 0.1, 10.0, 0.01)
+        self.sliders.add_slider('second R', 'r1', 0.5, 0.1, 10.0, 0.01)
+        self.sliders.add_slider(
+            'Time of change', 't1', mid_point, bounds[0], bounds[1], 1)
+
+        new_rs = [2.0, 0.5]
+        start_times = [0, mid_point]
+        simulator.model.set_r_profile(new_rs, start_times)
+
+        data = simulator.run(10)
+        df = pd.DataFrame({
+            'Time': simulator.get_regime(),
+            'Incidence Number': data})
+
         self.plot.add_simulation(df)
- 
-        self.model = model
+
+        self.simulator = simulator
+
+    def get_sliders_ids(self):
+        return self.sliders.slider_ids()
+
+    def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
+        new_rs = [new_r0, new_r1]
+        start_times = [0, new_t1]
+
+        model = self.simulator.model
+        model.set_r_profile(new_rs, start_times)
+
+        data = self.simulator.run(new_init_cond)
+        fig = self.plot.figure
+        fig['data'][1]['y'] = data
+
+        return fig
+
+
+app = IncidenceNumberSimulationApp()
+df = pd.DataFrame({
+        'Time': [1, 2, 3, 4, 5, 6, 7],
+        'Incidence Number': [10, 3, 4, 1, 2, 6, 9]
+    })
+app.add_data(df)
+
+br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
+simulationController = bp.SimulationController(br_pro_model, 1, 7)
+app.add_simulator(simulationController)
+
+sliders = app.get_sliders_ids()
+
+
+@app.app.callback(
+        Output('myfig', 'figure'),
+        [Input(s, 'value') for s in sliders])
+def update_simulation(*args):
+    """
+    Simulates the model for the current slider values and updates the
+    model plot in the figure.
+    """
+    parameters = args
+    fig = app.update_simulation(*parameters)
+
+    return fig
+
+
+app.app.run_server(debug=True)
