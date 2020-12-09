@@ -18,5 +18,4 @@ from .version_info import VERSION_INT, VERSION  # noqa
 # Import main classes
 from .models import ForwardModel, BranchProModel    # noqa
 from .simulation import SimulationController  # noqa
-from .apps._sliders import _SliderComponent # noqa
-from .apps._incidence_number_plot import IncidenceNumberPlot  # noqa
+from .apps import IncidenceNumberPlot, _SliderComponent # noqa
