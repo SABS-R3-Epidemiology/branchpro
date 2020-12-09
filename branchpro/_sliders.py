@@ -40,6 +40,18 @@ class _SliderComponent():
         step_size
             Incremement between slider values.
         """
+        marks_list = np.arange(
+                                start=min_val,
+                                stop=max_val+step_size,
+                                step=step_size
+                                )
+        if marks_list.size > 10:
+            marks_list = np.linspace(
+                                        start=min_val,
+                                        stop=max_val,
+                                        num=11
+                                        )
+
         new_slider = [
                         html.Label(label),
                         dcc.Slider(
@@ -47,12 +59,7 @@ class _SliderComponent():
                             min=min_val,
                             max=max_val,
                             value=init_val,
-                            marks={str(ri): str(ri) for ri in np.arange(
-                                start=min_val,
-                                stop=max_val+step_size,
-                                step=step_size
-                                )
-                            },
+                            marks={str(ri): str(ri) for ri in marks_list},
                             step=step_size
                         )
                     ]

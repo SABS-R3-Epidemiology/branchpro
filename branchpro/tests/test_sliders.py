@@ -7,6 +7,8 @@
 
 import unittest
 
+import numpy as np
+
 import branchpro as bp
 
 
@@ -20,6 +22,7 @@ class Test_SliderComponent(unittest.TestCase):
     def test_add_slider(self):
         sliders = bp._SliderComponent()
         sliders.add_slider('param1', '1', 0, 0, 1, 0.5)
+        sliders.add_slider('param2', '2', 0, 0, 1, 0.05)
         self.assertEqual(sliders._sliders[0].children, 'param1')
         self.assertEqual(sliders._sliders[1].id, '1')
         self.assertEqual(sliders._sliders[1].min, 0)
@@ -30,6 +33,17 @@ class Test_SliderComponent(unittest.TestCase):
             {str(ri): str(ri) for ri in [0.0, 0.5, 1.0]}
             )
         self.assertEqual(sliders._sliders[1].step, 0.5)
+
+        self.assertEqual(sliders._sliders[2].children, 'param2')
+        self.assertEqual(sliders._sliders[3].id, '2')
+        self.assertEqual(sliders._sliders[3].min, 0)
+        self.assertEqual(sliders._sliders[3].max, 1)
+        self.assertEqual(sliders._sliders[3].value, 0)
+        self.assertEqual(
+            sliders._sliders[3].marks,
+            {str(ri): str(ri) for ri in np.linspace(0, 1, 11)}
+            )
+        self.assertEqual(sliders._sliders[3].step, 0.05)
 
     def test_get_sliders_div(self):
         sliders = bp._SliderComponent()
