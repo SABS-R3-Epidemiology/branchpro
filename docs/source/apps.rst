@@ -2,7 +2,7 @@
 Visualisation Apps 
 ******************
 
-.. currentmodule:: branchpro.apps
+.. currentmodule:: branchpro
 
 Overview:
 
