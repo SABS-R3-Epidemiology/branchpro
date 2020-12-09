@@ -20,9 +20,11 @@ class IncidenceNumberPlot():
         self.figure = go.Figure()
 
     def _label_warning(self, time_key, inc_key):
-        if (self.figure['layout']['xaxis']['title']['text'] != time_key) or (
-                self.figure['layout']['yaxis']['title']['text'] != inc_key):
-            warnings.warn('Labels do not match. They will be updated.')
+        x_label = self.figure['layout']['xaxis']['title']['text']
+        y_label = self.figure['layout']['yaxis']['title']['text']
+        if (x_label is not None) and (y_label is not None):
+            if (x_label != time_key) or (y_label != inc_key):
+                warnings.warn('Labels do not match. They will be updated.')
 
     def add_data(self, df, time_key='Time', inc_key='Incidence Number'):
         """

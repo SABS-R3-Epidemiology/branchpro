@@ -56,7 +56,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 't': [1, 2, 3, 5, 6],
                 'Incidence Number': [10, 3, 4, 6, 9]
                 })
-            my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(df, time_key='t')
 
         with self.assertWarns(UserWarning):
@@ -64,7 +63,6 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 'Time': [1, 2, 4, 5, 6],
                 'i': [2, 3, 8, 10, 5]
                 })
-            my_plot = bp.IncidenceNumberPlot()
             my_plot.add_data(df, inc_key='i')
 
     def test_add_simulation(self):
@@ -115,8 +113,7 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 't': [1, 2, 4, 5, 6],
                 'Incidence Number': [2, 3, 8, 10, 5]
                 })
-            my_plot = bp.IncidenceNumberPlot()
-            my_plot.add_data(dfs1, time_key='t')
+            my_plot.add_simulation(dfs1, time_key='t')
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
@@ -130,8 +127,7 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 'Time': [1, 2, 4, 5, 6],
                 'i': [2, 3, 8, 10, 5]
                 })
-            my_plot = bp.IncidenceNumberPlot()
-            my_plot.add_data(dfs2, inc_key='i')
+            my_plot.add_simulation(dfs2, inc_key='i')
 
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
