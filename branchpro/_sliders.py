@@ -40,13 +40,13 @@ class _SliderComponent():
         step_size
             Incremement between slider values.
         """
-        marks_list = np.arange(
+        mark_list = np.arange(
                                 start=min_val,
                                 stop=max_val+step_size,
                                 step=step_size
                                 )
-        if marks_list.size > 11:
-            marks_list = np.linspace(
+        if mark_list.size > 11:
+            mark_list = np.linspace(
                                         start=min_val,
                                         stop=max_val,
                                         num=11
@@ -59,7 +59,9 @@ class _SliderComponent():
                             min=min_val,
                             max=max_val,
                             value=init_val,
-                            marks={str(ri): str(ri) for ri in marks_list},
+                            marks={
+                                str(r): '{:.2f}'.format(r) for r in mark_list
+                                },
                             step=step_size
                         )
                     ]

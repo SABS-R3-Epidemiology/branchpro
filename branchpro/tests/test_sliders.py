@@ -30,7 +30,7 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(sliders._sliders[1].value, 0)
         self.assertEqual(
             sliders._sliders[1].marks,
-            {str(ri): str(ri) for ri in [0.0, 0.5, 1.0]}
+            {str(ri): '{:.2f}'.format(ri) for ri in [0.00, 0.50, 1.00]}
             )
         self.assertEqual(sliders._sliders[1].step, 0.5)
 
@@ -41,7 +41,7 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(sliders._sliders[3].value, 0)
         self.assertEqual(
             sliders._sliders[3].marks,
-            {str(ri): str(ri) for ri in np.linspace(0, 1, 11)}
+            {str(ri): '{:.2f}'.format(ri) for ri in np.linspace(0, 1, 11)}
             )
         self.assertEqual(sliders._sliders[3].step, 0.05)
 
@@ -58,7 +58,7 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(div.children[1].value, 0)
         self.assertEqual(
             div.children[1].marks,
-            {str(ri): str(ri) for ri in [0.0, 0.5, 1.0]}
+            {str(ri): '{:.2f}'.format(ri) for ri in [0.00, 0.50, 1.00]}
             )
         self.assertEqual(div.children[1].step, 0.5)
 
@@ -69,7 +69,8 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(div.children[3].value, 0.5)
         self.assertEqual(
             div.children[3].marks,
-            {str(ri): str(ri) for ri in [0.0, 0.25, 0.5, 0.75, 1.0]}
+            {str(ri): '{:.2f}'.format(ri) for ri in [
+                0.00, 0.25, 0.50, 0.75, 1.00]}
         )
         self.assertEqual(div.children[3].step, 0.25)
 
