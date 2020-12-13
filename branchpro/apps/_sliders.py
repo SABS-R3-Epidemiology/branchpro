@@ -16,6 +16,8 @@ import numpy as np
 class _SliderComponent():
     """_SliderComponent Class
     Stores slider information for sliders in branchpro Dash app.
+    In this class we keep track of both the figure and the sliders determined
+    by the data figure.
     """
     def __init__(self):
         self._sliders = []

@@ -21,9 +21,10 @@ import numpy as np
 
 
 class IncidenceNumberSimulationApp:
-
+    """IncidenceNumberSimulationApp Class:
+    Class for the dash app with figure and sliders.
+    """
     def __init__(self):
-
         self.app = dash.Dash(
             __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         self.plot = bp.IncidenceNumberPlot()
@@ -45,9 +46,28 @@ class IncidenceNumberSimulationApp:
         )
 
     def add_data(self, df):
+        """
+        Adds incidence data to the plot in the dash app.
+
+        Parameters
+        ----------
+        df
+            (pandas DataFrame) contains numbers of new cases by days.
+            Data stored in columns 'Time' and 'Incidence Number', respectively.
+        """
         self.plot.add_data(df)
 
     def add_simulator(self, simulator):
+        """
+        Simulates an instance of a model, adds it as a line to the plot and
+        adds sliders to the app.
+
+        Parameters
+        ----------
+        simulator
+            (SimulatorController) a BranchPro model and the time bounds
+            between which you run the simulator.
+        """
         if not issubclass(type(simulator), bp.SimulationController):
             raise TypeError('Simulatior needs to be a SimulationController')
 
@@ -80,9 +100,17 @@ class IncidenceNumberSimulationApp:
         self.simulator = simulator
 
     def get_sliders_ids(self):
+        """
+        Returns the IDs aof all sliders accompaning the figure in the
+        app.
+        """
         return self.sliders.slider_ids()
 
     def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
+        """
+        Updates the model parameters in the simulator and the
+        simulated graph in the figure.
+        """
         new_rs = [new_r0, new_r1]
         start_times = [0, new_t1]
 
@@ -98,10 +126,9 @@ class IncidenceNumberSimulationApp:
 
 app = IncidenceNumberSimulationApp()
 df = pd.DataFrame({
-        'Time': [1, 2, 3, 4, 5, 6, 7],
-        'Incidence Number': [10, 3, 4, 1, 2, 6, 9]
-    })
-app.add_data(df)
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
 
 br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
 simulationController = bp.SimulationController(br_pro_model, 1, 7)
@@ -116,7 +143,7 @@ sliders = app.get_sliders_ids()
 def update_simulation(*args):
     """
     Simulates the model for the current slider values and updates the
-    model plot in the figure.
+    plot in the figure.
     """
     parameters = args
     fig = app.update_simulation(*parameters)
