@@ -72,7 +72,8 @@ class SimulationController:
 
     def get_time_bounds(self):
         """
-        Gets time bounds of the simulation.
+        Gets time bounds of the simulation as a tuple with start and end time
+        of the simulation.
         """
         return self._sim_end_points
 
