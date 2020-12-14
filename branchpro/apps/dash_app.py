@@ -32,7 +32,7 @@ app.add_data(df)
 sliders = app.get_sliders_ids()
 
 # Get server of the app
-server = app.server
+server = app.app.server
 
 
 @app.app.callback(
