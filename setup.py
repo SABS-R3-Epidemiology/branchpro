@@ -66,6 +66,7 @@ setup(
         # Dependencies go here!
         'numpy>=1.8',
         'dash',
+        'dash_bootstrap_components',
         'pandas',
         'plotly'
     ],

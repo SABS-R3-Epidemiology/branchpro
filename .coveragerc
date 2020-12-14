@@ -2,4 +2,5 @@
 source = branchpro
 omit = 
     branchpro/tests/*
-
+    branchpro/apps/_simulation.py
+    branchpro/apps/dash_app.py
