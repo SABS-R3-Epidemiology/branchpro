@@ -6,14 +6,16 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
-
-import pandas as pd
-
-from dash.dependencies import Input, Output
-import branchpro as bp
-from branchpro.apps import IncidenceNumberSimulationApp
+"""This is an app which shows forward simulation of the branching process model
+with fixed example data. To run all tests, use ``python dash_app.py``.
+"""
 
 import numpy as np
+import pandas as pd
+from dash.dependencies import Input, Output
+
+import branchpro as bp
+from branchpro.apps import IncidenceNumberSimulationApp
 
 
 app = IncidenceNumberSimulationApp()
