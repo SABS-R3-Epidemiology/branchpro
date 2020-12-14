@@ -39,7 +39,7 @@ class SimulationController:
             raise TypeError(
                 'Model needs to be a subclass of the branchpro.ForwardModel')
 
-        self._model = model
+        self.model = model
         start_sim_time = int(start_sim_time)
         end_sim_time = int(end_sim_time)
         self._sim_end_points = (start_sim_time, end_sim_time)
@@ -64,6 +64,19 @@ class SimulationController:
         self._regime = np.rint(np.linspace(
             start_sim_time, end_sim_time, num=num_points)).astype(int)
 
+    def get_regime(self):
+        """
+        Gets all time point the simulation uses.
+        """
+        return self._regime
+
+    def get_time_bounds(self):
+        """
+        Gets time bounds of the simulation as a tuple with start and end time
+        of the simulation.
+        """
+        return self._sim_end_points
+
     def run(self, parameters):
         """
         Operates the ``simulate`` method present in any subclass of the
@@ -75,4 +88,4 @@ class SimulationController:
             An ordered sequence of parameter values.
 
         """
-        return self._model.simulate(parameters, self._regime)
+        return self.model.simulate(parameters, self._regime)
