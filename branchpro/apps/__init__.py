@@ -10,3 +10,4 @@
 # Import main classes
 from ._sliders import _SliderComponent # noqa
 from ._incidence_number_plot import IncidenceNumberPlot  # noqa
+from ._simulation_app import IncidenceNumberSimulationApp # noqa
