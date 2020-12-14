@@ -1,1 +1,1 @@
-web: gunicorn dash_app:server
+web: gunicorn --pythonpath branchpro/apps dash_app:server
