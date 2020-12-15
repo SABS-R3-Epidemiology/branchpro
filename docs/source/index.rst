@@ -11,10 +11,11 @@ The branchpro source code is hosted on GitHub_.
 
 .. toctree::
 
+   apps
    core_classes_and_methods
+   data_library
    models
    simulation
-   apps
 
 
 Search
