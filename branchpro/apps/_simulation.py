@@ -25,6 +25,8 @@ class IncidenceNumberSimulationApp:
         self.app = dash.Dash(
             __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         self.plot = bp.IncidenceNumberPlot()
+
+        # Keeps traces visibility states fixed when changing sliders
         self.plot.figure['layout']['legend']['uirevision'] = True
         self.sliders = bp._SliderComponent()
 
