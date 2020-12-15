@@ -17,7 +17,8 @@ class DatasetLibraryAPI:
     .csv format.
     """
     def __init__(self):
-        self._directory = 'branchpro/data_library'
+        self._directory = os.path.join(
+            os.path.dirname(__file__), 'data_library')
 
     def french_flu(self):
         """
