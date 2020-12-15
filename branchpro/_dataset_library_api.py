@@ -16,9 +16,8 @@ class DatasetLibraryAPI:
     Class for reading the files in the data library. These files are in the
     .csv format.
     """
-
     def __init__(self):
-        self._directory = 'data_library/'
+        self._directory = 'branchpro/data_library'
 
     def french_flu(self):
         """
