@@ -15,10 +15,10 @@ class TestDatasetLibraryAPIClass(unittest.TestCase):
     Test the 'DatasetLibraryAPI' class.
     """
     def test__init__(self):
-        bp.DatasetLibraryAPI()
+        bp.DatasetLibrary()
 
     def test_french_flu(self):
-        dataframe = bp.DatasetLibraryAPI().french_flu()
+        dataframe = bp.DatasetLibrary().french_flu()
         column_names = dataframe.head()
         some_names = [
             'time_index', 'year', 'week', 'day', 'inc', 'inc_low',

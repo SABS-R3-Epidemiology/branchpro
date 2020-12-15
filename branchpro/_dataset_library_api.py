@@ -11,8 +11,8 @@ import os
 import pandas as pd
 
 
-class DatasetLibraryAPI:
-    """DatasetLibraryAPI Class:
+class DatasetLibrary:
+    """DatasetLibrary Class:
     Class for reading the files in the data library. These files are in the
     .csv format.
     """
