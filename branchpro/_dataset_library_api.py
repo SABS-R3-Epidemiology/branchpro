@@ -11,7 +11,7 @@ import os
 import pandas as pd
 
 
-class DatasetLibrary:
+class DatasetLibrary(object):
     """DatasetLibrary Class:
     A data library class which contains a number of real world epidemiology
     datasets.
