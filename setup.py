@@ -60,6 +60,7 @@ setup(
 
     # Packages to include
     packages=find_packages(include=('branchpro', 'branchpro.*')),
+    include_package_data=True,
 
     # List of dependencies
     install_requires=[

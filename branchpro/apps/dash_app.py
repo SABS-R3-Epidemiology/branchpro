@@ -31,6 +31,9 @@ app.add_data(df)
 
 sliders = app.get_sliders_ids()
 
+# Get server of the app; necessary for correct deployment of the app.
+server = app.app.server
+
 
 @app.app.callback(
         Output('myfig', 'figure'),
