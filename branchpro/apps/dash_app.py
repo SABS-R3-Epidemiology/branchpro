@@ -19,14 +19,18 @@ from branchpro.apps import IncidenceNumberSimulationApp
 
 
 app = IncidenceNumberSimulationApp()
+full_ffd = bp.DatasetLibrary().french_flu()
+small_ffd = full_ffd.query('year == 2020')
 df = pd.DataFrame({
-            'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [10, 3, 4, 6, 9]
+            'Time': small_ffd['week'],
+            'Incidence Number': small_ffd['inc']
         })
 
 br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
-simulationController = bp.SimulationController(br_pro_model, 1, 7)
-app.add_simulator(simulationController)
+simulationController = bp.SimulationController(br_pro_model, 1, 42)
+app.add_simulator(
+    simulationController,
+    magnitude_init_cond=max(df['Incidence Number']))
 app.add_data(df)
 
 sliders = app.get_sliders_ids()
