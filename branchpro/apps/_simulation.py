@@ -57,7 +57,12 @@ class IncidenceNumberSimulationApp:
         """
         self.plot.add_data(df)
 
-    def add_simulator(self, simulator, init_cond=10.0, r0=2.0, r1=0.5):
+    def add_simulator(self,
+                      simulator,
+                      init_cond=10.0,
+                      r0=2.0,
+                      r1=0.5,
+                      magnitude_init_cond=100.0):
         """
         Simulates an instance of a model, adds it as a line to the plot and
         adds sliders to the app.
@@ -76,6 +81,9 @@ class IncidenceNumberSimulationApp:
         r1
             (float) start position on the slider for the second reproduction
             number for the Branch Pro model in the simulator.
+        magnitude_init_cond
+            (int) maximal start position on the slider for the number of
+            initial cases for the Branch Pro model in the simulator.
         """
         if not issubclass(type(simulator), bp.SimulationController):
             raise TypeError('Simulatior needs to be a SimulationController')
@@ -89,7 +97,8 @@ class IncidenceNumberSimulationApp:
         mid_point = sum(bounds)/2
 
         self.sliders.add_slider(
-            'Initial Cases', 'init_cond', init_cond, 0.0, 100.0, 10.0)
+            'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
+            magnitude_init_cond/1000)
         self.sliders.add_slider('Initial R', 'r0', r0, 0.1, 10.0, 0.01)
         self.sliders.add_slider('second R', 'r1', r1, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
