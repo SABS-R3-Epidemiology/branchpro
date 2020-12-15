@@ -7,7 +7,7 @@
 # notice and full license details.
 #
 """This is an app which shows forward simulation of the branching process model
-with fixed example data. To run all tests, use ``python dash_app.py``.
+with fixed example data. To run the app, use ``python dash_app.py``.
 """
 
 import numpy as np
