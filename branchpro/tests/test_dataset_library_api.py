@@ -6,9 +6,6 @@
 #
 
 import unittest
-from unittest.mock import patch
-
-import pandas as pd
 
 import branchpro as bp
 
@@ -20,3 +17,10 @@ class TestDatasetLibraryAPIClass(unittest.TestCase):
     def test__init__(self):
         bp.DatasetLibraryAPI()
 
+    def test_french_flu(self):
+        dataframe = bp.DatasetLibraryAPI().french_flu()
+        column_names = dataframe.head()
+        some_names = [
+            'time_index', 'year', 'week', 'day', 'inc', 'inc_low',
+            'inc_up', 'inc100', 'inc100_low', 'inc100_up']
+        self.assertTrue(set(column_names) == set(some_names))
