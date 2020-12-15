@@ -27,7 +27,8 @@ df = pd.DataFrame({
         })
 
 br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
-simulationController = bp.SimulationController(br_pro_model, 1, 42)
+simulationController = bp.SimulationController(
+    br_pro_model, 1, len(small_ffd['week']))
 app.add_simulator(
     simulationController,
     magnitude_init_cond=max(df['Incidence Number']))
