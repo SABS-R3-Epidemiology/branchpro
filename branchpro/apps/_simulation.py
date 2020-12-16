@@ -45,17 +45,21 @@ class IncidenceNumberSimulationApp:
             fluid=True,
         )
 
-    def add_data(self, df):
+    def add_data(self, df, time_label='Time', inc_label='Incidence Number'):
         """
         Adds incidence data to the plot in the dash app.
 
         Parameters
         ----------
         df
-            (pandas DataFrame) contains numbers of new cases by days.
-            Data stored in columns 'Time' and 'Incidence Number', respectively.
+            (pandas DataFrame) contains numbers of new cases by time unit.
+            Data stored in columns of time and incidence number, respectively.
+        time_label
+            label key given to the temporal data in the dataframe.
+        inc_label
+            label key given to the incidental data in the dataframe.
         """
-        self.plot.add_data(df)
+        self.plot.add_data(df, time_key=time_label, inc_key=inc_label)
 
     def add_simulator(self,
                       simulator,
