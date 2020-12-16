@@ -42,6 +42,11 @@ class BranchProPosterior(object):
         label key given to the temporal data in the inc_data dataframe.
     inc_key
         label key given to the incidental data in the inc_data dataframe.
+
+    Notes
+    -----
+    Always apply method run_inference before calling
+    :meth:`BranchProPosterior.get_intervals` to get R behaviour dataframe!
     """
 
     def __init__(
