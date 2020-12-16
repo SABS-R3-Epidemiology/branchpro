@@ -87,6 +87,21 @@ class IncidenceNumberPlot():
             yaxis_title=inc_key,
             hovermode='x unified')
 
+    def update_labels(self, time_label='Time', inc_label='Incidence Number'):
+        """
+        Updates the figure labels with user inputed values.
+
+        Parameters
+        ----------
+        time_label
+            x-axis label for the bar plot.
+        inc_label
+            y-axis label for the bar plot.
+        """
+        self.figure.update_layout(
+            xaxis_title=time_label,
+            yaxis_title=inc_label)
+
     def show_figure(self):
         """
         Shows current figure.
