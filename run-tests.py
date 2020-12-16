@@ -145,7 +145,8 @@ def doctest_rst_and_public_interface():
         'branchpro.models',
         'branchpro.version_info',
         'branchpro.simulation',
-        'branchpro.apps'
+        'branchpro.apps',
+        'branchpro.posterior'
         ]
 
     doc_symbols = get_all_documented_symbols()
