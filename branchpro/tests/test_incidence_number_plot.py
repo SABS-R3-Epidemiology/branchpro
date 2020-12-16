@@ -129,6 +129,25 @@ class TestIncidenceNumberPlotClass(unittest.TestCase):
                 })
             my_plot.add_simulation(dfs2, inc_key='i')
 
+    def test_update_labels(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        my_plot = bp.IncidenceNumberPlot()
+        my_plot.add_data(df)
+
+        new_time_label = 'Week'
+        new_inc_label = 'Inc'
+
+        my_plot.update_labels(time_label=new_time_label)
+        self.assertEqual(
+            my_plot.figure['layout']['xaxis']['title']['text'], 'Week')
+
+        my_plot.update_labels(inc_label=new_inc_label)
+        self.assertEqual(
+            my_plot.figure['layout']['yaxis']['title']['text'], 'Inc')
+
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
             df = pd.DataFrame({
