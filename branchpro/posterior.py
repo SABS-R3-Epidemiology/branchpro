@@ -64,7 +64,7 @@ class BranchProPosterior(object):
                 min(data_times), max(data_times)+1)
                 ).fillna(0).reset_index()
 
-        self.cases_data = padded_inc_data[time_key]
+        self.cases_data = padded_inc_data[inc_key]
         self.cases_times = padded_inc_data[time_key]
         self.serial_interval = daily_serial_interval
         self.prior_parameters = (alpha, beta)
