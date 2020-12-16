@@ -94,7 +94,7 @@ class BranchProPosterior(object):
         beta = self.prior_parameters[1]
         serial_interval = self.serial_interval
         time_init_inf_r = tau + 1
-        cases = self.cases_data
+        cases = self.cases_data.to_list()
 
         shape = []
         rate = []
@@ -110,7 +110,7 @@ class BranchProPosterior(object):
 
             for subtime in range(time - tau, time + 1):
                 # incidences up to subtime taken in reverse order
-                sub_incidences = cases[(subtime-1)::-1]
+                sub_incidences = cases[(subtime - 1)::-1]
                 # serial interval values up to subtime
                 sub_serials = serial_interval[:subtime]
 
@@ -127,11 +127,11 @@ class BranchProPosterior(object):
         # compute the Gamma-shaped posterior distribution
         post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
 
-        self.inference_times = self.cases_times
+        self.inference_times = list(range(time_init_inf_r, total_time+1))
         self.inference_estimates = mean
         self.inference_posterior = post_dist
 
-    def get_interval(self, central_prob):
+    def get_intervals(self, central_prob):
         """
         Returns a dataframe of the estimated recombination number values,
         as well as the lower and upper bounds of a credible interval of
