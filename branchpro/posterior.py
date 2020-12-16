@@ -55,6 +55,12 @@ class BranchProPosterior(object):
             raise TypeError(
                 'Daily Serial Interval distribution has to be a list')
 
+        if time_key not in list(inc_data.columns):
+            raise ValueError('No column with this name in given data')
+
+        if inc_key not in list(inc_data.columns):
+            raise ValueError('No column with this name in given data')
+
         data_times = inc_data[time_key]
 
         # Pad with zeros the time points where we have no information on
