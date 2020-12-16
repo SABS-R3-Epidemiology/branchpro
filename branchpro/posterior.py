@@ -18,7 +18,7 @@ class BranchProPosterior(object):
     the reproduction numbers of an epidemic in the case of a branching process.
 
     Choice of prior distribution is the conjugate prior for the likelihood
-    (Poisson) of observing given incidence data, hence a Gamma distribution.
+    (Poisson) of observing given incidence data, hence is a Gamma distribution.
     We express it in the shape-rate configuration.
 
     Hence, the posterior distribution will be also be Gamma-distributed.
