@@ -15,6 +15,7 @@ The branchpro source code is hosted on GitHub_.
    core_classes_and_methods
    data_library
    models
+   posterior_distribution
    simulation
 
 
