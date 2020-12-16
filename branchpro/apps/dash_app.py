@@ -22,7 +22,7 @@ app = IncidenceNumberSimulationApp()
 full_ffd = bp.DatasetLibrary().french_flu()
 small_ffd = full_ffd.query('year == 2020')
 df = pd.DataFrame({
-            'Time': small_ffd['week'],
+            'Week': small_ffd['week'],
             'Incidence Number': small_ffd['inc']
         })
 
@@ -32,7 +32,7 @@ simulationController = bp.SimulationController(
 app.add_simulator(
     simulationController,
     magnitude_init_cond=max(df['Incidence Number']))
-app.add_data(df)
+app.add_data(df, time_label='Week')
 
 sliders = app.get_sliders_ids()
 
