@@ -69,7 +69,8 @@ setup(
         'dash>=1.18',
         'dash_bootstrap_components',
         'pandas',
-        'plotly'
+        'plotly',
+        'scipy'
     ],
     extras_require={
         'docs': [

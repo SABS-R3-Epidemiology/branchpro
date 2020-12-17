@@ -205,8 +205,6 @@ class BranchProModel(ForwardModel):
             evaluation time
         incidences
             sequence of incidence numbers
-        last_time
-            total evaluation and simulation time for the R_t profile.
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
