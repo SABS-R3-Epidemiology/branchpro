@@ -83,8 +83,16 @@ class BranchProPosterior(object):
 
         self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
-        self.serial_interval = daily_serial_interval
+        self._serial_interval = daily_serial_interval[::-1]
         self.prior_parameters = (alpha, beta)
+
+    def get_serial_intervals(self):
+        """
+        Returns serial intervals for the model.
+
+        """
+        # Reverse inverting of order of serial intervals
+        return self._serial_interval[::-1]
 
     def _infectious_individuals(self, t):
         """
@@ -96,13 +104,13 @@ class BranchProPosterior(object):
         t
             evaluation time
         """
-        if t > len(self.serial_interval):
-            start_date = t - len(self.serial_interval)
+        if t > len(self._serial_interval):
+            start_date = t - len(self._serial_interval)
             eff_num = np.sum(
-                self.cases_data[start_date:t] * self.serial_interval)
+                self.cases_data[start_date:t] * self._serial_interval)
             return eff_num
 
-        eff_num = np.sum(self.cases_data[:t] * self.serial_interval[-t:])
+        eff_num = np.sum(self.cases_data[:t] * self._serial_interval[-t:])
         return eff_num
 
     def _infectives_in_tau(self, start, end):
@@ -111,7 +119,7 @@ class BranchProPosterior(object):
         """
         num = []
         for time in range(start, end):
-            num += self._infectious_individuals(time)
+            num += [self._infectious_individuals(time)]
         return np.sum(num)
 
     def run_inference(self, tau):
