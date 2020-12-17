@@ -18,7 +18,7 @@ IncidenceNumberPlot
   :members: add_data, add_simulation, update_labels, show_figure
 
 ReproductionNumberPlot
-********************
+**********************
 
 .. autoclass:: ReproductionNumberPlot
   :members: add_ground_rt, add_interval_rt, update_labels, show_figure
