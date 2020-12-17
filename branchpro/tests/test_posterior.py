@@ -8,6 +8,8 @@
 import unittest
 
 import pandas as pd
+import numpy as np
+import numpy.testing as npt
 
 import branchpro as bp
 
@@ -45,6 +47,17 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         with self.assertRaises(ValueError) as test_excep:
             bp.BranchProPosterior(df, ser_int, 1, 0.2, inc_key='i')
         self.assertTrue('No incidence column' in str(test_excep.exception))
+
+    def test_get_serial_intervals(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
+        npt.assert_array_equal(
+            inference.get_serial_intervals(), np.array([1, 2]))
 
     def test_run_inference(self):
         df = pd.DataFrame({
