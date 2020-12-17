@@ -22,7 +22,7 @@ class Test_SliderComponent(unittest.TestCase):
     def test_add_slider(self):
         sliders = bp._SliderComponent()
         sliders.add_slider('param1', '1', 0, 0, 1, 0.5)
-        sliders.add_slider('param2', '2', 0, 0, 1, 0.05)
+        sliders.add_slider('param2', '2', 0, 0, 15, 1, as_integer=True)
 
         self.assertEqual(sliders._sliders[0].children[0].children, 'param1')
         self.assertEqual(sliders._sliders[0].children[1].id, '1')
@@ -38,13 +38,13 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(sliders._sliders[1].children[0].children, 'param2')
         self.assertEqual(sliders._sliders[1].children[1].id, '2')
         self.assertEqual(sliders._sliders[1].children[1].min, 0)
-        self.assertEqual(sliders._sliders[1].children[1].max, 1)
+        self.assertEqual(sliders._sliders[1].children[1].max, 15)
         self.assertEqual(sliders._sliders[1].children[1].value, 0)
         self.assertEqual(
             sliders._sliders[1].children[1].marks,
-            {ri: '{:.2f}'.format(ri) for ri in np.linspace(0, 1, 11)}
+            {ri: '{:.0f}'.format(ri) for ri in np.linspace(0, 15, 10)}
             )
-        self.assertEqual(sliders._sliders[1].children[1].step, 0.05)
+        self.assertEqual(sliders._sliders[1].children[1].step, 1)
 
     def test_get_sliders_div(self):
         sliders = bp._SliderComponent()
