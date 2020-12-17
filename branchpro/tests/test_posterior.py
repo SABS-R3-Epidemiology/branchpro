@@ -93,9 +93,9 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         intervals_df = inference.get_intervals(.95)
 
         self.assertEqual(len(intervals_df['Time Points']), 4)
-        self.assertEqual(len(intervals_df['Estimates of Mean']), 4)
+        self.assertEqual(len(intervals_df['Mean']), 4)
         self.assertEqual(len(intervals_df['Lower bound CI']), 4)
         self.assertEqual(len(intervals_df['Upper bound CI']), 4)
 
         self.assertListEqual(
-            intervals_df['Estimates of Mean'].to_list(), [5.0] * 4)
+            intervals_df['Mean'].to_list(), [5.0] * 4)

@@ -13,13 +13,16 @@ import pandas as pd
 
 
 class BranchProPosterior(object):
-    """BranchProPosterior Class:
+    r"""BranchProPosterior Class:
     Class for computing the posterior distribution used for the inference of
     the reproduction numbers of an epidemic in the case of a branching process.
 
     Choice of prior distribution is the conjugate prior for the likelihood
     (Poisson) of observing given incidence data, hence is a Gamma distribution.
-    We express it in the shape-rate configuration.
+    We express it in the shape-rate configuration, so that the PDF takes the
+    form:
+    .. math::
+        f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}
 
     Hence, the posterior distribution will be also be Gamma-distributed.
 
@@ -83,7 +86,7 @@ class BranchProPosterior(object):
 
         self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
-        self._serial_interval = daily_serial_interval[::-1]
+        self._serial_interval = np.asarray(daily_serial_interval)[::-1]
         self.prior_parameters = (alpha, beta)
 
     def get_serial_intervals(self):
@@ -174,9 +177,12 @@ class BranchProPosterior(object):
         Returns a dataframe of the reproduction number posterior mean
         with percentiles over time.
 
-        The lower and upper percentiles of the specified central
-        probability mass are computed from the posterior distribution
-        from the :meth:`BranchProPosterior.get_intervals`.
+        The lower and upper percentiles are computed from the posterior
+        distribution, using the specified central probability to form an
+        equal-tailed interval.
+
+        The results are returned in a dataframe with the following columns:
+        'Time Points', 'Mean', 'Lower bound CI' and 'Upper bound CI'
 
         Parameters
         ----------
@@ -190,7 +196,7 @@ class BranchProPosterior(object):
         intervals_df = pd.DataFrame(
             {
                 'Time Points': self.inference_times,
-                'Estimates of Mean': self.inference_estimates,
+                'Mean': self.inference_estimates,
                 'Lower bound CI': post_dist_interval[0],
                 'Upper bound CI': post_dist_interval[1]
             }
