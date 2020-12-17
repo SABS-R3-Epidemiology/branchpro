@@ -6,7 +6,6 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
-import math
 
 import numpy as np
 import scipy.stats
@@ -82,10 +81,38 @@ class BranchProPosterior(object):
                 min(data_times), max(data_times)+1)
                 ).fillna(0).reset_index()
 
-        self.cases_data = padded_inc_data[inc_key]
+        self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
         self.serial_interval = daily_serial_interval
         self.prior_parameters = (alpha, beta)
+
+    def _infectious_individuals(self, t):
+        """
+        Computes expected number of new cases at time t, using previous
+        incidences and serial intervals.
+
+        Parameters
+        ----------
+        t
+            evaluation time
+        """
+        if t > len(self.serial_interval):
+            start_date = t - len(self.serial_interval)
+            eff_num = np.sum(
+                self.cases_data[start_date:t] * self.serial_interval)
+            return eff_num
+
+        eff_num = np.sum(self.cases_data[:t] * self.serial_interval[-t:])
+        return eff_num
+
+    def _infectives_in_tau(self, start, end):
+        """
+        Sum total number of infectives in tau window.
+        """
+        num = []
+        for time in range(start, end):
+            num += self._infectious_individuals(time)
+        return np.sum(num)
 
     def run_inference(self, tau):
         """
@@ -102,44 +129,27 @@ class BranchProPosterior(object):
             estimated.
         """
         total_time = self.cases_times.max() - self.cases_times.min() + 1
-        alpha = self.prior_parameters[0]
-        beta = self.prior_parameters[1]
-        serial_interval = self.serial_interval
+        alpha, beta = self.prior_parameters
         time_init_inf_r = tau + 1
-        cases = self.cases_data.to_list()
 
         shape = []
         rate = []
         mean = []
 
         for time in range(time_init_inf_r, total_time+1):
+            # get cases in tau window
+            start_window = time - tau
+            end_window = time + 1
+
             # compute shape parameter of the posterior over time
             shape.append(
-                alpha + math.fsum(cases[(time - tau):(time + 1)]))
+                alpha + np.sum(
+                    self.cases_data[start_window:end_window]))
 
-            # compute shape parameter of the posterior over time
-            incidences = 0
+            # compute rate parameter of the posterior over time
 
-            for subtime in range(time - tau, time + 1):
-                # for short serial interval
-                if subtime > len(serial_interval):
-                    start_time = subtime - len(serial_interval)
-                    # incidences up to subtime taken in reverse order
-                    sub_incidences = cases[(subtime - 1):(start_time):-1]
-                    # serial interval values up to subtime
-                    sub_serials = serial_interval[:subtime]
-
-                # incidences up to subtime taken in reverse order
-                sub_incidences = cases[(subtime - 1)::-1]
-                # serial interval values up to subtime
-                sub_serials = serial_interval[:subtime]
-
-                # compute the total amount of new incidences based on
-                # previous days and the serial interval
-                incidences += math.fsum(np.multiply(
-                    sub_incidences, sub_serials))
-
-            rate.append(1/beta + incidences)
+            rate.append(beta + self._infectives_in_tau(
+                start_window, end_window))
 
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)

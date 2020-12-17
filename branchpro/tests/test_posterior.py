@@ -51,21 +51,29 @@ class TestBranchProPosteriorClass(unittest.TestCase):
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [10, 3, 4, 6, 9]
         })
-        ser_int = [1, 2, 1, 0, 0, 0]
+        ser_int1 = [1, 2, 1, 0, 0, 0]
+        ser_int2 = [1, 2]
 
-        inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
-        inference.run_inference(tau=2)
+        inference1 = bp.BranchProPosterior(df, ser_int1, 1, 0.2)
+        inference1.run_inference(tau=2)
 
-        self.assertEqual(len(inference.inference_estimates), 4)
-        self.assertEqual(len(inference.inference_times), 4)
-        self.assertEqual(len(inference.inference_posterior.mean()), 4)
+        inference2 = bp.BranchProPosterior(df, ser_int2, 1, 0.2)
+        inference2.run_inference(tau=2)
+
+        self.assertEqual(len(inference1.inference_estimates), 4)
+        self.assertEqual(len(inference1.inference_times), 4)
+        self.assertEqual(len(inference1.inference_posterior.mean()), 4)
+
+        self.assertEqual(len(inference2.inference_estimates), 4)
+        self.assertEqual(len(inference2.inference_times), 4)
+        self.assertEqual(len(inference2.inference_posterior.mean()), 4)
 
     def test_get_intervals(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [10, 3, 4, 6, 9]
+            'Incidence Number': [0, 0, 0, 0, 0]
         })
-        ser_int = [1, 2, 1, 0, 0, 0]
+        ser_int = [1, 2]
 
         inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
         inference.run_inference(tau=2)
@@ -75,3 +83,6 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         self.assertEqual(len(intervals_df['Estimates of Mean']), 4)
         self.assertEqual(len(intervals_df['Lower bound CI']), 4)
         self.assertEqual(len(intervals_df['Upper bound CI']), 4)
+
+        self.assertListEqual(
+            intervals_df['Estimates of Mean'].to_list(), [5.0] * 4)
