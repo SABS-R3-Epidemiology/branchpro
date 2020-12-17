@@ -102,7 +102,7 @@ class IncidenceNumberSimulationApp:
 
         self.sliders.add_slider(
             'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
-            magnitude_init_cond/1000)
+            1.0)
         self.sliders.add_slider('Initial R', 'r0', r0, 0.1, 10.0, 0.01)
         self.sliders.add_slider('second R', 'r1', r1, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
