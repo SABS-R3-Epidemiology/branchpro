@@ -22,20 +22,20 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
     def test__init__(self):
         bp.ReproductionNumberPlot()
 
-    def test_add_data(self):
+    def test_add_ground_truth_rt(self):
         df = pd.DataFrame({
-            'Time': [1, 2, 3, 4, 5, 6],
-            'Incidence Number': [3, 3, 0.5, 0.5, 0.5]
+            'Time Points': [1, 2, 3, 4, 5, 6],
+            'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
         })
         my_plot = bp.ReproductionNumberPlot()
-        my_plot.add_data(df)
+        my_plot.add_ground_truth_rt(df)
 
         npt.assert_array_equal(
             np.array(
                 [my_plot.figure['data'][0]['x']]
                 ),
             np.array(
-                [np.array([1, 2, 3, 5, 6])]
+                [np.array([1, 2, 3, 4, 5, 6])]
                 )
         )
 
@@ -44,118 +44,156 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][0]['y']]
                 ),
             np.array(
-                [np.array([10,  3,  4,  6,  9])]
+                [np.array([3, 3, 0.5, 0.5, 0.5, 0.5])]
                 )
         )
 
         with self.assertRaises(TypeError):
-            bp.IncidenceNumberPlot().add_data(0)
+            bp.ReproductionNumberPlot().add_ground_truth_rt(0)
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
-                't': [1, 2, 3, 5, 6],
-                'Incidence Number': [10, 3, 4, 6, 9]
+                't': [1, 2, 3, 4, 5, 6],
+                'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
                 })
-            my_plot.add_data(df, time_key='t')
+            my_plot.add_ground_truth_rt(df, time_key='t')
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
-                'Time': [1, 2, 4, 5, 6],
-                'i': [2, 3, 8, 10, 5]
+                'Time Points': [1, 2, 3, 4, 5, 6],
+                'r': [3, 3, 0.5, 0.5, 0.5, 0.5]
                 })
-            my_plot.add_data(df, inc_key='i')
+            my_plot.add_ground_truth_rt(df, r_key='r')
 
-    def test_add_simulation(self):
+    def test_add_interval_rt(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [10, 3, 4, 6, 9]
+            'Incidence Number': [0, 0, 0, 0, 0]
         })
-        my_plot = bp.IncidenceNumberPlot()
-        my_plot.add_data(df)
+        ser_int = [1, 2]
 
-        dfs = pd.DataFrame({
-            'Time': [1, 2, 4, 5, 6],
-            'Incidence Number': [2, 3, 8, 10, 5]
-        })
+        inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
+        inference.run_inference(tau=2)
+        intervals_df = inference.get_intervals(.95)
 
-        my_plot.add_simulation(dfs)
+        my_plot = bp.ReproductionNumberPlot()
+        my_plot.add_interval_rt(intervals_df)
 
+        npt.assert_array_equal(
+            np.array(
+                [my_plot.figure['data'][0]['x']]
+                ),
+            np.array(
+                [np.array([3, 4, 5, 6])]
+                )
+        )
+
+        npt.assert_array_equal(
+            np.array(
+                [my_plot.figure['data'][0]['y']]
+                ),
+            np.array(
+                [np.array([5.0] * 4)]
+                )
+        )
         npt.assert_array_equal(
             np.array(
                 [my_plot.figure['data'][1]['x']]
                 ),
             np.array(
-                [np.array([1, 2, 4, 5, 6])]
+                [np.array([3, 4, 5, 6])]
+                )
+        )
+
+        npt.assert_array_almost_equal(
+            np.array(
+                [my_plot.figure['data'][1]['y']]
+                ),
+            np.array(
+                [np.array([0.126589] * 4)]
                 )
         )
 
         npt.assert_array_equal(
             np.array(
-                [my_plot.figure['data'][1]['y']]
+                [my_plot.figure['data'][2]['x']]
                 ),
             np.array(
-                [np.array([2, 3, 8, 10, 5])]
+                [np.array([3, 4, 5, 6])]
+                )
+        )
+
+        npt.assert_array_almost_equal(
+            np.array(
+                [my_plot.figure['data'][2]['y']]
+                ),
+            np.array(
+                [np.array([18.444397] * 4)]
                 )
         )
 
         with self.assertRaises(TypeError):
-            bp.IncidenceNumberPlot().add_simulation(0)
+            bp.ReproductionNumberPlot().add_interval_rt(0)
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
-                'Time': [1, 2, 3, 5, 6],
-                'Incidence Number': [10, 3, 4, 6, 9]
+                'Time Points': [1, 2, 3, 4, 5, 6],
+                'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
                 })
-            my_plot = bp.IncidenceNumberPlot()
-            my_plot.add_data(df)
+            my_plot = bp.ReproductionNumberPlot()
+            my_plot.add_ground_truth_rt(df)
 
             dfs1 = pd.DataFrame({
-                't': [1, 2, 4, 5, 6],
-                'Incidence Number': [2, 3, 8, 10, 5]
+                't': [3, 4, 5, 6],
+                'Estimates of Mean': [5.0] * 4,
+                'Lower bound CI': [5.0] * 4,
+                'Upper bound CI': [5.0] * 4
                 })
-            my_plot.add_simulation(dfs1, time_key='t')
+            my_plot.add_interval_rt(dfs1, time_key='t')
 
         with self.assertWarns(UserWarning):
             df = pd.DataFrame({
-                'Time': [1, 2, 3, 5, 6],
-                'Incidence Number': [10, 3, 4, 6, 9]
+                'Time Points': [1, 2, 3, 4, 5, 6],
+                'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
                 })
-            my_plot = bp.IncidenceNumberPlot()
-            my_plot.add_data(df)
+            my_plot = bp.ReproductionNumberPlot()
+            my_plot.add_ground_truth_rt(df)
 
             dfs2 = pd.DataFrame({
-                'Time': [1, 2, 4, 5, 6],
-                'i': [2, 3, 8, 10, 5]
+                'Time Points': [3, 4, 5, 6],
+                'r': [5.0] * 4,
+                'Lower bound CI': [5.0] * 4,
+                'Upper bound CI': [5.0] * 4
                 })
-            my_plot.add_simulation(dfs2, inc_key='i')
+            my_plot.add_interval_rt(dfs2, r_key='r')
 
     def test_update_labels(self):
         df = pd.DataFrame({
-            'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [10, 3, 4, 6, 9]
-        })
-        my_plot = bp.IncidenceNumberPlot()
-        my_plot.add_data(df)
+            'Time Points': [1, 2, 3, 4, 5, 6],
+            'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
+            })
+        my_plot = bp.ReproductionNumberPlot()
+        my_plot.add_ground_truth_rt(df)
 
-        new_time_label = 'Week'
-        new_inc_label = 'Inc'
+        new_time_label = 'Time'
+        new_r_label = 'R Value'
 
         my_plot.update_labels(time_label=new_time_label)
         self.assertEqual(
-            my_plot.figure['layout']['xaxis']['title']['text'], 'Week')
+            my_plot.figure['layout']['xaxis']['title']['text'], 'Time')
 
-        my_plot.update_labels(inc_label=new_inc_label)
+        my_plot.update_labels(r_label=new_r_label)
         self.assertEqual(
-            my_plot.figure['layout']['yaxis']['title']['text'], 'Inc')
+            my_plot.figure['layout']['yaxis']['title']['text'], 'R Value')
 
     def test_show_figure(self):
         with patch('plotly.graph_objs.Figure.show') as show_patch:
             df = pd.DataFrame({
-                'Time': [1, 2, 3, 5, 6],
-                'Incidence Number': [10, 3, 4, 6, 9]
+                'Time Points': [1, 2, 3, 4, 5, 6],
+                'R_t': [3, 3, 0.5, 0.5, 0.5, 0.5]
             })
-            my_plot = bp.IncidenceNumberPlot()
-            my_plot.add_data(df)
+            my_plot = bp.ReproductionNumberPlot()
+            my_plot.add_ground_truth_rt(df)
             my_plot.show_figure()
 
         # Assert show_figure is called once
