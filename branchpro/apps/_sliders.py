@@ -7,7 +7,7 @@
 # notice and full license details.
 #
 
-import dash_core_components as dcc
+import dash_daq as daq
 import dash_html_components as html
 
 import numpy as np
@@ -59,18 +59,23 @@ class _SliderComponent():
         keys = [int(r) if r.is_integer() else r for r in mark_list]
         locks = ['{:.2f}'.format(r) for r in mark_list]
 
-        new_slider = [
+        new_slider = html.Div([
                         html.Label(label),
-                        dcc.Slider(
+                        daq.Slider(
                             id=new_id,
                             min=min_val,
                             max=max_val,
                             value=init_val,
+                            handleLabel={
+                                "showCurrentValue": True,
+                                "label": ' ',
+                                "style": {"positionBottom": -1}},
                             marks=dict(zip(keys, locks)),
-                            step=step_size
+                            step=step_size,
+                            size=725
                         )
-                    ]
-        self._sliders += new_slider
+                    ], style={'marginBottom': '2em'})
+        self._sliders += [new_slider]
         self._slider_ids.append(new_id)
 
     def get_sliders_div(self):
