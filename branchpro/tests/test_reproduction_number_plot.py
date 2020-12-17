@@ -145,7 +145,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
 
             dfs1 = pd.DataFrame({
                 't': [3, 4, 5, 6],
-                'Estimates of Mean': [5.0] * 4,
+                'Mean': [5.0] * 4,
                 'Lower bound CI': [5.0] * 4,
                 'Upper bound CI': [5.0] * 4
                 })

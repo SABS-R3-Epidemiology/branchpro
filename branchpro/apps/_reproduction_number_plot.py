@@ -59,7 +59,7 @@ class ReproductionNumberPlot():
             yaxis_title=r_key)
 
     def add_interval_rt(
-            self, df, time_key='Time Points', r_key='Estimates of Mean',
+            self, df, time_key='Time Points', r_key='Mean',
             lr_key='Lower bound CI', ur_key='Upper bound CI'):
         """
         Plots the estimated values of R_t as a line on the figure, as well
@@ -69,8 +69,8 @@ class ReproductionNumberPlot():
         ----------
         df
             (pandas DataFrame) contains the posterior mean with percentiles
-            over time. Data stored in columns 'Time Points', 'Estimates of
-            Mean', 'Lower bound CI', 'Upper bound CI', respectively.
+            over time. Data stored in columns 'Time Points', 'Mean',
+            'Lower bound CI', 'Upper bound CI', respectively.
         time_key
             x-axis label for the bar plot.
         r_key
