@@ -6,8 +6,9 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
-import numpy as np
 import math
+
+import numpy as np
 import scipy.stats
 import pandas as pd
 
@@ -56,15 +57,21 @@ class BranchProPosterior(object):
         if not issubclass(type(inc_data), pd.DataFrame):
             raise TypeError('Incidence data has to be a dataframe')
 
-        if not issubclass(type(daily_serial_interval), list):
+        try:
+            float(next(iter(daily_serial_interval)))
+        except (TypeError, StopIteration):
             raise TypeError(
-                'Daily Serial Interval distribution has to be a list')
+                'Daily Serial Interval distribution must be iterable')
+        except ValueError:
+            raise TypeError('Daily Serial Interval distribution must contain '
+                            'numeric values')
 
-        if time_key not in list(inc_data.columns):
-            raise ValueError('No column with this name in given data')
+        if time_key not in inc_data.columns:
+            raise ValueError('No time column with this name in given data')
 
-        if inc_key not in list(inc_data.columns):
-            raise ValueError('No column with this name in given data')
+        if inc_key not in inc_data.columns:
+            raise ValueError(
+                'No incidence column with this name in given data')
 
         data_times = inc_data[time_key]
 
@@ -114,6 +121,14 @@ class BranchProPosterior(object):
             incidences = 0
 
             for subtime in range(time - tau, time + 1):
+                # for short serial interval
+                if subtime > len(serial_interval):
+                    start_time = subtime - len(serial_interval)
+                    # incidences up to subtime taken in reverse order
+                    sub_incidences = cases[(subtime - 1):(start_time):-1]
+                    # serial interval values up to subtime
+                    sub_serials = serial_interval[:subtime]
+
                 # incidences up to subtime taken in reverse order
                 sub_incidences = cases[(subtime - 1)::-1]
                 # serial interval values up to subtime
@@ -138,22 +153,26 @@ class BranchProPosterior(object):
 
     def get_intervals(self, central_prob):
         """
-        Returns a dataframe of the estimated recombination number values,
-        as well as the lower and upper bounds of a credible interval of
-        specified level.
+        Returns a dataframe of the reproduction number posterior mean
+        with percentiles over time.
+
+        The lower and upper percentiles of the specified central
+        probability mass are computed from the posterior distribution
+        from the :meth:`BranchProPosterior.get_intervals`.
 
         Parameters
         ----------
         central_prob
             level of the computed credible interval of the estimated
-            R number values.
+            R number values. The interval the central probability.
         """
         # compute bounds of credible interval of level central_prob
         post_dist_interval = self.inference_posterior.interval(central_prob)
 
         intervals_df = pd.DataFrame(
             {
-                'Estimates': self.inference_estimates,
+                'Time Points': self.inference_times,
+                'Estimates of Mean': self.inference_estimates,
                 'Lower bound CI': post_dist_interval[0],
                 'Upper bound CI': post_dist_interval[1]
             }

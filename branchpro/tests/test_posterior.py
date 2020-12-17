@@ -25,17 +25,26 @@ class TestBranchProPosteriorClass(unittest.TestCase):
 
         bp.BranchProPosterior(df, ser_int, 1, 0.2)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as test_excep:
             bp.BranchProPosterior('0', ser_int, 1, 0.2)
+        self.assertTrue('Incidence data has to' in str(test_excep.exception))
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as test_excep:
             bp.BranchProPosterior(df, 0, 1, 0.2)
+        self.assertTrue('must be iterable' in str(test_excep.exception))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError) as test_excep:
+            bp.BranchProPosterior(df, ['zero'], 1, 0.2)
+        self.assertTrue(
+            'distribution must contain' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
             bp.BranchProPosterior(df, ser_int, 1, 0.2, time_key='t')
+        self.assertTrue('No time column' in str(test_excep.exception))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as test_excep:
             bp.BranchProPosterior(df, ser_int, 1, 0.2, inc_key='i')
+        self.assertTrue('No incidence column' in str(test_excep.exception))
 
     def test_run_inference(self):
         df = pd.DataFrame({
@@ -62,6 +71,7 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         inference.run_inference(tau=2)
         intervals_df = inference.get_intervals(.95)
 
-        self.assertEqual(len(intervals_df['Estimates']), 4)
+        self.assertEqual(len(intervals_df['Time Points']), 4)
+        self.assertEqual(len(intervals_df['Estimates of Mean']), 4)
         self.assertEqual(len(intervals_df['Lower bound CI']), 4)
         self.assertEqual(len(intervals_df['Upper bound CI']), 4)
