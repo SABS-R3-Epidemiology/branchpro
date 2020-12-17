@@ -11,3 +11,4 @@
 from ._sliders import _SliderComponent # noqa
 from ._incidence_number_plot import IncidenceNumberPlot  # noqa
 from ._simulation import IncidenceNumberSimulationApp # noqa
+from ._reproduction_number_plot import ReproductionNumberPlot # noqa
