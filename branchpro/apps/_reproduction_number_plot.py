@@ -113,7 +113,7 @@ class ReproductionNumberPlot():
 
         self.figure.update_layout(
             xaxis_title=time_key,
-            yaxis_title=r_key,
+            yaxis_title='R',
             hovermode='x unified')
 
     def update_labels(self, time_label=None, r_label=None):
