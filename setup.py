@@ -68,6 +68,7 @@ setup(
         'numpy>=1.8',
         'dash>=1.18',
         'dash_bootstrap_components',
+        'dash_daq',
         'pandas',
         'plotly',
         'scipy'

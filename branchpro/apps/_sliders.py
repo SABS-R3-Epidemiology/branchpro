@@ -7,7 +7,7 @@
 # notice and full license details.
 #
 
-import dash_core_components as dcc
+import dash_daq as daq
 import dash_html_components as html
 
 import numpy as np
@@ -23,7 +23,9 @@ class _SliderComponent():
         self._sliders = []
         self._slider_ids = []
 
-    def add_slider(self, label, new_id, init_val, min_val, max_val, step_size):
+    def add_slider(
+            self, label, new_id, init_val, min_val, max_val, step_size,
+            as_integer=False):
         """
         Creates a new slider with label for the Dash app plot.
 
@@ -41,6 +43,8 @@ class _SliderComponent():
             Maximum (rightmost) slider value.
         step_size
             Incremement between slider values.
+        as_integer
+            (boolean) display decimals or not for the marks of sliders.
         """
         mark_list = np.arange(
                                 start=min_val,
@@ -48,29 +52,37 @@ class _SliderComponent():
                                 step=step_size,
                                 dtype=np.float64
                                 )
-        if mark_list.size > 11:
+        if (mark_list.size > 10):
             mark_list = np.linspace(
                                         start=min_val,
                                         stop=max_val,
-                                        num=11,
+                                        num=10,
                                         dtype=np.float64
                                         )
 
         keys = [int(r) if r.is_integer() else r for r in mark_list]
-        locks = ['{:.2f}'.format(r) for r in mark_list]
+        if as_integer:
+            locks = ['{:.0f}'.format(r) for r in mark_list]
+        else:
+            locks = ['{:.2f}'.format(r) for r in mark_list]
 
-        new_slider = [
+        new_slider = html.Div([
                         html.Label(label),
-                        dcc.Slider(
+                        daq.Slider(
                             id=new_id,
                             min=min_val,
                             max=max_val,
                             value=init_val,
+                            handleLabel={
+                                "showCurrentValue": True,
+                                "label": ' ',
+                                "style": {"positionBottom": -1}},
                             marks=dict(zip(keys, locks)),
-                            step=step_size
+                            step=step_size,
+                            size=725
                         )
-                    ]
-        self._sliders += new_slider
+                    ], style={'marginBottom': '2em'})
+        self._sliders += [new_slider]
         self._slider_ids.append(new_id)
 
     def get_sliders_div(self):
