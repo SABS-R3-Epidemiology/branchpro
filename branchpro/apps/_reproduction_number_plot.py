@@ -49,7 +49,8 @@ class ReproductionNumberPlot():
             y=df[r_key],
             x=df[time_key],
             mode='lines',
-            name='True R'
+            name='True R',
+            line_color='green'
         )
 
         self.figure.add_trace(trace)
@@ -83,21 +84,26 @@ class ReproductionNumberPlot():
             y=df[r_key],
             x=df[time_key],
             mode='lines',
-            name='Estimated R'
+            name='Estimated R',
+            line_color='indigo'
         )
 
         trace = go.Scatter(
             y=df[lr_key],
             x=df[time_key],
+            fill=None,
             mode='lines',
-            name='Lower bound of R (CI)'
+            name='Lower bound of R (CI)',
+            line_color='goldenrod'
         )
 
         trace = go.Scatter(
             y=df[ur_key],
             x=df[time_key],
+            fill='tonexty',  # fill area between trace0 and trace1
             mode='lines',
-            name='Upper bound of R (CI)'
+            name='Upper bound of R (CI)',
+            line_color='goldenrod'
         )
 
         self.figure.add_trace(trace)
