@@ -7,6 +7,7 @@ Visualisation Apps
 Overview:
 
 - :class:`IncidenceNumberPlot`
+- :class:`ReproductionNumberPlot`
 - :class:`_SliderComponent`
 - :class:`IncidenceNumberSimulationApp`
 
@@ -15,6 +16,13 @@ IncidenceNumberPlot
 
 .. autoclass:: IncidenceNumberPlot
   :members: add_data, add_simulation, update_labels, show_figure
+
+ReproductionNumberPlot
+**********************
+
+.. autoclass:: ReproductionNumberPlot
+  :members: add_ground_truth_rt, add_interval_rt, update_labels, show_figure
+
 
 Sliders
 *******
