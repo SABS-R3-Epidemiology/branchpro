@@ -26,7 +26,7 @@ class ReproductionNumberPlot():
             if (x_label != time_key) or (y_label != r_key):
                 warnings.warn('Labels do not match. They will be updated.')
 
-    def add_ground_truth_rt(self, df, time_key='Time', r_key='R_t'):
+    def add_ground_truth_rt(self, df, time_key='Time Points', r_key='R_t'):
         """
         Plots the true values of R_t as a line on the figure.
 
@@ -34,7 +34,7 @@ class ReproductionNumberPlot():
         ----------
         df
             (pandas DataFrame) contains the true values of the reproduction
-            number by days. Data stored in columns 'Time' and 'R_t',
+            number by days. Data stored in columns 'Time Points' and 'R_t',
             respectively.
         time_key
             x-axis label for the bar plot.
@@ -80,7 +80,7 @@ class ReproductionNumberPlot():
             raise TypeError('df needs to be a dataframe')
         self._label_warning(time_key, r_key)
 
-        trace = go.Scatter(
+        trace1 = go.Scatter(
             y=df[r_key],
             x=df[time_key],
             mode='lines',
@@ -88,7 +88,7 @@ class ReproductionNumberPlot():
             line_color='indigo'
         )
 
-        trace = go.Scatter(
+        trace2 = go.Scatter(
             y=df[lr_key],
             x=df[time_key],
             fill=None,
@@ -97,7 +97,7 @@ class ReproductionNumberPlot():
             line_color='goldenrod'
         )
 
-        trace = go.Scatter(
+        trace3 = go.Scatter(
             y=df[ur_key],
             x=df[time_key],
             fill='tonexty',  # fill area between trace0 and trace1
@@ -106,7 +106,10 @@ class ReproductionNumberPlot():
             line_color='goldenrod'
         )
 
-        self.figure.add_trace(trace)
+        self.figure.add_trace(trace1)
+        self.figure.add_trace(trace2)
+        self.figure.add_trace(trace3)
+
         self.figure.update_layout(
             xaxis_title=time_key,
             yaxis_title=r_key,
