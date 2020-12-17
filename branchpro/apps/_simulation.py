@@ -102,11 +102,12 @@ class IncidenceNumberSimulationApp:
 
         self.sliders.add_slider(
             'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
-            1.0)
+            1.0, as_integer=True)
         self.sliders.add_slider('Initial R', 'r0', r0, 0.1, 10.0, 0.01)
-        self.sliders.add_slider('second R', 'r1', r1, 0.1, 10.0, 0.01)
+        self.sliders.add_slider('Second R', 'r1', r1, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
-            'Time of change', 't1', mid_point, bounds[0], bounds[1], 1)
+            'Time of change', 't1', mid_point, bounds[0], bounds[1], 1,
+            as_integer=True)
 
         new_rs = [r0, r1]
         start_times = [0, mid_point]
