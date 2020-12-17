@@ -21,6 +21,7 @@ class BranchProPosterior(object):
     (Poisson) of observing given incidence data, hence is a Gamma distribution.
     We express it in the shape-rate configuration, so that the PDF takes the
     form:
+
     .. math::
         f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}
 
