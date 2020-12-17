@@ -199,7 +199,8 @@ class BranchProPosterior(object):
                 'Time Points': self.inference_times,
                 'Mean': self.inference_estimates,
                 'Lower bound CI': post_dist_interval[0],
-                'Upper bound CI': post_dist_interval[1]
+                'Upper bound CI': post_dist_interval[1],
+                'Central Probability': central_prob
             }
         )
 

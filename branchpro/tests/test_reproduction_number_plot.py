@@ -101,7 +101,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][1]['x']]
                 ),
             np.array(
-                [np.array([3, 4, 5, 6])]
+                [np.array([3, 4, 5, 6, 6, 5, 4, 3])]
                 )
         )
 
@@ -110,25 +110,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][1]['y']]
                 ),
             np.array(
-                [np.array([0.126589] * 4)]
-                )
-        )
-
-        npt.assert_array_equal(
-            np.array(
-                [my_plot.figure['data'][2]['x']]
-                ),
-            np.array(
-                [np.array([3, 4, 5, 6])]
-                )
-        )
-
-        npt.assert_array_almost_equal(
-            np.array(
-                [my_plot.figure['data'][2]['y']]
-                ),
-            np.array(
-                [np.array([18.444397] * 4)]
+                [np.array([18.444397] * 4 + [0.126589] * 4)]
                 )
         )
 
@@ -147,7 +129,8 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 't': [3, 4, 5, 6],
                 'Mean': [5.0] * 4,
                 'Lower bound CI': [5.0] * 4,
-                'Upper bound CI': [5.0] * 4
+                'Upper bound CI': [5.0] * 4,
+                'Central Probability': [.95] * 4
                 })
             my_plot.add_interval_rt(dfs1, time_key='t')
 
@@ -163,7 +146,8 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 'Time Points': [3, 4, 5, 6],
                 'r': [5.0] * 4,
                 'Lower bound CI': [5.0] * 4,
-                'Upper bound CI': [5.0] * 4
+                'Upper bound CI': [5.0] * 4,
+                'Central Probability': [.95] * 4
                 })
             my_plot.add_interval_rt(dfs2, r_key='r')
 

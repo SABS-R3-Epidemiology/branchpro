@@ -60,7 +60,8 @@ class ReproductionNumberPlot():
 
     def add_interval_rt(
             self, df, time_key='Time Points', r_key='Mean',
-            lr_key='Lower bound CI', ur_key='Upper bound CI'):
+            lr_key='Lower bound CI', ur_key='Upper bound CI',
+            cp_key='Central Probability'):
         """
         Plots the estimated values of R_t as a line on the figure, as well
         as an area of confidence for the location of the true value.
@@ -75,6 +76,15 @@ class ReproductionNumberPlot():
             x-axis label for the bar plot.
         r_key
             y-axis label for the bar plot.
+        lr_key
+            dataframe label for the lower bound of the credible interval of
+            r.
+        ur_key
+            dataframe label for the upper bound of he credible interval of
+            r.
+        cp_key
+            dataframe label for the central probability of the credible
+            interval of r.
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
@@ -89,26 +99,17 @@ class ReproductionNumberPlot():
         )
 
         trace2 = go.Scatter(
-            y=df[lr_key],
-            x=df[time_key],
-            fill=None,
-            mode='lines',
-            name='Lower bound of R (CI)',
-            line_color='goldenrod'
-        )
-
-        trace3 = go.Scatter(
-            y=df[ur_key],
-            x=df[time_key],
-            fill='tonexty',  # fill area between trace0 and trace1
-            mode='lines',
-            name='Upper bound of R (CI)',
-            line_color='goldenrod'
+            x=list(df[time_key]) + list(df[time_key])[::-1],
+            y=list(df[ur_key]) + list(df[lr_key])[::-1],
+            fill='toself',
+            fillcolor='indigo',
+            line_color='indigo',
+            opacity=0.5,
+            name='Credible interval ' + str(df[cp_key]) + '%',
         )
 
         self.figure.add_trace(trace1)
         self.figure.add_trace(trace2)
-        self.figure.add_trace(trace3)
 
         self.figure.update_layout(
             xaxis_title=time_key,

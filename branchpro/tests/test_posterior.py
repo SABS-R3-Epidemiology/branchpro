@@ -99,3 +99,5 @@ class TestBranchProPosteriorClass(unittest.TestCase):
 
         self.assertListEqual(
             intervals_df['Mean'].to_list(), [5.0] * 4)
+        self.assertEqual(
+            intervals_df['Central Probability'].to_list(), [.95] * 4)
