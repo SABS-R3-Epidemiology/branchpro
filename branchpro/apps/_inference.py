@@ -128,8 +128,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         posterior.prior_parameters = prior_parameters
 
         posterior.run_inference(tau)
-        full_df2 = posterior.get_intervals(central_prob)
-        df2 = full_df2.iloc[:, :-1]
+        df2 = posterior.get_intervals(central_prob)
 
         self.plot1.add_data(df1)
         self.plot2.add_interval_rt(df2)
@@ -138,6 +137,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
 
         # Save the infered figure for later update
         self._graph = self.plot2.figure['data'][-1]
+        self._graph_mean = self.plot2.figure['data'][-2]
 
     def get_sliders_ids(self):
         """
@@ -175,9 +175,21 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         self.posterior.prior_parameters = new_prior_parameters
 
         self.posterior.run_inference(new_tau)
-        full_df = self.posterior.get_intervals(new_central_prob)
-        df = full_df.iloc[:, :-1]
+        df = self.posterior.get_intervals(new_central_prob)
 
-        self._graph['y'] = df
+        time_key = 'Time Points'
+        ur_key = 'Upper bound CI'
+        lr_key = 'Lower bound CI'
+        cp_key = 'Central Probability'
+        new_x = list(df[time_key]) + list(df[time_key])[::-1]
+        new_y = list(df[ur_key]) + list(df[lr_key])[::-1]
+
+        self._graph['x'] = new_x
+        self._graph['y'] = new_y
+
+        self._graph_mean['x'] = df[time_key]
+        self._graph_mean['y'] = df['Mean']
+
+        self._graph['name'] = 'Credible interval ' + str(df[cp_key][0])
 
         return self.plot2.figure
