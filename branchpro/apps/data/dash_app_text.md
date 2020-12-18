@@ -1,7 +1,5 @@
-##### small title
+##### BranchPro
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ut ex nec sem aliquam tincidunt eget vitae dui. Pellentesque a eros non velit auctor congue. Ut rutrum eget ligula in auctor. Vivamus vulputate congue est, id eleifend velit venenatis id. Aliquam erat volutpat. Mauris quis tellus ultrices, ullamcorper turpis vel, facilisis purus. Cras posuere risus non massa luctus, in consectetur turpis lacinia. Sed et venenatis quam. Nullam dapibus magna eget nunc lacinia porttitor. Aenean sollicitudin nisl a efficitur elementum. Vestibulum euismod justo dui, eu efficitur quam iaculis eu. Sed condimentum efficitur nulla a gravida. Nunc porttitor mollis purus a porta. Etiam eu ipsum vel dolor efficitur porta in ac est. Vivamus auctor, ipsum vitae ultricies ultricies, arcu ex interdum ligula, vitae pulvinar metus velit eu lectus. Nam condimentum viverra pharetra.
+BranchPro is an open source software package for the simulation of infectious disease case numbers and inference of the effective reproduction number from case data. This web application demonstrates some of its capabilities.
 
-$ f(x) = \text{inline equation} $
-
-$$ g(x) = \text{centered equation} $$
+BranchPro can simulate daily incidence numbers (new cases) by using a branching process model. The only inputs needed from the user are the initial numebr of cases $I_0$ and the value of the disease's reproduction number $R_t$. This app also allows the user to change the reproduction number at a user-specified time.
