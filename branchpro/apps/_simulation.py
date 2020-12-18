@@ -120,7 +120,7 @@ class IncidenceNumberSimulationApp:
                     id='collapsedtext',
                 ),
             ])
-        self.app.layout.children[0].children[3].children.append(collapse)
+        self.app.layout.children[0].children[-1].children.append(collapse)
 
     def add_data(self, df, time_label='Time', inc_label='Incidence Number'):
         """
