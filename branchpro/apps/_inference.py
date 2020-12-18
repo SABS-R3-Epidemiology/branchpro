@@ -73,8 +73,8 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
 
     def add_posterior(self,
                       posterior,
-                      alpha=1.0,
-                      beta=0.2,
+                      mean=5.0,
+                      stdev=5.0,
                       tau=6,
                       central_prob=.95):
         """
@@ -88,12 +88,12 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             (BranchProPosterior) a dataframe of instances and the parameters of
             the prior used to infer the reproduction numbers of a BranchPro
             model used to model the data.
-        alpha
-            (float) start position on the slider for the shape parameter of the
+        mean
+            (float) start position on the slider for the mean of the
             prior for the Branch Pro model in the posterior.
-        beta
-            (float) start position on the slider for the rate parameter of the
-            prior for the Branch Pro model in the posterior.
+        stdev
+            (float) start position on the slider for the standard deviation of
+            the prior for the Branch Pro model in the posterior.
         tau
             (int) start position on the slider for the tau window used in the
             running of the inference of the reproduction numbers of the Branch
@@ -112,9 +112,9 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         max_tau = posterior.cases_times.max() - posterior.cases_times.min() + 1
 
         self.sliders.add_slider(
-            'Shape Parameter', 'alpha', alpha, 0.1, 10.0, 0.01)
+            'Mean', 'mean', mean, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
-            'Rate Parameter', 'beta', beta, 0.1, 10.0, 0.01)
+            'Standard Deviation', 'stdev', stdev, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
             'Time of change', 'tau', tau, 0, max_tau, 1,
             as_integer=True)
@@ -122,6 +122,8 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             'Central Probability', 'central_prob', central_prob, 0.1, 1.0,
             0.01)
 
+        alpha = (mean/stdev)**2
+        beta = mean/(stdev**2)
         prior_parameters = (alpha, beta)
         posterior.prior_parameters = prior_parameters
 
@@ -145,19 +147,19 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         return self.sliders.slider_ids()
 
     def update_inference(
-            self, new_alpha, new_beta, new_tau, new_central_prob):
+            self, new_mean, new_stdev, new_tau, new_central_prob):
         """
         Updates the parameters in the inference and the estimated reproduction
         numbers and quantiles graph in the second figure.
 
         Parameters
         ----------
-        new_alpha
-            (float) updated position on the slider for the shape parameter of
+        new_mean
+            (float) updated position on the slider for the mean of
             the prior for the Branch Pro model in the posterior.
-        new_beta
-            (float) updated position on the slider for the rate parameter of
-            the prior for the Branch Pro model in the posterior.
+        new_stdev
+            (float) updated position on the slider for the standard deviation
+            of the prior for the Branch Pro model in the posterior.
         new_tau
             (int) updated position on the slider for the tau window used in the
             running of the inference of the reproduction numbers of the Branch
@@ -166,6 +168,8 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             (float) start position on the slider for the level of the computed
             credible interval of the estimated R number values.
         """
+        new_alpha = (new_mean/new_stdev)**2
+        new_beta = new_mean/(new_stdev**2)
         new_prior_parameters = (new_alpha, new_beta)
 
         self.posterior.prior_parameters = new_prior_parameters
