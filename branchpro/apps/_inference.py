@@ -136,13 +136,6 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         self._graph = self.plot2.figure['data'][-1]
         self._graph_mean = self.plot2.figure['data'][-2]
 
-    def get_sliders_ids(self):
-        """
-        Returns the IDs of all sliders accompaning the figure in the
-        app.
-        """
-        return self.sliders.slider_ids()
-
     def update_inference(
             self, new_mean, new_stdev, new_tau, new_central_prob):
         """
