@@ -10,6 +10,7 @@ Overview:
 - :class:`ReproductionNumberPlot`
 - :class:`_SliderComponent`
 - :class:`IncidenceNumberSimulationApp`
+- :class:`BranchProInferenceApp`
 
 IncidenceNumberPlot
 ********************
@@ -35,3 +36,9 @@ Simulation Apps
 
 .. autoclass:: IncidenceNumberSimulationApp
   :members: add_data, add_simulator, get_sliders_ids, update_simulation
+
+Inference Apps
+***************
+
+.. autoclass:: BranchProInferenceApp
+  :members: add_ground_truth_rt, add_posterior, get_sliders_ids, update_inference
