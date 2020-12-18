@@ -85,6 +85,7 @@ class BranchProPosterior(object):
                 min(data_times), max(data_times)+1)
                 ).fillna(0).reset_index()
 
+        self.cases_labels = list(padded_inc_data[[time_key, inc_key]].columns)
         self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
         self._serial_interval = np.asarray(daily_serial_interval)[::-1]

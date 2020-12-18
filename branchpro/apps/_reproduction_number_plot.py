@@ -37,9 +37,9 @@ class ReproductionNumberPlot():
             number by days. Data stored in columns 'Time Points' and 'R_t',
             respectively.
         time_key
-            x-axis label for the bar plot.
+            x-axis label for the line plot.
         r_key
-            y-axis label for the bar plot.
+            y-axis label for the line plot.
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
@@ -73,9 +73,9 @@ class ReproductionNumberPlot():
             over time. Data stored in columns 'Time Points', 'Mean',
             'Lower bound CI', 'Upper bound CI', respectively.
         time_key
-            x-axis label for the bar plot.
+            x-axis label for the line plot.
         r_key
-            y-axis label for the bar plot.
+            y-axis label for the line plot.
         lr_key
             dataframe label for the lower bound of the credible interval of
             r.
