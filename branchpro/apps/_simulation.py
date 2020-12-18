@@ -18,7 +18,7 @@ import branchpro as bp
 
 class IncidenceNumberSimulationApp:
     """IncidenceNumberSimulationApp Class:
-    Class for the dash app with figure and sliders for the
+    Class for the simulation dash app with figure and sliders for the
     BranchPro models.
     """
     def __init__(self):
