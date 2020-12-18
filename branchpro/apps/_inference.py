@@ -8,7 +8,6 @@
 #
 
 import pandas as pd
-import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -23,15 +22,13 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
     BranchPro models.
     """
     def __init__(self):
-        self.app = dash.Dash(
-            __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-        self.plot1 = bp.IncidenceNumberPlot()
+        super(BranchProInferenceApp, self).__init__()
+        self.plot1 = self.plot
         self.plot2 = bp.ReproductionNumberPlot()
 
         # Keeps traces visibility states fixed when changing sliders
         # in the second figure
         self.plot2.figure['layout']['legend']['uirevision'] = True
-        self.sliders = bp._SliderComponent()
 
         self.app.layout = dbc.Container(
             [
