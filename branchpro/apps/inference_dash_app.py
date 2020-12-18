@@ -32,7 +32,7 @@ ws_var = 1.5**2
 theta = ws_var / ws_mean
 k = ws_mean / theta
 w_dist = scipy.stats.gamma(k, scale=theta)
-disc_w = w_dist.pdf(np.arange(num_timepoints))
+disc_w = w_dist.pdf(np.arange(1, num_timepoints+1))
 
 # Simulate incidence data
 initial_r = 3
@@ -41,7 +41,7 @@ model = bp.BranchProModel(initial_r, serial_interval)
 new_rs = [3, 0.5]          # sequence of R_0 numbers
 start_times = [0, 15]      # days at which each R_0 period begins
 model.set_r_profile(new_rs, start_times)
-parameters = 100  # initial number of cases
+parameters = 10  # initial number of cases
 times = np.arange(num_timepoints)
 
 cases = model.simulate(parameters, times)

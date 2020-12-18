@@ -6,6 +6,7 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
+from math import floor
 
 import pandas as pd
 import dash_bootstrap_components as dbc
@@ -106,18 +107,19 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             'Time': posterior.cases_times,
             'Incidence Number': posterior.cases_data})
 
-        max_tau = posterior.cases_times.max() - posterior.cases_times.min() + 1
+        max_tau = floor(
+            posterior.cases_times.max() - posterior.cases_times.min() + 1)/3
 
         self.sliders.add_slider(
-            'Mean', 'mean', mean, 0.1, 10.0, 0.01)
+            'Prior Mean', 'mean', mean, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
-            'Standard Deviation', 'stdev', stdev, 0.1, 10.0, 0.01)
+            'Prior Standard Deviation', 'stdev', stdev, 0.1, 10.0, 0.01)
         self.sliders.add_slider(
-            'Time of change', 'tau', tau, 0, max_tau, 1,
+            'Inference Sliding Window', 'tau', tau, 0, max_tau, 1,
             as_integer=True)
         self.sliders.add_slider(
-            'Central Probability', 'central_prob', central_prob, 0.1, 1.0,
-            0.01)
+            'Central Posterior Probability', 'central_prob', central_prob, 0.1,
+            1.0, 0.01)
 
         alpha = (mean/stdev)**2
         beta = mean/(stdev**2)
