@@ -103,9 +103,11 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         if not issubclass(type(posterior), bp.BranchProPosterior):
             raise TypeError('Posterior needs to be a BranchProPosterior')
 
+        fig1_labels = posterior.cases_labels
+
         df1 = pd.DataFrame({
-            'Time': posterior.cases_times,
-            'Incidence Number': posterior.cases_data})
+            fig1_labels[0]: posterior.cases_times,
+            fig1_labels[1]: posterior.cases_data})
 
         max_tau = floor(
             posterior.cases_times.max() - posterior.cases_times.min() + 1)/3
@@ -129,7 +131,8 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         posterior.run_inference(tau)
         df2 = posterior.get_intervals(central_prob)
 
-        self.plot1.add_data(df1)
+        self.plot1.add_data(
+            df1, time_key=fig1_labels[0], inc_key=fig1_labels[1])
         self.plot2.add_interval_rt(df2)
 
         self.posterior = posterior
