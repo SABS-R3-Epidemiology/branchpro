@@ -69,6 +69,7 @@ setup(
         'dash>=1.18',
         'dash_bootstrap_components',
         'dash_daq',
+        'dash_defer_js_import',
         'pandas',
         'plotly',
         'scipy'
