@@ -8,12 +8,48 @@
 #
 
 import pandas as pd
+import dash_defer_js_import as dji  # For mathjax
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
 import branchpro as bp
+
+
+# Import the mathjax
+mathjax_script = dji.Import(
+    src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js'
+        '?config=TeX-AMS-MML_SVG')
+
+# Write the mathjax index html
+# https://chrisvoncsefalvay.com/2020/07/25/dash-latex/
+index_str_math = """<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                tex2jax: {
+                inlineMath: [ ['$','$'],],
+                processEscapes: true
+                }
+            });
+            </script>
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+"""
 
 
 class IncidenceNumberSimulationApp:
@@ -30,20 +66,61 @@ class IncidenceNumberSimulationApp:
         self.plot.figure['layout']['legend']['uirevision'] = True
         self.sliders = bp._SliderComponent()
 
-        self.app.layout = dbc.Container(
-            [
-                html.H1('Branching Processes'),
-                dbc.Row(
-                    [
-                        dbc.Col(dcc.Graph(
-                            figure=self.plot.figure, id='myfig')),
-                        dbc.Col(self.sliders.get_sliders_div())
-                    ],
-                    align='center',
+        self.app.layout = \
+            html.Div([
+                dbc.Container([
+                    html.H1('Branching Processes'),
+                    html.Div([]),  # Empty div for top explanation texts
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(figure=self.plot.figure,
+                                          id='myfig')),
+                        dbc.Col(self.sliders.get_sliders_div())],
+                        align='center'
+                    ),
+                    html.Div([])], fluid=True),  # Empty div for bottom text
+                mathjax_script])
+
+        # Set the app index string for mathjax
+        self.app.index_string = index_str_math
+
+    def add_text(self, text):
+        """Add a block of text at the top of the app.
+
+        This can be used to add introductory text that everyone looking at the
+        app will see right away.
+
+        Parameters
+        ----------
+        text
+            The text to add to the html div
+        """
+        self.app.layout.children[0].children[1].children.append(text)
+
+    def add_collapsed_text(self, text, title='More details...'):
+        """Add a block of collapsible text at the bottom of the app.
+
+        By default, this text will be hidden. The user can click on a button
+        with the specified title in order to view the text.
+
+        Parameters
+        ----------
+        text
+            The text to add to the html div
+        title
+            str which will be displayed on the show/hide button
+        """
+        collapse = html.Div([
+                dbc.Button(
+                    title,
+                    id='showhidebutton',
+                    color='primary',
                 ),
-            ],
-            fluid=True,
-        )
+                dbc.Collapse(
+                    dbc.Card(dbc.CardBody(text)),
+                    id='collapsedtext',
+                ),
+            ])
+        self.app.layout.children[0].children[-1].children.append(collapse)
 
     def add_data(self, df, time_label='Time', inc_label='Incidence Number'):
         """
