@@ -11,10 +11,13 @@ the branching process model with genreated example data. To run the app, use
 ``python inference_dash_app.py``.
 """
 
+import os
+
 import numpy as np
 import pandas as pd
 import scipy.stats
-from dash.dependencies import Input, Output
+import dash_core_components as dcc
+from dash.dependencies import Input, Output, State
 
 import branchpro as bp
 from branchpro.apps import BranchProInferenceApp
@@ -62,6 +65,20 @@ app.add_ground_truth_rt(r_df, time_label='Days')
 
 sliders = app.get_sliders_ids()
 
+
+# Add the explanation texts
+fname = os.path.join(os.path.dirname(__file__),
+                     'data',
+                     'dash_app_text_inference.md')
+with open(fname) as f:
+    app.add_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+
+fname = os.path.join(os.path.dirname(__file__),
+                     'data',
+                     'dash_app_collapsible_text_inference.md')
+with open(fname) as f:
+    app.add_collapsed_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 
@@ -78,6 +95,19 @@ def update_simulation(*args):
     fig = app.update_inference(*parameters)
 
     return fig
+
+
+@app.app.callback(
+    Output('collapsedtext', 'is_open'),
+    [Input('showhidebutton', 'n_clicks')],
+    [State('collapsedtext', 'is_open')],
+)
+def toggle_hidden_text(num_clicks, is_it_open):
+    """Switches the visibility of the hidden text.
+    """
+    if num_clicks:
+        return not is_it_open
+    return is_it_open
 
 
 if __name__ == "__main__":

@@ -9,12 +9,19 @@
 from math import floor
 
 import pandas as pd
+import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
 import branchpro as bp
 from branchpro.apps import IncidenceNumberSimulationApp
+
+
+# Import the mathjax
+mathjax_script = dji.Import(
+    src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js'
+        '?config=TeX-AMS-MML_SVG')
 
 
 class BranchProInferenceApp(IncidenceNumberSimulationApp):
@@ -31,26 +38,28 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
         # in the second figure
         self.plot2.figure['layout']['legend']['uirevision'] = True
 
-        self.app.layout = dbc.Container(
-            [
-                html.H1('Branching Processes'),
-                html.H2('Incidence Data'),
-                dbc.Row(
-                    dbc.Col(dcc.Graph(
-                            figure=self.plot1.figure, id='fig1'))
-                ),
-                html.H2('Plot of R values'),
-                dbc.Row(
-                    [
+        self.app.layout = html.Div([
+            dbc.Container(
+                [
+                    html.H1('Branching Processes'),
+                    html.Div([]),  # Empty div for top explanation texts
+                    html.H2('Incidence Data'),
+                    dbc.Row(
                         dbc.Col(dcc.Graph(
-                            figure=self.plot2.figure, id='fig2')),
-                        dbc.Col(self.sliders.get_sliders_div())
-                    ],
-                    align='center',
-                ),
-            ],
-            fluid=True,
-        )
+                                figure=self.plot1.figure, id='fig1'))
+                    ),
+                    html.H2('Plot of R values'),
+                    dbc.Row(
+                        [
+                            dbc.Col(dcc.Graph(
+                                figure=self.plot2.figure, id='fig2')),
+                            dbc.Col(self.sliders.get_sliders_div())
+                        ],
+                        align='center',
+                    ),
+                    html.Div([])],  # Empty div for bottom text
+                fluid=True),
+            mathjax_script])
 
     def add_ground_truth_rt(self, df, time_label='Time Points', r_label='R_t'):
         """
