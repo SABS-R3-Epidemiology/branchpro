@@ -190,14 +190,14 @@ class BranchProModel(ForwardModel):
             raise ValueError(
                 'Chosen times storage format must be 1-dimensional')
 
-        # Invert order of serial intervals for ease in _normalised_daily_mean
+        # Invert order of serial intervals for ease in _effective_no_infectives
         self._serial_interval = np.asarray(serial_intervals)[::-1]
         self._normalizing_const = np.sum(self._serial_interval)
 
-    def _normalised_daily_mean(self, t, incidences):
+    def _effective_no_infectives(self, t, incidences):
         """
         Computes expected number of new cases at time t, using previous
-        incidences and serial intervals.
+        incidences and serial intervals at a rate of 1:1 reproduction.
 
         Parameters
         ----------
@@ -208,12 +208,12 @@ class BranchProModel(ForwardModel):
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            mean = self._r_profile[t-1] * (
+            mean = (
                 np.sum(incidences[start_date:t] * self._serial_interval) /
                 self._normalizing_const)
             return mean
 
-        mean = self._r_profile[t-1] * (
+        mean = (
             np.sum(incidences[:t] * self._serial_interval[-t:]) /
             self._normalizing_const)
         return mean
@@ -255,7 +255,151 @@ class BranchProModel(ForwardModel):
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            norm_daily_mean = self._normalised_daily_mean(t, incidences)
+            norm_daily_mean = self._r_profile[t-1] * (
+                self._effective_no_infectives(t, incidences))
+            incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
+
+        mask = np.in1d(np.append(np.asarray(0), simulation_times), times)
+        return incidences[mask]
+
+
+class LocImpBranchProModel(BranchProModel):
+    r"""LocImpBranchProModel Class:
+    Class for the models following a Branching Processes behaviour with
+    local and imported cases. It inherits from the `BranchProModel`` class.
+
+    In the branching process model, we track the number of cases
+    registered each day, I_t, also known as the "incidence" at time t.
+
+    For the Local & Imported cases scenario, to the local incidences we add
+    migration of cases from an external source. The conditions of this external
+    environment may differ from the ones we are currently in through a change
+    in the value of the R number.
+
+    To account for this difference, we assume that at all times the R number of
+    the imported cases is proportional to the R number of the local incidences:
+
+    .. math::
+        R_{t}^{\text(imported)} = (1 + \epsilon)R_{t}^{\text(local)}
+
+    The local incidence at time t is modelled by a random variable distributed
+    according to a Poisson distribution with a mean that depends on previous
+    number of cases both local and imported, according to the following
+    formula:
+
+    .. math::
+        E(I_{t}^{\text(local)}|I_0, I_1, \dots I_{t-1}, w_{s}, R_{t}) =
+            R_{t}^{\text(local)}\sum_{s=1}^{t}I_{t-s}^{\text(local)}w_{s} +
+            R_{t}^{\text(imported)}\sum_{s=1}^{t}I_{t-s}^{\text(imported)}w_{s}
+
+    Parameters
+    ----------
+    epsilon
+        (numeric) Proportionality constant of the R number for imported cases
+        with respect to its analog for local ones.
+
+    """
+    def __init__(self, epsilon):
+        super(LocImpBranchProModel, self).__init__()
+
+        self.epsilon = epsilon
+
+    def set_epsilon(self, new_epsilon):
+        """
+        Updates proportionality constant of the R number for imported cases
+        with respect to its analog for local ones.
+
+        Parameters
+        ----------
+        new_epsilon
+            new value of constant of proportionality
+
+        """
+        self.epsilon = new_epsilon
+
+    def set_imported_cases(self, times, cases):
+        """
+        Sets number of imported cases and when they occur.
+
+        Parameters
+        ----------
+        times
+            times at which imported cases occur
+        cases
+            number of imported cases at that specified point.
+
+        """
+        # Raise error if not correct dimensionality of inputs
+        if np.asarray(times).ndim != 1:
+            raise ValueError(
+                'Times of arising imported cases storage format must \
+                    be 1-dimensional'
+                )
+        if np.asarray(cases).ndim != 1:
+            raise ValueError(
+                'Number of imported cases storage format must be \
+                    1-dimensional')
+
+        # Raise error if inputs do not have same shape
+        if np.asarray(times).shape != np.asarray(cases).shape:
+            raise ValueError('Both inputs should have same number of elements')
+
+        self._imported_times = np.asarray(times)
+        self._imported_cases = np.asarray(cases)
+
+    def simulate(self, parameters, times):
+        """
+        Runs a forward simulation with the given ``parameters`` and returns a
+        time-series with incidence numbers corresponding to the given ``times``
+        .
+
+        Parameters
+        ----------
+        parameters
+            Initial number of cases.
+        times
+            The times at which to evaluate. Must be an ordered sequence,
+            without duplicates, and without negative values.
+            All simulations are started at time 0, regardless of whether this
+            value appears in ``times``.
+
+        """
+        initial_cond = parameters
+        last_time_point = np.max(times)
+
+        # Repeat final r if necessary
+        # (r_1, r_2, ..., r_t)
+        if len(self._r_profile) < last_time_point:
+            missing_days = last_time_point - len(self._r_profile)
+            last_r = self._r_profile[-1]
+            repeated_r = np.full(shape=missing_days, fill_value=last_r)
+            self._r_profile = np.append(self._r_profile, repeated_r)
+
+        incidences = np.empty(shape=last_time_point + 1)
+        incidences[0] = initial_cond
+
+        # Create vector of imported cases
+        imported_incidences = np.zeros(shape=last_time_point + 1)
+
+        imports_times = self._imported_times[
+            self._imported_times <= last_time_point]
+        imports_cases = self._imported_cases[
+            self._imported_times <= last_time_point]
+
+        imported_incidences = np.put(
+            imported_incidences, ind=imports_times, v=imports_cases)
+
+        # Construct simulation times in steps of 1 unit time each
+        simulation_times = np.arange(start=1, stop=last_time_point+1, step=1)
+
+        # Compute normalised daily means for full timespan
+        # and draw samples for the incidences
+        for t in simulation_times:
+            norm_daily_mean = self._r_profile[t-1] * (
+                self._effective_no_infectives(
+                    t, incidences) + self.epsilon * (
+                        self._effective_no_infectives(
+                            t, imported_incidences)))
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
 
         mask = np.in1d(np.append(np.asarray(0), simulation_times), times)
