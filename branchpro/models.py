@@ -312,7 +312,7 @@ class LocImpBranchProModel(BranchProModel):
         Parameters
         ----------
         new_epsilon
-            new value of constant of proportionality
+            new value of constant of proportionality.
 
         """
         self.epsilon = new_epsilon
@@ -324,7 +324,7 @@ class LocImpBranchProModel(BranchProModel):
         Parameters
         ----------
         times
-            times at which imported cases occur
+            times at which imported cases occur.
         cases
             number of imported cases at that specified point.
 
