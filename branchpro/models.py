@@ -271,7 +271,7 @@ class LocImpBranchProModel(BranchProModel):
     In the branching process model, we track the number of cases
     registered each day, I_t, also known as the "incidence" at time t.
 
-    For the Local & Imported cases scenario, to the local incidences we add
+    For the local & imported cases scenario, to the local incidences we add
     migration of cases from an external source. The conditions of this external
     environment may differ from the ones we are currently in through a change
     in the value of the R number.
