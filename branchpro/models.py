@@ -294,13 +294,25 @@ class LocImpBranchProModel(BranchProModel):
 
     Parameters
     ----------
+    initial_r
+        (numeric) Value of the reproduction number at the beginning
+        of the epidemic
+    serial_interval
+        (list) Unnormalised probability distribution of that the recipient
+        first displays symptoms s days after the infector first displays
+        symptoms
     epsilon
         (numeric) Proportionality constant of the R number for imported cases
         with respect to its analog for local ones.
 
     """
-    def __init__(self, epsilon):
-        super(LocImpBranchProModel, self).__init__()
+    def __init__(self, initial_r, serial_interval, epsilon):
+        BranchProModel.__init__(self, initial_r, serial_interval)
+
+        if not isinstance(epsilon, (int, float)):
+            raise TypeError('Value of epsilon must be integer or float.')
+        if epsilon < -1:
+            raise ValueError('Epsilon needs to be greater or equal to -1.')
 
         self.epsilon = epsilon
 
@@ -324,7 +336,8 @@ class LocImpBranchProModel(BranchProModel):
         Parameters
         ----------
         times
-            times at which imported cases occur.
+            times at which imported cases occur. Must be an ordered sequence,
+            without duplicates, and without negative values.
         cases
             number of imported cases at that specified point.
 
@@ -379,14 +392,14 @@ class LocImpBranchProModel(BranchProModel):
         incidences[0] = initial_cond
 
         # Create vector of imported cases
-        imported_incidences = np.zeros(shape=last_time_point + 1)
+        imported_incidences = np.zeros(last_time_point + 1, dtype=int)
 
         imports_times = self._imported_times[
             self._imported_times <= last_time_point]
         imports_cases = self._imported_cases[
             self._imported_times <= last_time_point]
 
-        imported_incidences = np.put(
+        np.put(
             imported_incidences, ind=imports_times, v=imports_cases)
 
         # Construct simulation times in steps of 1 unit time each
