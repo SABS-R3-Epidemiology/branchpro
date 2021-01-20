@@ -54,7 +54,7 @@ class ForwardModel(object):
 class BranchProModel(ForwardModel):
     r"""BranchProModel Class:
     Class for the models following a Branching Processes behaviour.
-    It inherits from the `ForwardModel`` class.
+    It inherits from the ``ForwardModel`` class.
 
     In the branching process model, we track the number of cases
     registered each day, I_t, also known as the "incidence" at time t.
@@ -266,7 +266,7 @@ class BranchProModel(ForwardModel):
 class LocImpBranchProModel(BranchProModel):
     r"""LocImpBranchProModel Class:
     Class for the models following a Branching Processes behaviour with
-    local and imported cases. It inherits from the `BranchProModel`` class.
+    local and imported cases. It inherits from the ``BranchProModel`` class.
 
     In the branching process model, we track the number of cases
     registered each day, I_t, also known as the "incidence" at time t.
