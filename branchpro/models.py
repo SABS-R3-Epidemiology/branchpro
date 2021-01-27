@@ -410,7 +410,7 @@ class LocImpBranchProModel(BranchProModel):
         for t in simulation_times:
             norm_daily_mean = self._r_profile[t-1] * (
                 self._effective_no_infectives(
-                    t, incidences) + self.epsilon * (
+                    t, incidences) + (self.epsilon + 1)* (
                         self._effective_no_infectives(
                             t, imported_incidences)))
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
