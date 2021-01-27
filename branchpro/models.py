@@ -357,7 +357,7 @@ class LocImpBranchProModel(BranchProModel):
         if np.asarray(times).shape != np.asarray(cases).shape:
             raise ValueError('Both inputs should have same number of elements')
 
-        self._imported_times = np.asarray(times)
+        self._imported_times = np.asarray(times, dtype=int)
         self._imported_cases = np.asarray(cases)
 
     def simulate(self, parameters, times):
