@@ -209,7 +209,59 @@ class BranchProPosterior(object):
 
 
 class LocImpBranchProPosterior(BranchProPosterior):
-    """
+    r"""LocImpBranchProPosterior Class:
+    Class for computing the posterior distribution used for the inference of
+    the reproduction numbers of an epidemic in the case of a branching process
+    with local and imported cases.
+
+    Choice of prior distribution is the conjugate prior for the likelihood
+    (Poisson) of observing given incidence data, hence is a Gamma distribution.
+    We express it in the shape-rate configuration, so that the PDF takes the
+    form:
+
+    .. math::
+        f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}
+
+    Hence, the posterior distribution will be also be Gamma-distributed.
+
+    We assume that at all times the R number of the imported cases is
+    proportional to the R number of the local incidences:
+
+    .. math::
+        R_{t}^{\text(imported)} = (1 + \epsilon)R_{t}^{\text(local)}
+
+    Parameters
+    ----------
+    inc_data
+        (pandas Dataframe) contains numbers of local new cases by time unit
+        (usually days).
+        Data stored in columns of with one for time and one for incidence
+        number, respectively.
+    imported_inc_data
+        (pandas Dataframe) contains numbers of imported new cases by time unit
+        (usually days).
+        Data stored in columns of with one for time and one for incidence
+        number, respectively.
+    epsilon
+        (numeric) Proportionality constant of the R number for imported cases
+        with respect to its analog for local ones.
+    daily_serial_interval
+        (list) Unnormalised probability distribution of that the recipient
+        first displays symptoms s days after the infector first displays
+        symptoms.
+    alpha
+        the shape parameter of the Gamma distribution of the prior.
+    beta
+        the rate parameter of the Gamma distribution of the prior.
+    time_key
+        label key given to the temporal data in the inc_data dataframe.
+    inc_key
+        label key given to the incidental data in the inc_data dataframe.
+
+    Notes
+    -----
+    Always apply method run_inference before calling
+    :meth:`BranchProPosterior.get_intervals` to get R behaviour dataframe!
     """
     def __init__(
             self, inc_data, imported_inc_data, epsilon,
