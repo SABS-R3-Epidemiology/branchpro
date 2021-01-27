@@ -5,3 +5,5 @@ Here are some Jupyter Notebook examples of the different functionalities offered
 - [Forward simulation of a branching process epidemic model with BranchPro](https://nbviewer.jupyter.org/github/SABS-R3-Epidemiology/branchpro/blob/main/branchpro/examples/branchpro-first-notebook.ipynb)
 
 - [Reading and plotting the French Flu data form the data library included in the module](https://nbviewer.jupyter.org/github/SABS-R3-Epidemiology/branchpro/blob/main/branchpro/examples/french-flu-data.ipynb)
+
+- [Forward simulation of a branching process epidemic model with local and imported cases with LocImpBranchPro](https://nbviewer.jupyter.org/github/SABS-R3-Epidemiology/branchpro/blob/main/branchpro/examples/locimpbranchpro-first-notebook.ipynb)

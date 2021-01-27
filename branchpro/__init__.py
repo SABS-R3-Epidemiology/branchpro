@@ -16,7 +16,7 @@ number of cases of infections by day during an outbreak of the influenza virus.
 from .version_info import VERSION_INT, VERSION  # noqa
 
 # Import main classes
-from .models import ForwardModel, BranchProModel    # noqa
+from .models import ForwardModel, BranchProModel, LocImpBranchProModel    # noqa
 from .simulation import SimulationController  # noqa
 from .apps import IncidenceNumberPlot, _SliderComponent, IncidenceNumberSimulationApp, ReproductionNumberPlot, BranchProInferenceApp # noqa
 from ._dataset_library_api import DatasetLibrary # noqa
