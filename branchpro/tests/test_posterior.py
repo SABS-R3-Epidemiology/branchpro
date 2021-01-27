@@ -152,7 +152,8 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
         with self.assertRaises(ValueError) as test_excep:
             bp.LocImpBranchProPosterior(
                 local_df2, imp_df, 0, ser_int, 1, 0.2, inc_key='i')
-        self.assertTrue('No incidence column' in str(test_excep.exception))
+        self.assertTrue(
+            'No imported incidence column' in str(test_excep.exception))
 
     def test_set_epsilon(self):
         local_df = pd.DataFrame({
