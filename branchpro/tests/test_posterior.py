@@ -112,6 +112,14 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [10, 3, 4, 6, 9]
         })
+        local_df1 = pd.DataFrame({
+            't': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        local_df2 = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'i': [10, 3, 4, 6, 9]
+        })
 
         imp_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -138,12 +146,12 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
 
         with self.assertRaises(ValueError) as test_excep:
             bp.LocImpBranchProPosterior(
-                local_df, imp_df, 0, ser_int, 1, 0.2, time_key='t')
+                local_df1, imp_df, 0, ser_int, 1, 0.2, time_key='t')
         self.assertTrue('No time column' in str(test_excep.exception))
 
         with self.assertRaises(ValueError) as test_excep:
             bp.LocImpBranchProPosterior(
-                local_df, imp_df, 0, ser_int, 1, 0.2, inc_key='i')
+                local_df2, imp_df, 0, ser_int, 1, 0.2, inc_key='i')
         self.assertTrue('No incidence column' in str(test_excep.exception))
 
     def test_set_epsilon(self):
@@ -159,7 +167,9 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
 
         inference = bp.LocImpBranchProPosterior(
             local_df, imp_df, 0.3, ser_int, 1, 0.2)
-        self.assertEqual(inference.epsilon, 0.3)
+        inference.set_epsilon(1)
+
+        self.assertEqual(inference.epsilon, 1)
 
     def test_run_inference(self):
         local_df = pd.DataFrame({
