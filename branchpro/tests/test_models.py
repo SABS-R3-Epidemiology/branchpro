@@ -132,7 +132,7 @@ class TestLocImpBranchProModelClass(unittest.TestCase):
 
     def test_simulate(self):
         libr_model_1 = bp.LocImpBranchProModel(2, np.array([1, 2, 3, 2, 1]), 0)
-        libr_model_1.set_imported_cases([1, 2, 4, 8], [5, 10, 9, 2])
+        libr_model_1.set_imported_cases([1, 2.0, 4, 8], [5, 10, 9, 2])
         simulated_sample_model_1 = libr_model_1.simulate(1, np.array([2, 4]))
         new_simulated_sample_model_1 = libr_model_1.simulate(1, [0, 2, 4])
         self.assertEqual(simulated_sample_model_1.shape, (2,))
