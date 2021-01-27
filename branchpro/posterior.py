@@ -235,12 +235,11 @@ class LocImpBranchProPosterior(BranchProPosterior):
             raise ValueError(
                 'No imported incidence column with this name in given data')
 
-        imp_data_times = imported_inc_data[time_key]
         data_times = inc_data[time_key]
 
         # Pad with zeros the time points where we have no information on
         # the number of imported incidences
-        padded_imp_inc_data = imp_data_times.set_index(time_key).reindex(
+        padded_imp_inc_data = imported_inc_data.set_index(time_key).reindex(
             range(
                 min(data_times), max(data_times)+1)
                 ).fillna(0).reset_index()
