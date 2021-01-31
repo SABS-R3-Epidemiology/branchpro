@@ -107,10 +107,8 @@ class BranchProPosterior(object):
         Parameters
         ----------
         cases_data
-            (pandas Dataframe) contains numbers of cases by time unit (usually
-            days).
-            Data stored in columns of with one for time and one for incidence
-            number, respectively.
+            (1D numpy array) contains numbers of cases occuring in each time
+            unit (usually days) including zeros.
         t
             evaluation time
         """
@@ -130,10 +128,8 @@ class BranchProPosterior(object):
         Parameters
         ----------
         cases_data
-            (pandas Dataframe) contains numbers of cases by time unit (usually
-            days).
-            Data stored in columns of with one for time and one for incidence
-            number, respectively.
+            (1D numpy array) contains numbers of cases occuring in each time
+            unit (usually days) including zeros.
         start
             start time of the time window in which to calculate effective
             number of infectives.
