@@ -289,11 +289,6 @@ class LocImpBranchProPosterior(BranchProPosterior):
             daily_serial_interval, alpha, beta,
             time_key='Time', inc_key='Incidence Number'):
 
-        if not isinstance(epsilon, (int, float)):
-            raise TypeError('Value of epsilon must be integer or float.')
-        if epsilon < -1:
-            raise ValueError('Epsilon needs to be greater or equal to -1.')
-
         super().__init__(
             inc_data, daily_serial_interval, alpha, beta, time_key, inc_key)
 
@@ -320,7 +315,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
             padded_imp_inc_data[[time_key, inc_key]].columns)
         self.imp_cases_data = padded_imp_inc_data[inc_key].to_numpy()
         self.imp_cases_times = padded_imp_inc_data[time_key]
-        self.epsilon = self.set_epsilon(epsilon)
+        self.set_epsilon(epsilon)
 
     def set_epsilon(self, new_epsilon):
         """
@@ -333,6 +328,11 @@ class LocImpBranchProPosterior(BranchProPosterior):
             new value of constant of proportionality.
 
         """
+        if not isinstance(new_epsilon, (int, float)):
+            raise TypeError('Value of epsilon must be integer or float.')
+        if new_epsilon < -1:
+            raise ValueError('Epsilon needs to be greater or equal to -1.')
+
         self.epsilon = new_epsilon
 
     def run_inference(self, tau):

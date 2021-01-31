@@ -307,14 +307,14 @@ class LocImpBranchProModel(BranchProModel):
 
     """
     def __init__(self, initial_r, serial_interval, epsilon):
-        BranchProModel.__init__(self, initial_r, serial_interval)
+        super().__init__(initial_r, serial_interval)
 
         if not isinstance(epsilon, (int, float)):
             raise TypeError('Value of epsilon must be integer or float.')
         if epsilon < -1:
             raise ValueError('Epsilon needs to be greater or equal to -1.')
 
-        self.epsilon = self.set_epsilon(epsilon)
+        self.set_epsilon(epsilon)
 
     def set_epsilon(self, new_epsilon):
         """
