@@ -89,6 +89,7 @@ class BranchProPosterior(object):
         self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
         self._serial_interval = np.asarray(daily_serial_interval)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
         self.prior_parameters = (alpha, beta)
 
     def get_serial_intervals(self):
@@ -116,11 +117,14 @@ class BranchProPosterior(object):
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            eff_num = np.sum(
-                cases_data[start_date:t] * self._serial_interval)
+            eff_num = (
+                np.sum(cases_data[start_date:t] * self._serial_interval) /
+                self._normalizing_const)
             return eff_num
 
-        eff_num = np.sum(cases_data[:t] * self._serial_interval[-t:])
+        eff_num = (
+            np.sum(cases_data[:t] * self._serial_interval[-t:]) /
+            self._normalizing_const)
         return eff_num
 
     def _infectives_in_tau(self, cases_data, start, end):
