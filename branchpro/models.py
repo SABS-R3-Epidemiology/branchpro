@@ -314,7 +314,7 @@ class LocImpBranchProModel(BranchProModel):
         if epsilon < -1:
             raise ValueError('Epsilon needs to be greater or equal to -1.')
 
-        self.epsilon = epsilon
+        self.epsilon = self.set_epsilon(epsilon)
 
     def set_epsilon(self, new_epsilon):
         """

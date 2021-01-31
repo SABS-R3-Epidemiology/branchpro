@@ -106,6 +106,11 @@ class BranchProPosterior(object):
 
         Parameters
         ----------
+        cases_data
+            (pandas Dataframe) contains numbers of cases by time unit (usually
+            days).
+            Data stored in columns of with one for time and one for incidence
+            number, respectively.
         t
             evaluation time
         """
@@ -121,6 +126,20 @@ class BranchProPosterior(object):
     def _infectives_in_tau(self, cases_data, start, end):
         """
         Sum total number of infectives in tau window.
+
+        Parameters
+        ----------
+        cases_data
+            (pandas Dataframe) contains numbers of cases by time unit (usually
+            days).
+            Data stored in columns of with one for time and one for incidence
+            number, respectively.
+        start
+            start time of the time window in which to calculate effective
+            number of infectives.
+        end
+            end time of the time window in which to calculate effective number
+            of infectives.
         """
         num = []
         for time in range(start, end):
@@ -254,9 +273,11 @@ class LocImpBranchProPosterior(BranchProPosterior):
     beta
         the rate parameter of the Gamma distribution of the prior.
     time_key
-        label key given to the temporal data in the inc_data dataframe.
+        label key given to the temporal data in the inc_data and
+        imported_inc_data dataframes.
     inc_key
-        label key given to the incidental data in the inc_data dataframe.
+        label key given to the incidental data in the inc_data and
+        imported_inc_data dataframes.
 
     Notes
     -----
@@ -273,9 +294,8 @@ class LocImpBranchProPosterior(BranchProPosterior):
         if epsilon < -1:
             raise ValueError('Epsilon needs to be greater or equal to -1.')
 
-        BranchProPosterior.__init__(
-            self, inc_data, daily_serial_interval, alpha, beta,
-            time_key, inc_key)
+        super().__init__(
+            inc_data, daily_serial_interval, alpha, beta, time_key, inc_key)
 
         if not issubclass(type(imported_inc_data), pd.DataFrame):
             raise TypeError('Imported incidence data has to be a dataframe')
@@ -300,7 +320,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
             padded_imp_inc_data[[time_key, inc_key]].columns)
         self.imp_cases_data = padded_imp_inc_data[inc_key].to_numpy()
         self.imp_cases_times = padded_imp_inc_data[time_key]
-        self.epsilon = epsilon
+        self.epsilon = self.set_epsilon(epsilon)
 
     def set_epsilon(self, new_epsilon):
         """
