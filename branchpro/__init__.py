@@ -20,4 +20,4 @@ from .models import ForwardModel, BranchProModel, LocImpBranchProModel    # noqa
 from .simulation import SimulationController  # noqa
 from .apps import IncidenceNumberPlot, _SliderComponent, IncidenceNumberSimulationApp, ReproductionNumberPlot, BranchProInferenceApp # noqa
 from ._dataset_library_api import DatasetLibrary # noqa
-from .posterior import BranchProPosterior # noqa
+from .posterior import BranchProPosterior, LocImpBranchProPosterior # noqa

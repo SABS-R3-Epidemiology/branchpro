@@ -101,3 +101,101 @@ class TestBranchProPosteriorClass(unittest.TestCase):
             intervals_df['Mean'].to_list(), [5.0] * 4)
         self.assertEqual(
             intervals_df['Central Probability'].to_list(), [.95] * 4)
+
+
+class TestLocImpBranchProPosteriorClass(unittest.TestCase):
+    """
+    Test the 'LocImpBranchProPosterior' class.
+    """
+    def test__init__(self):
+        local_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        local_df1 = pd.DataFrame({
+            't': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        local_df2 = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'i': [10, 3, 4, 6, 9]
+        })
+
+        imp_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+
+        ser_int = [1, 2]
+        epsilon = 0.3
+
+        bp.LocImpBranchProPosterior(local_df, imp_df, epsilon, ser_int, 1, 0.2)
+
+        with self.assertRaises(TypeError) as test_excep:
+            bp.LocImpBranchProPosterior(local_df, imp_df, '0', ser_int, 1, 0.2)
+        self.assertTrue('epsilon must be' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.LocImpBranchProPosterior(local_df, imp_df, -3, ser_int, 1, 0.2)
+        self.assertTrue('greater or equal to -1' in str(test_excep.exception))
+
+        with self.assertRaises(TypeError) as test_excep:
+            bp.LocImpBranchProPosterior(local_df, '0', 0, ser_int, 1, 0.2)
+        self.assertTrue(
+            'Imported incidence data has to be' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.LocImpBranchProPosterior(
+                local_df1, imp_df, 0, ser_int, 1, 0.2, time_key='t')
+        self.assertTrue('No time column' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.LocImpBranchProPosterior(
+                local_df2, imp_df, 0, ser_int, 1, 0.2, inc_key='i')
+        self.assertTrue(
+            'No imported incidence column' in str(test_excep.exception))
+
+    def test_set_epsilon(self):
+        local_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        imp_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.LocImpBranchProPosterior(
+            local_df, imp_df, 0.3, ser_int, 1, 0.2)
+        inference.set_epsilon(1)
+
+        self.assertEqual(inference.epsilon, 1)
+
+    def test_run_inference(self):
+        local_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        imp_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        ser_int1 = [1, 2, 1, 0, 0, 0]
+        ser_int2 = [1, 2]
+
+        inference1 = bp.LocImpBranchProPosterior(
+            local_df, imp_df, 0.3, ser_int1, 1, 0.2)
+        inference1.run_inference(tau=2)
+
+        inference2 = bp.LocImpBranchProPosterior(
+            local_df, imp_df, 0.3, ser_int2, 1, 0.2)
+        inference2.run_inference(tau=2)
+
+        self.assertEqual(len(inference1.inference_estimates), 4)
+        self.assertEqual(len(inference1.inference_times), 4)
+        self.assertEqual(len(inference1.inference_posterior.mean()), 4)
+
+        self.assertEqual(len(inference2.inference_estimates), 4)
+        self.assertEqual(len(inference2.inference_times), 4)
+        self.assertEqual(len(inference2.inference_posterior.mean()), 4)
