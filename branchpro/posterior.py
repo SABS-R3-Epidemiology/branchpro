@@ -89,6 +89,7 @@ class BranchProPosterior(object):
         self.cases_data = padded_inc_data[inc_key].to_numpy()
         self.cases_times = padded_inc_data[time_key]
         self._serial_interval = np.asarray(daily_serial_interval)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
         self.prior_parameters = (alpha, beta)
 
     def get_serial_intervals(self):
@@ -98,6 +99,26 @@ class BranchProPosterior(object):
         """
         # Reverse inverting of order of serial intervals
         return self._serial_interval[::-1]
+
+    def set_serial_intervals(self, serial_intervals):
+        """
+        Updates serial intervals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms.
+
+        """
+        if np.asarray(serial_intervals).ndim != 1:
+            raise ValueError(
+                'Chosen times storage format must be 1-dimensional')
+
+        # Invert order of serial intervals for ease in _effective_no_infectives
+        self._serial_interval = np.asarray(serial_intervals)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
 
     def _infectious_individuals(self, cases_data, t):
         """
@@ -114,11 +135,14 @@ class BranchProPosterior(object):
         """
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
-            eff_num = np.sum(
-                cases_data[start_date:t] * self._serial_interval)
+            eff_num = (
+                np.sum(cases_data[start_date:t] * self._serial_interval) /
+                self._normalizing_const)
             return eff_num
 
-        eff_num = np.sum(cases_data[:t] * self._serial_interval[-t:])
+        eff_num = (
+            np.sum(cases_data[:t] * self._serial_interval[-t:]) /
+            self._normalizing_const)
         return eff_num
 
     def _infectives_in_tau(self, cases_data, start, end):
