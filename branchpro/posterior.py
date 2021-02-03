@@ -100,6 +100,26 @@ class BranchProPosterior(object):
         # Reverse inverting of order of serial intervals
         return self._serial_interval[::-1]
 
+    def set_serial_intervals(self, serial_intervals):
+        """
+        Updates serial intervals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms.
+
+        """
+        if np.asarray(serial_intervals).ndim != 1:
+            raise ValueError(
+                'Chosen times storage format must be 1-dimensional')
+
+        # Invert order of serial intervals for ease in _effective_no_infectives
+        self._serial_interval = np.asarray(serial_intervals)[::-1]
+        self._normalizing_const = np.sum(self._serial_interval)
+
     def _infectious_individuals(self, cases_data, t):
         """
         Computes expected number of new cases at time t, using previous
