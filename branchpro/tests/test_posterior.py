@@ -66,11 +66,16 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         })
         ser_int = [1, 2]
         new_ser_int = [1, 2, 1]
+        wrong_ser_int = (1)
+
         inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
         inference.set_serial_intervals(new_ser_int)
 
         npt.assert_array_equal(
             inference.get_serial_intervals(), np.array([1, 2, 1]))
+
+        with self.assertRaises(ValueError):
+            inference.set_serial_intervals(wrong_ser_int)
 
     def test_run_inference(self):
         df = pd.DataFrame({
