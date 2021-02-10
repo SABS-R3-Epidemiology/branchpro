@@ -41,9 +41,6 @@ app.add_data(df, time_label='Weeks')
 
 sliders = app.get_sliders_ids()
 
-# Get the sliders that change with new data
-changing_sliders = ['init_cond', 't1']
-
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
 with open(fname) as f:
@@ -106,6 +103,9 @@ def update_current_df(*args):
     Input('incidence-data-upload', 'children')
 )
 def update_sliders(*args):
+    """
+    Update sliders when a data file is uploaded.
+    """
     data = app.current_df
     if data is not None:
         # Send the new sliders div to the callback output

@@ -9,6 +9,7 @@
 
 import base64
 import io
+import os
 
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
@@ -82,13 +83,17 @@ class IncidenceNumberSimulationApp:
                             ],
                             align='center'
                             ),
+                    html.H4(['You can upload your own incidence data here. It \
+                        will appear as bars, while the simulation will be a \
+                        line.']),
                     dcc.Upload(
                         id='upload-data',
                         children=html.Div([
                             'Drag and Drop or ',
                             html.A(
                                 'Select Files',
-                                style={'text-decoration': 'underline'})
+                                style={'text-decoration': 'underline'}),
+                            ' to upload your Incidence Number data.'
                         ]),
                         style={
                             'width': '100%',
@@ -152,17 +157,20 @@ class IncidenceNumberSimulationApp:
         self.app.layout.children[0].children[-1].children.append(collapse)
 
     def parse_contents(self, contents, filename):
+        """
+        Opens user-uploaded file and passes its content to a pandas
+        Dataframe format, returning to the user the name of the file that
+        has been used.
+        """
         content_type, content_string = contents.split(',')
+        _, extension = os.path.splitext(filename)
 
         decoded = base64.b64decode(content_string)
         try:
-            if 'csv' in filename or 'txt' in filename:
+            if extension in ['csv', 'txt']:
                 # Assume that the user uploaded a CSV or TXT file
                 df = pd.read_csv(
                     io.StringIO(decoded.decode('utf-8')))
-            elif 'xls' in filename:
-                # Assume that the user uploaded an excel file
-                df = pd.read_excel(io.BytesIO(decoded))
         except Exception as e:
             print(e)
             return html.Div([
@@ -231,7 +239,7 @@ class IncidenceNumberSimulationApp:
             raise TypeError('Models needs to be a BranchPro')
 
         bounds = simulator.get_time_bounds()
-        mid_point = sum(bounds)/2
+        mid_point = round(sum(bounds)/2)
 
         self.sliders.add_slider(
             'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
