@@ -168,7 +168,7 @@ class IncidenceNumberSimulationApp:
 
         decoded = base64.b64decode(content_string)
         try:
-            if extension in ['csv', 'txt']:
+            if extension in ['.csv', '.txt']:
                 # Assume that the user uploaded a CSV or TXT file
                 df = pd.read_csv(
                     io.StringIO(decoded.decode('utf-8')))
