@@ -31,6 +31,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
     """
     def __init__(self):
         super(BranchProInferenceApp, self).__init__()
+        self.app.title = 'BranchproInf'
         self.plot1 = self.plot
         self.plot2 = bp.ReproductionNumberPlot()
 
@@ -130,7 +131,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             as_integer=True)
         self.sliders.add_slider(
             'Central Posterior Probability', 'central_prob', central_prob, 0.1,
-            1.0, 0.01)
+            0.99, 0.01)
 
         alpha = (mean/stdev)**2
         beta = mean/(stdev**2)
