@@ -69,13 +69,6 @@ class IncidenceNumberSimulationApp:
         self.plot.figure['layout']['legend']['uirevision'] = True
         self.sliders = bp._SliderComponent()
 
-        self.set_app_layout()
-
-        # Set the app index string for mathjax
-        self.app.index_string = index_str_math
-
-    def set_app_layout(self, new_sliders_div=None):
-
         self.app.layout = \
             html.Div([
                 dbc.Container([
@@ -84,14 +77,18 @@ class IncidenceNumberSimulationApp:
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=self.plot.figure,
                                           id='myfig')),
-                        dbc.Col(self.sliders.get_sliders_div())],
-                        align='center'
-                    ),
+                        dbc.Col(
+                            self.sliders.get_sliders_div(), id='all-sliders')
+                            ],
+                            align='center'
+                            ),
                     dcc.Upload(
                         id='upload-data',
                         children=html.Div([
                             'Drag and Drop or ',
-                            html.A('Select Files')
+                            html.A(
+                                'Select Files',
+                                style={'text-decoration': 'underline'})
                         ]),
                         style={
                             'width': '100%',
@@ -109,6 +106,11 @@ class IncidenceNumberSimulationApp:
                     html.Div(id='incidence-data-upload'),
                     html.Div([])], fluid=True),  # Empty div for bottom text
                 mathjax_script])
+
+        # Set the app index string for mathjax
+        self.app.index_string = index_str_math
+
+        self.current_df = None
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
@@ -169,7 +171,7 @@ class IncidenceNumberSimulationApp:
 
         self.current_df = df
 
-        return html.Div([html.H5(filename)])
+        return html.Div(['Loaded data from: {}'.format(filename)])
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):
