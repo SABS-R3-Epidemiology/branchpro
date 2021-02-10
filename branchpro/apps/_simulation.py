@@ -154,7 +154,7 @@ class IncidenceNumberSimulationApp:
 
     def parse_contents(self, contents, filename):
         content_type, content_string = contents.split(',')
-
+            _, extension = os.path.splitext(filename)
         decoded = base64.b64decode(content_string)
         try:
             if 'csv' in filename or 'txt' in filename:
