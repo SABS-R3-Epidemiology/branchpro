@@ -31,6 +31,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
     """
     def __init__(self):
         super(BranchProInferenceApp, self).__init__()
+        self.app.title = 'BranchproInf'
         self.plot1 = self.plot
         self.plot2 = bp.ReproductionNumberPlot()
 

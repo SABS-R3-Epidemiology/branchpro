@@ -60,6 +60,7 @@ class IncidenceNumberSimulationApp:
     def __init__(self):
         self.app = dash.Dash(
             __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+        self.app.title = 'BranchproSim'
         self.plot = bp.IncidenceNumberPlot()
 
         # Keeps traces visibility states fixed when changing sliders
