@@ -41,6 +41,9 @@ app.add_data(df, time_label='Weeks')
 
 sliders = app.get_sliders_ids()
 
+# Get the sliders that change with new data
+changing_sliders = ['init_cond', 't1']
+
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
 with open(fname) as f:
@@ -58,45 +61,72 @@ server = app.app.server
 
 @app.app.callback(
         Output('incidence-data-upload', 'children'),
-        Output('myfig', 'figure'),
-        [Input(s, 'value') for s in sliders],
         Input('upload-data', 'contents'),
         State('upload-data', 'filename')
         )
+def update_current_df(*args):
+    """
+    Update when a data file is uploaded.
+    """
+    list_of_contents, list_of_names = args
+
+    if list_of_contents is not None:
+        # Run content parser for each file and get message
+        # Only use latest file
+        message = app.parse_contents(
+            list_of_contents[-1], list_of_names[-1])
+
+        if (
+            'Time' not in app.current_df.columns) or (
+                'Incidence Number' not in app.current_df.columns):
+            return html.Div(['Incorrect format; file must contain a `Time` \
+                and `Incidence Number` column'])
+
+        else:
+            # Make new empty plot and add data
+            app.plot = bp.IncidenceNumberPlot()
+            app.add_data(app.current_df)
+
+            # Clear sliders - prevents from doubling sliders upon
+            # page reload
+            app.sliders = bp._SliderComponent()
+
+            # Make a new simulation controller for this data
+            simulationController = bp.SimulationController(
+                br_pro_model, 1, len(app.current_df['Time']))
+            app.add_simulator(
+                simulationController,
+                magnitude_init_cond=max(app.current_df['Incidence Number']))
+
+            return message
+
+
+@app.app.callback(
+    Output('all-sliders', 'children'),
+    Input('incidence-data-upload', 'children')
+)
+def update_sliders(*args):
+    data = app.current_df
+    if data is not None:
+        # Send the new sliders div to the callback output
+        return app.sliders.get_sliders_div()
+    else:
+        # There is no loaded data, so make no change to the output
+        raise dash.exceptions.PreventUpdate()
+
+
+@app.app.callback(
+        Output('myfig', 'figure'),
+        [Input(s, 'value') for s in sliders])
 def update_simulation(*args):
     """
     Simulates the model for the current slider values and updates the
     plot in the figure.
     """
-    parameters = args[:-2]
-    contents = args[-2]
-    name = args[-1]
+    parameters = args
+    fig = app.update_simulation(*parameters)
 
-    context = dash.callback_context
-    print(context.triggered[0]['prop_id'])
-
-    children = html.Div([])
-    if context.triggered[0]['prop_id'] == 'upload-data.contents':
-        if contents is not None:
-            children = [
-                app.parse_contents(c, n) for c, n in zip(contents, name)]
-            df = app.current_df
-            new_fig = bp.IncidenceNumberPlot()
-            new_sliders = bp._SliderComponent()
-            new_fig.add_data(df)
-            app.plot = new_fig
-            app.sliders = new_sliders
-            app.set_app_layout()
-            simulationController = bp.SimulationController(
-                br_pro_model, 1, max(df['Time']))
-            app.add_simulator(
-                simulationController,
-                magnitude_init_cond=max(df['Incidence Number']))
-        fig = app.plot.figure
-    else:
-        fig = app.update_simulation(*parameters)
-
-    return children, fig
+    return fig
 
 
 @app.app.callback(
@@ -105,7 +135,8 @@ def update_simulation(*args):
     [State('collapsedtext', 'is_open')],
 )
 def toggle_hidden_text(num_clicks, is_it_open):
-    """Switches the visibility of the hidden text.
+    """
+    Switches the visibility of the hidden text.
     """
     if num_clicks:
         return not is_it_open
