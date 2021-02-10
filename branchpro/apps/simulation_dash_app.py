@@ -17,7 +17,6 @@ import pandas as pd
 import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
-import dash_html_components as html
 
 import branchpro as bp
 from branchpro.apps import IncidenceNumberSimulationApp
@@ -73,13 +72,7 @@ def update_current_df(*args):
         message = app.parse_contents(
             list_of_contents[-1], list_of_names[-1])
 
-        if (
-            'Time' not in app.current_df.columns) or (
-                'Incidence Number' not in app.current_df.columns):
-            return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column.'])
-
-        elif app.current_df is not None:
+        if app.current_df is not None:
             # Make new empty plot and add data
             app.plot = bp.IncidenceNumberPlot()
             app.add_data(app.current_df)
@@ -95,7 +88,7 @@ def update_current_df(*args):
                 simulationController,
                 magnitude_init_cond=max(app.current_df['Incidence Number']))
 
-            return message
+        return message
 
 
 @app.app.callback(

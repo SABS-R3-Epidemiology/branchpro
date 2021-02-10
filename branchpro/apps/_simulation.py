@@ -163,6 +163,8 @@ class IncidenceNumberSimulationApp:
         Dataframe format, returning to the user the name of the file that
         has been used.
         """
+        self.current_df = None
+
         content_type, content_string = contents.split(',')
         _, extension = os.path.splitext(filename)
 
@@ -180,9 +182,14 @@ class IncidenceNumberSimulationApp:
                 'There was an error processing this file.'
             ])
 
-        self.current_df = df
+        if ('Time' not in df.columns) or (
+                'Incidence Number' not in df.columns):
+            return html.Div(['Incorrect format; file must contain a `Time` \
+                and `Incidence Number` column.'])
+        else:
+            self.current_df = df
 
-        return html.Div(['Loaded data from: {}'.format(filename)])
+            return html.Div(['Loaded data from: {}'.format(filename)])
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):
