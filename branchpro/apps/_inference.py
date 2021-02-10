@@ -131,7 +131,7 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
             as_integer=True)
         self.sliders.add_slider(
             'Central Posterior Probability', 'central_prob', central_prob, 0.1,
-            1.0, 0.01)
+            0.99, 0.01)
 
         alpha = (mean/stdev)**2
         beta = mean/(stdev**2)
