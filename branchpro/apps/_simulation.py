@@ -7,6 +7,10 @@
 # notice and full license details.
 #
 
+import base64
+import io
+import os
+
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash
@@ -75,14 +79,44 @@ class IncidenceNumberSimulationApp:
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=self.plot.figure,
                                           id='myfig')),
-                        dbc.Col(self.sliders.get_sliders_div())],
-                        align='center'
+                        dbc.Col(
+                            self.sliders.get_sliders_div(), id='all-sliders')
+                            ],
+                            align='center'
+                            ),
+                    html.H4(['You can upload your own incidence data here. It \
+                        will appear as bars, while the simulation will be a \
+                        line.']),
+                    dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                            'Drag and Drop or ',
+                            html.A(
+                                'Select Files',
+                                style={'text-decoration': 'underline'}),
+                            ' to upload your Incidence Number data.'
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                        # Allow multiple files to be uploaded
+                        multiple=True
                     ),
+                    html.Div(id='incidence-data-upload'),
                     html.Div([])], fluid=True),  # Empty div for bottom text
                 mathjax_script])
 
         # Set the app index string for mathjax
         self.app.index_string = index_str_math
+
+        self.current_df = None
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
@@ -123,7 +157,42 @@ class IncidenceNumberSimulationApp:
             ])
         self.app.layout.children[0].children[-1].children.append(collapse)
 
-    def add_data(self, df, time_label='Time', inc_label='Incidence Number'):
+    def parse_contents(self, contents, filename):
+        """
+        Opens user-uploaded file and passes its content to a pandas
+        Dataframe format, returning to the user the name of the file that
+        has been used.
+        """
+        self.current_df = None
+
+        content_type, content_string = contents.split(',')
+        _, extension = os.path.splitext(filename)
+
+        decoded = base64.b64decode(content_string)
+        try:
+            if extension in ['.csv', '.txt']:
+                # Assume that the user uploaded a CSV or TXT file
+                df = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8')))
+            else:
+                return html.Div(['File type must be CSV or TXT.'])
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ])
+
+        if ('Time' not in df.columns) or (
+                'Incidence Number' not in df.columns):
+            return html.Div(['Incorrect format; file must contain a `Time` \
+                and `Incidence Number` column.'])
+        else:
+            self.current_df = df
+
+            return html.Div(['Loaded data from: {}'.format(filename)])
+
+    def add_data(
+            self, df=None, time_label='Time', inc_label='Incidence Number'):
         """
         Adds incidence data to the plot in the dash app.
 
@@ -137,7 +206,11 @@ class IncidenceNumberSimulationApp:
         inc_label
             label key given to the incidental data in the dataframe.
         """
-        self.plot.add_data(df, time_key=time_label, inc_key=inc_label)
+        if df is not None:
+            self.current_df = df
+
+        self.plot.add_data(
+            self.current_df, time_key=time_label, inc_key=inc_label)
 
     def add_simulator(self,
                       simulator,
@@ -176,7 +249,7 @@ class IncidenceNumberSimulationApp:
             raise TypeError('Models needs to be a BranchPro')
 
         bounds = simulator.get_time_bounds()
-        mid_point = sum(bounds)/2
+        mid_point = round(sum(bounds)/2)
 
         self.sliders.add_slider(
             'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,

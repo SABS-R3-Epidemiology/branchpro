@@ -14,6 +14,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 
@@ -55,6 +56,59 @@ server = app.app.server
 
 
 @app.app.callback(
+        Output('incidence-data-upload', 'children'),
+        Input('upload-data', 'contents'),
+        State('upload-data', 'filename')
+        )
+def update_current_df(*args):
+    """
+    Update when a data file is uploaded.
+    """
+    list_of_contents, list_of_names = args
+
+    if list_of_contents is not None:
+        # Run content parser for each file and get message
+        # Only use latest file
+        message = app.parse_contents(
+            list_of_contents[-1], list_of_names[-1])
+
+        if app.current_df is not None:
+            # Make new empty plot and add data
+            app.plot = bp.IncidenceNumberPlot()
+            app.add_data(app.current_df)
+
+            # Clear sliders - prevents from doubling sliders upon
+            # page reload
+            app.sliders = bp._SliderComponent()
+
+            # Make a new simulation controller for this data
+            simulationController = bp.SimulationController(
+                br_pro_model, 1, len(app.current_df['Time']))
+            app.add_simulator(
+                simulationController,
+                magnitude_init_cond=max(app.current_df['Incidence Number']))
+
+        return message
+
+
+@app.app.callback(
+    Output('all-sliders', 'children'),
+    Input('incidence-data-upload', 'children')
+)
+def update_sliders(*args):
+    """
+    Update sliders when a data file is uploaded.
+    """
+    data = app.current_df
+    if data is not None:
+        # Send the new sliders div to the callback output
+        return app.sliders.get_sliders_div()
+    else:
+        # There is no loaded data, so make no change to the output
+        raise dash.exceptions.PreventUpdate()
+
+
+@app.app.callback(
         Output('myfig', 'figure'),
         [Input(s, 'value') for s in sliders])
 def update_simulation(*args):
@@ -74,7 +128,8 @@ def update_simulation(*args):
     [State('collapsedtext', 'is_open')],
 )
 def toggle_hidden_text(num_clicks, is_it_open):
-    """Switches the visibility of the hidden text.
+    """
+    Switches the visibility of the hidden text.
     """
     if num_clicks:
         return not is_it_open
