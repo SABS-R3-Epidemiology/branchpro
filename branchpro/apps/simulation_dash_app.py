@@ -77,9 +77,9 @@ def update_current_df(*args):
             'Time' not in app.current_df.columns) or (
                 'Incidence Number' not in app.current_df.columns):
             return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column'])
+                and `Incidence Number` column.'])
 
-        else:
+        elif app.current_df is not None:
             # Make new empty plot and add data
             app.plot = bp.IncidenceNumberPlot()
             app.add_data(app.current_df)

@@ -172,6 +172,8 @@ class IncidenceNumberSimulationApp:
                 # Assume that the user uploaded a CSV or TXT file
                 df = pd.read_csv(
                     io.StringIO(decoded.decode('utf-8')))
+            else:
+                return html.Div(['File type must be CSV or TXT.'])
         except Exception as e:
             print(e)
             return html.Div([
