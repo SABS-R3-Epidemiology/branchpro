@@ -7,6 +7,9 @@
 # notice and full license details.
 #
 
+import base64
+import io
+
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash
@@ -66,6 +69,13 @@ class IncidenceNumberSimulationApp:
         self.plot.figure['layout']['legend']['uirevision'] = True
         self.sliders = bp._SliderComponent()
 
+        self.set_app_layout()
+
+        # Set the app index string for mathjax
+        self.app.index_string = index_str_math
+
+    def set_app_layout(self, new_sliders_div=None):
+
         self.app.layout = \
             html.Div([
                 dbc.Container([
@@ -77,11 +87,28 @@ class IncidenceNumberSimulationApp:
                         dbc.Col(self.sliders.get_sliders_div())],
                         align='center'
                     ),
+                    dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                            'Drag and Drop or ',
+                            html.A('Select Files')
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                        # Allow multiple files to be uploaded
+                        multiple=True
+                    ),
+                    html.Div(id='incidence-data-upload'),
                     html.Div([])], fluid=True),  # Empty div for bottom text
                 mathjax_script])
-
-        # Set the app index string for mathjax
-        self.app.index_string = index_str_math
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
@@ -122,7 +149,30 @@ class IncidenceNumberSimulationApp:
             ])
         self.app.layout.children[0].children[-1].children.append(collapse)
 
-    def add_data(self, df, time_label='Time', inc_label='Incidence Number'):
+    def parse_contents(self, contents, filename):
+        content_type, content_string = contents.split(',')
+
+        decoded = base64.b64decode(content_string)
+        try:
+            if 'csv' in filename or 'txt' in filename:
+                # Assume that the user uploaded a CSV or TXT file
+                df = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8')))
+            elif 'xls' in filename:
+                # Assume that the user uploaded an excel file
+                df = pd.read_excel(io.BytesIO(decoded))
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ])
+
+        self.current_df = df
+
+        return html.Div([html.H5(filename)])
+
+    def add_data(
+            self, df=None, time_label='Time', inc_label='Incidence Number'):
         """
         Adds incidence data to the plot in the dash app.
 
@@ -136,7 +186,11 @@ class IncidenceNumberSimulationApp:
         inc_label
             label key given to the incidental data in the dataframe.
         """
-        self.plot.add_data(df, time_key=time_label, inc_key=inc_label)
+        if df is not None:
+            self.current_df = df
+
+        self.plot.add_data(
+            self.current_df, time_key=time_label, inc_key=inc_label)
 
     def add_simulator(self,
                       simulator,

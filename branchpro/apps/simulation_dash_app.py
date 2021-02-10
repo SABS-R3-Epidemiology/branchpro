@@ -14,8 +14,10 @@ import os
 
 import numpy as np
 import pandas as pd
+import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
+import dash_html_components as html
 
 import branchpro as bp
 from branchpro.apps import IncidenceNumberSimulationApp
@@ -55,17 +57,46 @@ server = app.app.server
 
 
 @app.app.callback(
+        Output('incidence-data-upload', 'children'),
         Output('myfig', 'figure'),
-        [Input(s, 'value') for s in sliders])
+        [Input(s, 'value') for s in sliders],
+        Input('upload-data', 'contents'),
+        State('upload-data', 'filename')
+        )
 def update_simulation(*args):
     """
     Simulates the model for the current slider values and updates the
     plot in the figure.
     """
-    parameters = args
-    fig = app.update_simulation(*parameters)
+    parameters = args[:-2]
+    contents = args[-2]
+    name = args[-1]
 
-    return fig
+    context = dash.callback_context
+    print(context.triggered[0]['prop_id'])
+
+    children = html.Div([])
+    if context.triggered[0]['prop_id'] == 'upload-data.contents':
+        if contents is not None:
+            children = [
+                app.parse_contents(c, n) for c, n in zip(contents, name)]
+            df = app.current_df
+            new_fig = bp.IncidenceNumberPlot()
+            new_sliders = bp._SliderComponent()
+            new_fig.add_data(df)
+            app.plot = new_fig
+            app.sliders = new_sliders
+            app.set_app_layout()
+            simulationController = bp.SimulationController(
+                br_pro_model, 1, max(df['Time']))
+            app.add_simulator(
+                simulationController,
+                magnitude_init_cond=max(df['Incidence Number']))
+        fig = app.plot.figure
+    else:
+        fig = app.update_simulation(*parameters)
+
+    return children, fig
 
 
 @app.app.callback(
