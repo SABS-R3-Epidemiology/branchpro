@@ -123,6 +123,7 @@ def manage_simulation(*args):
     simulation for the current slider values and updates the
     plot in the figure.
     """
+    cache.clear()
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
     if source == 'sim-button':
