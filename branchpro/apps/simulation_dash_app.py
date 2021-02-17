@@ -55,7 +55,7 @@ with open(fname) as f:
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 cache = Cache(app.app.server, config={
-    'CACHE_TYPE': 'simple',
+    'CACHE_TYPE': 'null',
     'CACHE_THRESHOLD': 100})
 
 
