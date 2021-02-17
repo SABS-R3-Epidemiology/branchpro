@@ -17,6 +17,7 @@ import pandas as pd
 import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
+from flask_caching import Cache
 
 import branchpro as bp
 from branchpro.apps import IncidenceNumberSimulationApp
@@ -53,6 +54,9 @@ with open(fname) as f:
 
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
+cache = Cache(app.app.server, config={
+    'CACHE_TYPE': 'simple',
+    'CACHE_THRESHOLD': 100})
 
 
 @app.app.callback(
