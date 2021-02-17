@@ -17,7 +17,7 @@ import pandas as pd
 import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
-from flask_caching import Cache
+from datetime import datetime as dt
 
 import branchpro as bp
 from branchpro.apps import IncidenceNumberSimulationApp
@@ -54,9 +54,6 @@ with open(fname) as f:
 
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
-cache = Cache(app.app.server, config={
-    'CACHE_TYPE': 'null',
-    'CACHE_THRESHOLD': 100})
 
 
 @app.app.callback(
@@ -123,7 +120,10 @@ def manage_simulation(*args):
     simulation for the current slider values and updates the
     plot in the figure.
     """
-    cache.clear()
+    now = dt.now()
+    if (now - app.last_call).seconds < 1:
+        raise dash.exceptions.PreventUpdate()
+
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
     if source == 'sim-button':
@@ -142,6 +142,7 @@ def manage_simulation(*args):
         # The input source is not recognized, so make no change to the output
         raise dash.exceptions.PreventUpdate()
 
+    app.last_call = now
     return fig
 
 

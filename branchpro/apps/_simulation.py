@@ -17,6 +17,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import datetime
 
 import branchpro as bp
 
@@ -68,6 +69,7 @@ class IncidenceNumberSimulationApp:
                 'https://codepen.io/chriddyp/pen/bWLwgP.css'])
         self.app.title = 'BranchproSim'
         self.plot = bp.IncidenceNumberPlot()
+        self.last_call = datetime.datetime(1, 1, 1)
 
         # Keeps traces visibility states fixed when changing sliders
         self.plot.figure['layout']['legend']['uirevision'] = True
