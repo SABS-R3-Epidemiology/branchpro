@@ -110,14 +110,32 @@ def update_sliders(*args):
 
 @app.app.callback(
         Output('myfig', 'figure'),
-        [Input(s, 'value') for s in sliders])
-def update_simulation(*args):
+        [Input(s, 'value') for s in sliders],
+        Input('sim-button', 'n_clicks'),
+        )
+def manage_simulation(*args):
     """
-    Simulates the model for the current slider values and updates the
+    Simulates the model for the current slider values or adds a new
+    simulation for the current slider values and updates the
     plot in the figure.
     """
-    parameters = args
-    fig = app.update_simulation(*parameters)
+    ctx = dash.callback_context
+    source = ctx.triggered[0]['prop_id'].split('.')[0]
+    if source == 'sim-button':
+        fig = app.add_simulation()
+        for i in range(len(app.plot.figure['data'])-2):
+            # Change opacity of all traces in the figure but for the
+            # first - the barplot of incidences
+            # last - the latest simulation
+            app.plot.figure['data'][i+1]['line'].color = 'rgba(255,0,0,0.25)'
+            app.plot.figure['data'][i+1]['showlegend'] = False
+    elif source in sliders:
+        parameters = args[:-1]
+        fig = app.update_simulation(*parameters)
+        fig = app.clear_simulations()
+    else:
+        # The input source is not recognized, so make no change to the output
+        raise dash.exceptions.PreventUpdate()
 
     return fig
 

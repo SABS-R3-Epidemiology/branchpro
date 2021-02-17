@@ -63,7 +63,9 @@ class IncidenceNumberSimulationApp:
     """
     def __init__(self):
         self.app = dash.Dash(
-            __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+             __name__, external_stylesheets=[
+                dbc.themes.BOOTSTRAP,
+                'https://codepen.io/chriddyp/pen/bWLwgP.css'])
         self.app.title = 'BranchproSim'
         self.plot = bp.IncidenceNumberPlot()
 
@@ -77,8 +79,13 @@ class IncidenceNumberSimulationApp:
                     html.H1('Branching Processes'),
                     html.Div([]),  # Empty div for top explanation texts
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=self.plot.figure,
-                                          id='myfig')),
+                        dbc.Col([
+                            html.Button(
+                                'Add new simulation',
+                                id='sim-button',
+                                n_clicks=0),
+                            dcc.Graph(figure=self.plot.figure, id='myfig')]
+                            ),
                         dbc.Col(
                             self.sliders.get_sliders_div(), id='all-sliders')
                             ],
@@ -212,6 +219,10 @@ class IncidenceNumberSimulationApp:
         self.plot.add_data(
             self.current_df, time_key=time_label, inc_key=inc_label)
 
+        # Save the labels incidence figure for later update
+        self._time_label = time_label
+        self._inc_label = inc_label
+
     def add_simulator(self,
                       simulator,
                       init_cond=10.0,
@@ -264,7 +275,9 @@ class IncidenceNumberSimulationApp:
         start_times = [0, mid_point]
         simulator.model.set_r_profile(new_rs, start_times)
 
-        data = simulator.run(init_cond)
+        self._init_cond = init_cond
+
+        data = simulator.run(self._init_cond)
         df = pd.DataFrame({
             'Time': simulator.get_regime(),
             'Incidence Number': data})
@@ -282,6 +295,37 @@ class IncidenceNumberSimulationApp:
         app.
         """
         return self.sliders.slider_ids()
+
+    def add_simulation(self):
+        """
+        Adds new simulated graph in the figure for the current slider values.
+        """
+        data = self.simulator.run(self._init_cond)
+        df = pd.DataFrame({
+            'Time': self.simulator.get_regime(),
+            'Incidence Number': data})
+
+        self.plot.add_simulation(df)
+
+        return self.plot.figure
+
+    def clear_simulations(self):
+        """
+        Clears all simulations currently plotted in the figure and adds
+        one fitted for the current parameters of the sliders.
+        """
+        self.plot = bp.IncidenceNumberPlot()
+        # Keeps traces visibility states fixed when changing sliders
+        self.plot.figure['layout']['legend']['uirevision'] = True
+
+        self.add_data(
+            df=self.current_df,
+            time_label=self._time_label,
+            inc_label=self._inc_label)
+
+        self.plot.figure = self.add_simulation()
+
+        return self.plot.figure
 
     def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
         """
@@ -309,7 +353,9 @@ class IncidenceNumberSimulationApp:
         model = self.simulator.model
         model.set_r_profile(new_rs, start_times)
 
-        data = self.simulator.run(new_init_cond)
+        self._init_cond = new_init_cond
+
+        data = self.simulator.run(self._init_cond)
         self._graph['y'] = data
 
         return self.plot.figure

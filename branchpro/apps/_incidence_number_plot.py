@@ -47,7 +47,7 @@ class IncidenceNumberPlot():
         trace = go.Bar(
             y=df[inc_key],
             x=df[time_key],
-            name='Cases'
+            name='Cases',
         )
 
         self.figure.add_trace(trace)
@@ -78,7 +78,8 @@ class IncidenceNumberPlot():
             y=df[inc_key],
             x=df[time_key],
             mode='lines',
-            name='Simulation'
+            name='Simulation',
+            line_color='red'
         )
 
         self.figure.add_trace(trace)
