@@ -124,13 +124,17 @@ def manage_simulation(*args):
     if source == 'sim-button':
         fig = app.add_simulation()
         for i in range(len(app.plot.figure['data'])-2):
+            # Change opacity of all traces in the figure but for the
+            # first - the barplot of incidences
+            # last - the latest simulation
             app.plot.figure['data'][i+1]['line'].color = 'rgba(255,0,0,0.25)'
+            app.plot.figure['data'][i+1]['showlegend'] = False
     elif source in sliders:
         parameters = args[:-1]
         fig = app.update_simulation(*parameters)
         fig = app.clear_simulations()
     else:
-        # There is no loaded data, so make no change to the output
+        # The input source is not recognized, so make no change to the output
         raise dash.exceptions.PreventUpdate()
 
     return fig

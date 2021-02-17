@@ -63,7 +63,9 @@ class IncidenceNumberSimulationApp:
     """
     def __init__(self):
         self.app = dash.Dash(
-            __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+             __name__, external_stylesheets=[
+                dbc.themes.BOOTSTRAP,
+                'https://codepen.io/chriddyp/pen/bWLwgP.css'])
         self.app.title = 'BranchproSim'
         self.plot = bp.IncidenceNumberPlot()
 
@@ -309,7 +311,8 @@ class IncidenceNumberSimulationApp:
 
     def clear_simulations(self):
         """
-        Clears all simulations currently plotted in the figure.
+        Clears all simulations currently plotted in the figure and adds
+        one fitted for the current parameters of the sliders.
         """
         self.plot = bp.IncidenceNumberPlot()
         # Keeps traces visibility states fixed when changing sliders
