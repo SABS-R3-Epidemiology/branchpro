@@ -121,11 +121,10 @@ def manage_simulation(*args):
     """
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
-    print(source)
-    print(sliders)
-    print(source in sliders)
     if source == 'sim-button':
         fig = app.add_simulation()
+        for i in range(len(app.plot.figure['data'])-2):
+            app.plot.figure['data'][i+1]['line'].color = 'Grey'
     elif source in sliders:
         parameters = args[:-1]
         fig = app.update_simulation(*parameters)
