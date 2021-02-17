@@ -124,7 +124,7 @@ def manage_simulation(*args):
     if source == 'sim-button':
         fig = app.add_simulation()
         for i in range(len(app.plot.figure['data'])-2):
-            app.plot.figure['data'][i+1]['line'].color = 'Grey'
+            app.plot.figure['data'][i+1]['line'].color = 'rgba(255,0,0,0.25)'
     elif source in sliders:
         parameters = args[:-1]
         fig = app.update_simulation(*parameters)
