@@ -7,13 +7,8 @@
 # notice and full license details.
 #
 
-import base64
-import io
-import os
-
 import numpy as np
 import pandas as pd
-import dash_defer_js_import as dji  # For mathjax
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -21,41 +16,6 @@ import dash_html_components as html
 
 import branchpro as bp
 from branchpro.apps import BranchProDashApp
-
-
-# Import the mathjax
-mathjax_script = dji.Import(
-    src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js'
-        '?config=TeX-AMS-MML_SVG')
-
-# Write the mathjax index html
-# https://chrisvoncsefalvay.com/2020/07/25/dash-latex/
-index_str_math = """<!DOCTYPE html>
-<html>
-    <head>
-        {%metas%}
-        <title>{%title%}</title>
-        {%favicon%}
-        {%css%}
-    </head>
-    <body>
-        {%app_entry%}
-        <footer>
-            {%config%}
-            {%scripts%}
-            <script type="text/x-mathjax-config">
-            MathJax.Hub.Config({
-                tex2jax: {
-                inlineMath: [ ['$','$'],],
-                processEscapes: true
-                }
-            });
-            </script>
-            {%renderer%}
-        </footer>
-    </body>
-</html>
-"""
 
 
 class IncidenceNumberSimulationApp(BranchProDashApp):
@@ -158,9 +118,10 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Calculate slider values that depend on the data
         if data is not None:
+            time_label, inc_label = data.columns
             if magnitude_init_cond is None:
-                magnitude_init_cond = max(data['Incidence Number'])
-            bounds = (1, max(data['Time']))
+                magnitude_init_cond = max(data[inc_label])
+            bounds = (1, max(data[time_label]))
 
         else:
             # choose values to use if there is no data
@@ -192,24 +153,24 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Figure with updated data and simulations
         """
         data = self.session_data['data_storage']
-        print(data)
+        time_label, inc_label = data.columns
         simulations = self.session_data['sim_storage']
         num_simulations = len(simulations.columns) - 1
 
         plot = bp.IncidenceNumberPlot()
-        plot.add_data(data)
+        plot.add_data(data, time_key=time_label, inc_key=inc_label)
 
         # Keeps traces visibility states fixed when changing sliders
         plot.figure['layout']['legend']['uirevision'] = True
 
         for sim in range(num_simulations):
-            # plot.add_simulation(simulations[['Time', 'sim{}'.format(sim + 1)]])
-
+            # plot.add_simulation(
+                # simulations[['Time', 'sim{}'.format(sim + 1)]])
             df = pd.DataFrame(
-                {'Time': simulations['Time'],
-                 'Incidence Number': simulations['sim{}'.format(sim + 1)]
-                })
-            plot.add_simulation(df)
+                {time_label: simulations[time_label],
+                 inc_label: simulations['sim{}'.format(sim + 1)]
+                 })
+            plot.add_simulation(df, time_key=time_label, inc_key=inc_label)
 
             # Unless it is the most recent simulation, decrease the opacity to
             # 25% and remove it from the legend
@@ -224,10 +185,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         """
         sim = self.session_data['sim_storage']
         data = self.session_data['data_storage']
+        time_label, inc_label = data.columns
 
         # Only attempt the purge if there is data there
         if sim is not None:
-            self.session_data['sim_storage'] = data[['Time']]
+            self.session_data['sim_storage'] = data[[time_label]]
 
     def add_text(self, text):
         self._load_text(text)
@@ -237,6 +199,54 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         self._load_collapsed_text(text, title)
         self.app.layout.children[0].children[-3].children.append(
             self.collapsed_text)
+
+    def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
+        """Run a simulation of the branchpro model at the given slider values.
+
+        Parameters
+        ----------
+        new_init_cond
+            (int) updated position on the slider for the number of initial
+            cases for the Branch Pro model in the simulator.
+        new_r0
+            (float) updated position on the slider for the initial reproduction
+            number for the Branch Pro model in the simulator.
+        new_r1
+            (float) updated position on the slider for the second reproduction
+            number for the Branch Pro model in the simulator.
+        new_t1
+            (float) updated position on the slider for the time change in
+            reproduction numbers for the Branch Pro model in the simulator.
+
+        Returns
+        -------
+        str
+            Simulations storage dataframe in JSON format
+        """
+        data = self.session_data['data_storage']
+        time_label, inc_label = data.columns
+        simulations = self.session_data['sim_storage']
+        times = data[time_label]
+
+        # There might be no simulation data if it got just cleared, or this is
+        # the first call --- start a new dataframe in this case
+        if simulations is None:
+            simulations = data[[time_label]]
+
+        # Add the correct R profile to the branchpro model
+        br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))
+        br_pro_model.set_r_profile([new_r0, new_r1], [0, new_t1])
+
+        # Generate one simulation trajectory from this model
+        simulation_controller = bp.SimulationController(
+            br_pro_model, 1, len(times))
+        data = simulation_controller.run(new_init_cond)
+
+        # Add data to simulations storage
+        num_sims = len(simulations.columns)
+        simulations['sim{}'.format(num_sims)] = data
+
+        return simulations.to_json()
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):
@@ -348,50 +358,3 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         self.plot.add_simulation(df)
 
         return self.plot.figure
-
-    def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
-        """Run a simulation of the branchpro model at the given slider values.
-
-        Parameters
-        ----------
-        new_init_cond
-            (int) updated position on the slider for the number of initial
-            cases for the Branch Pro model in the simulator.
-        new_r0
-            (float) updated position on the slider for the initial reproduction
-            number for the Branch Pro model in the simulator.
-        new_r1
-            (float) updated position on the slider for the second reproduction
-            number for the Branch Pro model in the simulator.
-        new_t1
-            (float) updated position on the slider for the time change in
-            reproduction numbers for the Branch Pro model in the simulator.
-
-        Returns
-        -------
-        str
-            Simulations storage dataframe in JSON format
-        """
-        data = self.session_data['data_storage']
-        simulations = self.session_data['sim_storage']
-        times = data['Time']
-
-        # There might be no simulation data if it got just cleared, or this is
-        # the first call --- start a new dataframe in this case
-        if simulations is None:
-            simulations = pd.DataFrame({'Time': times})
-
-        # Add the correct R profile to the branchpro model
-        br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))
-        br_pro_model.set_r_profile([new_r0, new_r1], [0, new_t1])
-
-        # Generate one simulation trajectory from this model
-        simulation_controller = bp.SimulationController(
-            br_pro_model, 1, len(times))
-        data = simulation_controller.run(new_init_cond)
-
-        # Add data to simulations storage
-        num_sims = len(simulations.columns)
-        simulations['sim{}'.format(num_sims)] = data
-
-        return simulations.to_json()

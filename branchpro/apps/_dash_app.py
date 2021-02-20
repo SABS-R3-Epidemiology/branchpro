@@ -90,6 +90,10 @@ class BranchProDashApp:
     def parse_contents(self, contents, filename):
         """Load a text (csv) file into a pandas dataframe.
 
+        This method is for loading incidence number data. It expects files to
+        have two columns, the first with title `Time` and the second with title
+        `Incidence Number`.
+
         Parameters
         ----------
         contents : str

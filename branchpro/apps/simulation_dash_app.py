@@ -12,7 +12,6 @@ with fixed example data. To run the app, use ``python dash_app.py``.
 
 import os
 
-import numpy as np
 import pandas as pd
 import dash
 import dash_core_components as dcc
@@ -31,11 +30,6 @@ df = pd.DataFrame({
             'Incidence Number': small_ffd['inc']
         })
 
-# # TODO:  FIX this
-df = pd.DataFrame({
-            'Time': small_ffd['week'],
-            'Incidence Number': small_ffd['inc']
-        })
 
 french_flu_data = df
 sliders = ['init_cond', 'r0', 'r1', 't1']
