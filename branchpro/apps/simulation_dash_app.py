@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import dash
 import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 import branchpro as bp
@@ -29,6 +30,8 @@ df = pd.DataFrame({
             'Weeks': small_ffd['week'],
             'Incidence Number': small_ffd['inc']
         })
+
+french_flu_data = df
 
 br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
 simulationController = bp.SimulationController(
@@ -56,39 +59,27 @@ server = app.app.server
 
 
 @app.app.callback(
-        Output('incidence-data-upload', 'children'),
-        Input('upload-data', 'contents'),
-        State('upload-data', 'filename')
-        )
-def update_current_df(*args):
+    Output('incidence-data-upload', 'children'),
+    Output('data_storage', 'children'),
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+)
+def load_data(*args):
+    """Load data from a file and save it in storage.
     """
-    Update when a data file is uploaded.
-    """
-    list_of_contents, list_of_names = args
+    list_contents, list_names = args
 
-    if list_of_contents is not None:
+    if list_contents is not None:
         # Run content parser for each file and get message
         # Only use latest file
-        message = app.parse_contents(
-            list_of_contents[-1], list_of_names[-1])
+        message, data = app.parse_contents(list_contents[-1], list_names[-1])
+        data = data.to_json()
 
-        if app.current_df is not None:
-            # Make new empty plot and add data
-            app.plot = bp.IncidenceNumberPlot()
-            app.add_data(app.current_df)
+    else:
+        message = html.Div(['No data file selected.'])
+        data = french_flu_data.to_json()
 
-            # Clear sliders - prevents from doubling sliders upon
-            # page reload
-            app.sliders = bp._SliderComponent()
-
-            # Make a new simulation controller for this data
-            simulationController = bp.SimulationController(
-                br_pro_model, 1, len(app.current_df['Time']))
-            app.add_simulator(
-                simulationController,
-                magnitude_init_cond=max(app.current_df['Incidence Number']))
-
-        return message
+    return message, data
 
 
 @app.app.callback(
