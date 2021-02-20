@@ -81,11 +81,12 @@ class BranchProDashApp:
             by the particular app, and each value should be a string containing
             the JSON data accessed from that storage.
         """
-        self.session_data = {}
+        self.new_session_data = {}
         for k, v in kwargs.items():
             if v is not None:
                 v = pd.read_json(v)
-            self.session_data[k] = v
+            self.new_session_data[k] = v
+        self.session_data = self.new_session_data
 
     def parse_contents(self, contents, filename):
         """Load a text (csv) file into a pandas dataframe.

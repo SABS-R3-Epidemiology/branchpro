@@ -74,6 +74,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                     ),
                     html.Div(id='incidence-data-upload'),
                     html.Div([]),  # Empty div for bottom text
+                    # dcc.Store(id='data_storage'),
+                    # dcc.Store(id='sim_storage')
                     html.Div(id='data_storage', style={'display': 'none'}),
                     html.Div(id='sim_storage', style={'display': 'none'})
                     ], fluid=True),
@@ -180,8 +182,15 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def clear_simulations(self):
         """Remove all previous simulations from sim storage.
         """
-        sim = self.session_data['sim_storage']
-        data = self.session_data['data_storage']
+        try:
+            sim = self.session_data['sim_storage']
+            k = self.session_data.keys()
+            data = self.session_data['data_storage']
+        except KeyError:
+            print(self.session_data)
+            print(k)
+            print('\n\n\n\n')
+            raise KeyError
 
         time_label, inc_label = data.columns
 
