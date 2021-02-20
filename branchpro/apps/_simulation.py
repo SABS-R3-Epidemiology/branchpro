@@ -11,6 +11,7 @@ import base64
 import io
 import os
 
+import numpy as np
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash
@@ -328,9 +329,7 @@ class IncidenceNumberSimulationApp:
         return self.plot.figure
 
     def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
-        """
-        Updates the model parameters in the simulator and the
-        simulated graph in the figure.
+        """Run a simulation of the branchpro model at the given slider values.
 
         Parameters
         ----------
@@ -346,16 +345,27 @@ class IncidenceNumberSimulationApp:
         new_t1
             (float) updated position on the slider for the time change in
             reproduction numbers for the Branch Pro model in the simulator.
+
+        Returns
+        -------
+        str
+            Simulations storage dataframe in JSON format
         """
-        new_rs = [new_r0, new_r1]
-        start_times = [0, new_t1]
+        data = self.session_data['data-storage']
+        simulations = self.session_data['sim-storage']
+        times = data['Time']
 
-        model = self.simulator.model
-        model.set_r_profile(new_rs, start_times)
+        # Add the correct R profile to the branchpro model
+        br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))
+        br_pro_model.set_r_profile([new_r0, new_r1], [0, new_t1])
 
-        self._init_cond = new_init_cond
+        # Generate one simulation trajectory from this model
+        simulation_controller = bp.SimulationController(
+            br_pro_model, 1, len(times))
+        data = simulation_controller.run(new_init_cond)
 
-        data = self.simulator.run(self._init_cond)
-        self._graph['y'] = data
+        # Add data to simulations storage
+        num_sims = len(simulations.columns)
+        simulations['sim{}'.format(num_sims)] = data
 
-        return self.plot.figure
+        return simulations.to_json()
