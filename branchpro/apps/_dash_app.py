@@ -7,6 +7,8 @@
 # notice and full license details.
 #
 
+import pandas as pd
+
 
 class BranchProDashApp:
     """Base class for dash apps for branching processes.
