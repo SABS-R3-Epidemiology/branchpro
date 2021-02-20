@@ -182,6 +182,35 @@ class IncidenceNumberSimulationApp:
 
         return sliders.get_sliders_div()
 
+    def update_figure(self):
+        """Generate a plotly figure of incidence numbers and simulated cases.
+
+        Returns
+        -------
+        plotly.Figure
+            Figure with updated data and simulations
+        """
+        data = self.session_data['data_storage']
+        simulations = self.session_data['sim_storage']
+        num_simulations = len(simulations.columns) - 1
+
+        plot = bp.IncidenceNumberPlot()
+        plot.add_data(data)
+
+        # Keeps traces visibility states fixed when changing sliders
+        plot.figure['layout']['legend']['uirevision'] = True
+
+        for sim in range(num_simulations):
+            plot.add_simulation(simulations[['Time', 'sim{}'.format(sim + 1)]])
+
+            # Unless it is the most recent simulation, decrease the opacity to
+            # 25% and remove it from the legend
+            if sim < num_simulations - 1:
+                plot.figure['data'][-1]['line'].color = 'rgba(255,0,0,0.25)'
+                plot.figure['data'][-1]['showlegend'] = False
+
+        return plot.figure
+
     def add_text(self, text):
         """Add a block of text at the top of the app.
 
