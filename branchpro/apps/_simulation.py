@@ -230,81 +230,13 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             self.session_data['sim_storage'] = data[['Time']]
 
     def add_text(self, text):
-        """Add a block of text at the top of the app.
-
-        This can be used to add introductory text that everyone looking at the
-        app will see right away.
-
-        Parameters
-        ----------
-        text
-            The text to add to the html div
-        """
-        self.app.layout.children[0].children[1].children.append(text)
+        self._load_text(text)
+        self.app.layout.children[0].children[1].children.append(self.text)
 
     def add_collapsed_text(self, text, title='More details...'):
-        """Add a block of collapsible text at the bottom of the app.
-
-        By default, this text will be hidden. The user can click on a button
-        with the specified title in order to view the text.
-
-        Parameters
-        ----------
-        text
-            The text to add to the html div
-        title
-            str which will be displayed on the show/hide button
-        """
-        collapse = html.Div([
-                dbc.Button(
-                    title,
-                    id='showhidebutton',
-                    color='primary',
-                ),
-                dbc.Collapse(
-                    dbc.Card(dbc.CardBody(text)),
-                    id='collapsedtext',
-                ),
-            ])
-        self.app.layout.children[0].children[-1].children.append(collapse)
-
-    def parse_contents(self, contents, filename):
-        """Load a text (csv) file into a pandas dataframe.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        html Div
-            A div which contains a message for the user.
-        pandas.DataFrame
-            A dataframe with the loaded file. If the file load was not
-            successful, it will be None.
-        """
-        content_type, content_string = contents.split(',')
-        _, extension = os.path.splitext(filename)
-
-        decoded = base64.b64decode(content_string)
-        try:
-            if extension in ['.csv', '.txt']:
-                # Assume that the user uploaded a CSV or TXT file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')))
-            else:
-                return html.Div(['File type must be CSV or TXT.']), None
-        except Exception as e:
-            print(e)
-            return html.Div([
-                'There was an error processing this file.'
-            ]), None
-
-        if ('Time' not in df.columns) or (
-                'Incidence Number' not in df.columns):
-            return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column.']), None
-        else:
-            return html.Div(['Loaded data from: {}'.format(filename)]), df
+        self._load_collapsed_text(text, title)
+        self.app.layout.children[0].children[-3].children.append(
+            self.collapsed_text)
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):

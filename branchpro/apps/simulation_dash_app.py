@@ -41,15 +41,15 @@ french_flu_data = df
 sliders = ['init_cond', 'r0', 'r1', 't1']
 
 # Add the explanation texts
-# fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
-# with open(fname) as f:
-#     app.add_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
-#
-# fname = os.path.join(os.path.dirname(__file__),
-#                      'data',
-#                      'dash_app_collapsible_text.md')
-# with open(fname) as f:
-#     app.add_collapsed_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
+with open(fname) as f:
+    app.add_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+
+fname = os.path.join(os.path.dirname(__file__),
+                     'data',
+                     'dash_app_collapsible_text.md')
+with open(fname) as f:
+    app.add_collapsed_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
 
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
@@ -127,18 +127,18 @@ def run_simulation(*args):
     return app.update_simulation(init_cond, r0, r1, t1)
 
 
-# @app.app.callback(
-#     Output('collapsedtext', 'is_open'),
-#     [Input('showhidebutton', 'n_clicks')],
-#     [State('collapsedtext', 'is_open')],
-# )
-# def toggle_hidden_text(num_clicks, is_it_open):
-#     """
-#     Switches the visibility of the hidden text.
-#     """
-#     if num_clicks:
-#         return not is_it_open
-#     return is_it_open
+@app.app.callback(
+    Output('collapsedtext', 'is_open'),
+    [Input('showhidebutton', 'n_clicks')],
+    [State('collapsedtext', 'is_open')],
+)
+def toggle_hidden_text(num_clicks, is_it_open):
+    """
+    Switches the visibility of the hidden text.
+    """
+    if num_clicks:
+        return not is_it_open
+    return is_it_open
 
 
 if __name__ == "__main__":
