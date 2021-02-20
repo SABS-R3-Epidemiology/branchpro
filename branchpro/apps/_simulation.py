@@ -351,8 +351,8 @@ class IncidenceNumberSimulationApp:
         str
             Simulations storage dataframe in JSON format
         """
-        data = self.session_data['data-storage']
-        simulations = self.session_data['sim-storage']
+        data = self.session_data['data_storage']
+        simulations = self.session_data['sim_storage']
         times = data['Time']
 
         # Add the correct R profile to the branchpro model
