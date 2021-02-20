@@ -102,40 +102,32 @@ def update_slider_ranges(*args):
 def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
-    app.refresh_user_data(data_storage=args[0], sim_storage=args[1])
+    app.refresh_user_data_json(data_storage=args[0], sim_storage=args[1])
     return app.update_figure()
 
 
 @app.app.callback(
-        Output('myfig', 'figure'),
-        [Input(s, 'value') for s in sliders],
-        Input('sim-button', 'n_clicks'),
-        )
-def manage_simulation(*args):
+    Output('sim_storage', 'children'),
+    Input('sim-button', 'n_clicks'),
+    Input('sim_storage', 'children'),
+    Input('data_storage', 'children'),
+    [Input(s, 'value') for s in sliders],
+)
+def run_simulation(*args):
+    """Run simulation based on slider values, simulation button, or new data.
     """
-    Simulates the model for the current slider values or adds a new
-    simulation for the current slider values and updates the
-    plot in the figure.
-    """
+    n_clicks, sim_json, data_json, init_cond, r0, r1, t1 = args
+
+    app.refresh_user_data_json(data_storage=data_json, sim_storage=sim_json)
+
+    # In all cases except the a click of the add new simulation buttom, we want
+    # to remove all previous simulation traces from the figure
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
-    if source == 'sim-button':
-        fig = app.add_simulation()
-        for i in range(len(app.plot.figure['data'])-2):
-            # Change opacity of all traces in the figure but for the
-            # first - the barplot of incidences
-            # last - the latest simulation
-            app.plot.figure['data'][i+1]['line'].color = 'rgba(255,0,0,0.25)'
-            app.plot.figure['data'][i+1]['showlegend'] = False
-    elif source in sliders:
-        parameters = args[:-1]
-        fig = app.update_simulation(*parameters)
-        fig = app.clear_simulations()
-    else:
-        # The input source is not recognized, so make no change to the output
-        raise dash.exceptions.PreventUpdate()
+    if source != 'sim-button':
+        app.purge_simulations()
 
-    return fig
+    return app.update_simulation(init_cond, r0, r1, t1)
 
 
 @app.app.callback(
