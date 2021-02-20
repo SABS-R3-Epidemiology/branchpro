@@ -122,6 +122,66 @@ class IncidenceNumberSimulationApp:
         # Set the app index string for mathjax
         self.app.index_string = 'fix this'
 
+    def update_sliders(self,
+                       init_cond=10.0,
+                       r0=2.0,
+                       r1=0.5,
+                       magnitude_init_cond=None):
+        """Generate sliders for the app.
+
+        This method tunes the bounds of the sliders to the time period and
+        magnitude of the data.
+
+        Parameters
+        ----------
+        init_cond : int
+            start position on the slider for the number of initial cases for
+            the Branch Pro model in the simulator.
+        r0 : float
+            start position on the slider for the initial reproduction number
+            for the Branch Pro model in the simulator.
+        r1 : float
+            start position on the slider for the second reproduction number for
+            the Branch Pro model in the simulator.
+        magnitude_init_cond : int
+            maximal start position on the slider for the number of initial
+            cases for the Branch Pro model in the simulator. By default, it
+            will be set to the maximum value observed in the data.
+
+        Returns
+        -------
+        html.Div
+            A dash html component containing the sliders
+        """
+        data = self.session_data['data_storage']
+
+        # Calculate slider values that depend on the data
+        if data is not None:
+            if magnitude_init_cond is None:
+                magnitude_init_cond = max(data['Incidence Number'])
+            bounds = (1, max(data['Time']))
+
+        else:
+            # choose values to use if there is no data
+            if magnitude_init_cond is None:
+                magnitude_init_cond = 10
+            bounds = (1, 30)
+
+        mid_point = round(sum(bounds) / 2)
+
+        # Make new sliders
+        sliders = bp._SliderComponent()
+        sliders.add_slider(
+            'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
+            1, as_integer=True)
+        sliders.add_slider('Initial R', 'r0', r0, 0.1, 10.0, 0.01)
+        sliders.add_slider('Second R', 'r1', r1, 0.1, 10.0, 0.01)
+        sliders.add_slider(
+            'Time of change', 't1', mid_point, bounds[0], bounds[1], 1,
+            as_integer=True)
+
+        return sliders.get_sliders_div()
+
     def add_text(self, text):
         """Add a block of text at the top of the app.
 
