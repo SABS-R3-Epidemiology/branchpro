@@ -153,8 +153,9 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Figure with updated data and simulations
         """
         data = self.session_data['data_storage']
-        time_label, inc_label = data.columns
         simulations = self.session_data['sim_storage']
+
+        time_label, inc_label = data.columns
         num_simulations = len(simulations.columns) - 1
 
         plot = bp.IncidenceNumberPlot()
@@ -164,12 +165,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         plot.figure['layout']['legend']['uirevision'] = True
 
         for sim in range(num_simulations):
-            # plot.add_simulation(
-                # simulations[['Time', 'sim{}'.format(sim + 1)]])
-            df = pd.DataFrame(
-                {time_label: simulations[time_label],
-                 inc_label: simulations['sim{}'.format(sim + 1)]
-                 })
+            df = simulations[[time_label, 'sim{}'.format(sim + 1)]]
+            df.columns = [time_label, inc_label]
             plot.add_simulation(df, time_key=time_label, inc_key=inc_label)
 
             # Unless it is the most recent simulation, decrease the opacity to
@@ -185,6 +182,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         """
         sim = self.session_data['sim_storage']
         data = self.session_data['data_storage']
+
         time_label, inc_label = data.columns
 
         # Only attempt the purge if there is data there
@@ -224,8 +222,9 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Simulations storage dataframe in JSON format
         """
         data = self.session_data['data_storage']
-        time_label, inc_label = data.columns
         simulations = self.session_data['sim_storage']
+
+        time_label, inc_label = data.columns
         times = data[time_label]
 
         # There might be no simulation data if it got just cleared, or this is

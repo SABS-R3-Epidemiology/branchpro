@@ -25,13 +25,11 @@ from branchpro.apps import IncidenceNumberSimulationApp
 app = IncidenceNumberSimulationApp()
 full_ffd = bp.DatasetLibrary().french_flu()
 small_ffd = full_ffd.query('year == 2020')
-df = pd.DataFrame({
+french_flu_data = pd.DataFrame({
             'Weeks': small_ffd['week'],
             'Incidence Number': small_ffd['inc']
         })
 
-
-french_flu_data = df
 sliders = ['init_cond', 'r0', 'r1', 't1']
 
 # Add the explanation texts
