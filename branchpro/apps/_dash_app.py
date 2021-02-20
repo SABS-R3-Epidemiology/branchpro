@@ -16,8 +16,8 @@ class BranchProDashApp:
     def __init__(self):
         self.session_data = {}
 
-    def refresh_user_data(self, **kwargs):
-        """Load the user's session data.
+    def refresh_user_data_json(self, **kwargs):
+        """Load the user's session data from JSON.
 
         To be called at the beginning of an HTTP request so that this object
         contains the appropriate information for completing the request.
@@ -29,9 +29,9 @@ class BranchProDashApp:
         Parameters
         ----------
         kwargs
-            Each key should be the id of a storage HTML div recognized by the
-            particular app, and each value should be a string containing the
-            JSON data accessed from that container.
+            Each key should be the id or name of a storage container recognized
+            by the particular app, and each value should be a string containing
+            the JSON data accessed from that storage.
         """
         self.session_data = {}
         for k, v in kwargs.items():
