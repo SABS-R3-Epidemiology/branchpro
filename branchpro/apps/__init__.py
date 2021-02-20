@@ -13,3 +13,4 @@ from ._incidence_number_plot import IncidenceNumberPlot  # noqa
 from ._simulation import IncidenceNumberSimulationApp # noqa
 from ._reproduction_number_plot import ReproductionNumberPlot # noqa
 from ._inference import BranchProInferenceApp # noqa
+from ._dash_app import BranchProDashApp # noqa
