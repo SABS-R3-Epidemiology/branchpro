@@ -7,6 +7,9 @@
 # notice and full license details.
 #
 
+import base64
+import io
+import os
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
@@ -89,6 +92,10 @@ class BranchProDashApp:
 
         Parameters
         ----------
+        contents : str
+            File contents in binary encoding
+        filename : str
+            Name of the file
 
         Returns
         -------
