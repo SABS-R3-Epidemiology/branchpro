@@ -95,6 +95,18 @@ def update_slider_ranges(*args):
 
 
 @app.app.callback(
+    Output('myfig', 'figure'),
+    Input('data_storage', 'children'),
+    Input('sim_storage', 'children'),
+)
+def update_figure(*args):
+    """Handles all updates to the incidence number figure.
+    """
+    app.refresh_user_data(data_storage=args[0], sim_storage=args[1])
+    return app.update_figure()
+
+
+@app.app.callback(
         Output('myfig', 'figure'),
         [Input(s, 'value') for s in sliders],
         Input('sim-button', 'n_clicks'),
