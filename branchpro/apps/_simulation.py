@@ -20,6 +20,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 import branchpro as bp
+from branchpro.apps import BranchProDashApp
 
 
 # Import the mathjax
@@ -57,7 +58,7 @@ index_str_math = """<!DOCTYPE html>
 """
 
 
-class IncidenceNumberSimulationApp:
+class IncidenceNumberSimulationApp(BranchProDashApp):
     """IncidenceNumberSimulationApp Class:
     Class for the simulation dash app with figure and sliders for the
     BranchPro models.
@@ -116,11 +117,11 @@ class IncidenceNumberSimulationApp:
                     html.Div(id='data_storage', style={'display': 'none'}),
                     html.Div(id='sim_storage', style={'display': 'none'})
                     ], fluid=True),
-                mathjax_script
+                self.mathjax_script
                 ])
 
         # Set the app index string for mathjax
-        self.app.index_string = 'fix this'
+        self.app.index_string = self.mathjax_html
 
     def update_sliders(self,
                        init_cond=10.0,

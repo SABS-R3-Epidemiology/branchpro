@@ -8,7 +8,44 @@
 #
 
 import pandas as pd
+import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
+
+
+# Import the mathjax
+mathjax_script = dji.Import(
+    src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js'
+        '?config=TeX-AMS-MML_SVG')
+
+
+# Write the mathjax index html
+# https://chrisvoncsefalvay.com/2020/07/25/dash-latex/
+index_str_math = """<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                tex2jax: {
+                inlineMath: [ ['$','$'],],
+                processEscapes: true
+                }
+            });
+            </script>
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+"""
 
 
 class BranchProDashApp:
@@ -20,6 +57,8 @@ class BranchProDashApp:
                     'https://codepen.io/chriddyp/pen/bWLwgP.css']
 
         self.session_data = {}
+        self.mathjax_html = index_str_math
+        self.mathjax_script = mathjax_script
 
     def refresh_user_data_json(self, **kwargs):
         """Load the user's session data from JSON.

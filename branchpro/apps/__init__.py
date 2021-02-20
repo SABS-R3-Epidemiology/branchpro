@@ -8,9 +8,9 @@
 #
 
 # Import main classes
+from ._dash_app import BranchProDashApp # noqa
 from ._sliders import _SliderComponent # noqa
 from ._incidence_number_plot import IncidenceNumberPlot  # noqa
 from ._simulation import IncidenceNumberSimulationApp # noqa
 from ._reproduction_number_plot import ReproductionNumberPlot # noqa
 from ._inference import BranchProInferenceApp # noqa
-from ._dash_app import BranchProDashApp # noqa
