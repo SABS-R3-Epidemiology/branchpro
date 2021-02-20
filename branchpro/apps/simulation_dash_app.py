@@ -84,19 +84,14 @@ def load_data(*args):
 
 @app.app.callback(
     Output('all-sliders', 'children'),
-    Input('incidence-data-upload', 'children')
+    Input('data_storage', 'children'),
 )
-def update_sliders(*args):
+def update_slider_ranges(*args):
+    """Update sliders when a data file is uploaded.
     """
-    Update sliders when a data file is uploaded.
-    """
-    data = app.current_df
-    if data is not None:
-        # Send the new sliders div to the callback output
-        return app.sliders.get_sliders_div()
-    else:
-        # There is no loaded data, so make no change to the output
-        raise dash.exceptions.PreventUpdate()
+    data = french_flu_data if args[0] is None else args[0]
+    app.refresh_user_data_json(data_storage=data)
+    return app.update_sliders()
 
 
 @app.app.callback(
