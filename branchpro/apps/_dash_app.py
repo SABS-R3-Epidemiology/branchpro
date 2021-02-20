@@ -8,6 +8,7 @@
 #
 
 import pandas as pd
+import dash_bootstrap_components as dbc
 
 
 class BranchProDashApp:

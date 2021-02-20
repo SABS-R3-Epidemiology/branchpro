@@ -87,37 +87,37 @@ class IncidenceNumberSimulationApp:
                         dbc.Col(
                             self.update_sliders(), id='all-sliders')
                     ], align='center'),
-                html.H4([
-                    'You can upload your own incidence data here. It will'
-                    'appear as bars, while the simulation will be a line.'
-                ]),
-                dcc.Upload(
-                    id='upload-data',
-                    children=html.Div([
-                        'Drag and Drop or ',
-                            html.A('Select Files',
-                                style={'text-decoration': 'underline'}),
-                        ' to upload your Incidence Number data.'
+                    html.H4([
+                        'You can upload your own incidence data here. It will'
+                        'appear as bars, while the simulation will be a line.'
                     ]),
-                    style={
-                        'width': '100%',
-                        'height': '60px',
-                        'lineHeight': '60px',
-                        'borderWidth': '1px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'margin': '10px'
-                    },
-                    multiple=True  # Allow multiple files to be uploaded
-                ),
-                html.Div(id='incidence-data-upload'),
-                html.Div([]), # Empty div for bottom text
-                html.Div(id='data_storage', style={'display': 'none'}),
-                html.Div(id='sim_storage', style={'display': 'none'})
-                ], fluid=True),
-            mathjax_script
-            ])
+                    dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                            'Drag and Drop or ',
+                            html.A('Select Files',
+                                   style={'text-decoration': 'underline'}),
+                            ' to upload your Incidence Number data.'
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                        multiple=True  # Allow multiple files to be uploaded
+                    ),
+                    html.Div(id='incidence-data-upload'),
+                    html.Div([]),  # Empty div for bottom text
+                    html.Div(id='data_storage', style={'display': 'none'}),
+                    html.Div(id='sim_storage', style={'display': 'none'})
+                    ], fluid=True),
+                mathjax_script
+                ])
 
         # Set the app index string for mathjax
         self.app.index_string = 'fix this'
