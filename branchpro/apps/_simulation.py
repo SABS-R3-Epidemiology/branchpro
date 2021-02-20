@@ -192,6 +192,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Figure with updated data and simulations
         """
         data = self.session_data['data_storage']
+        print(data)
         simulations = self.session_data['sim_storage']
         num_simulations = len(simulations.columns) - 1
 
@@ -202,7 +203,13 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         plot.figure['layout']['legend']['uirevision'] = True
 
         for sim in range(num_simulations):
-            plot.add_simulation(simulations[['Time', 'sim{}'.format(sim + 1)]])
+            # plot.add_simulation(simulations[['Time', 'sim{}'.format(sim + 1)]])
+
+            df = pd.DataFrame(
+                {'Time': simulations['Time'],
+                 'Incidence Number': simulations['sim{}'.format(sim + 1)]
+                })
+            plot.add_simulation(df)
 
             # Unless it is the most recent simulation, decrease the opacity to
             # 25% and remove it from the legend
@@ -211,6 +218,16 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 plot.figure['data'][-1]['showlegend'] = False
 
         return plot.figure
+
+    def clear_simulations(self):
+        """Remove all previous simulations from sim storage.
+        """
+        sim = self.session_data['sim_storage']
+        data = self.session_data['data_storage']
+
+        # Only attempt the purge if there is data there
+        if sim is not None:
+            self.session_data['sim_storage'] = data[['Time']]
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
@@ -252,13 +269,19 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         self.app.layout.children[0].children[-1].children.append(collapse)
 
     def parse_contents(self, contents, filename):
-        """
-        Opens user-uploaded file and passes its content to a pandas
-        Dataframe format, returning to the user the name of the file that
-        has been used.
-        """
-        self.current_df = None
+        """Load a text (csv) file into a pandas dataframe.
 
+        Parameters
+        ----------
+
+        Returns
+        -------
+        html Div
+            A div which contains a message for the user.
+        pandas.DataFrame
+            A dataframe with the loaded file. If the file load was not
+            successful, it will be None.
+        """
         content_type, content_string = contents.split(',')
         _, extension = os.path.splitext(filename)
 
@@ -269,21 +292,19 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 df = pd.read_csv(
                     io.StringIO(decoded.decode('utf-8')))
             else:
-                return html.Div(['File type must be CSV or TXT.'])
+                return html.Div(['File type must be CSV or TXT.']), None
         except Exception as e:
             print(e)
             return html.Div([
                 'There was an error processing this file.'
-            ])
+            ]), None
 
         if ('Time' not in df.columns) or (
                 'Incidence Number' not in df.columns):
             return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column.'])
+                and `Incidence Number` column.']), None
         else:
-            self.current_df = df
-
-            return html.Div(['Loaded data from: {}'.format(filename)])
+            return html.Div(['Loaded data from: {}'.format(filename)]), df
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):
@@ -396,24 +417,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         return self.plot.figure
 
-    def clear_simulations(self):
-        """
-        Clears all simulations currently plotted in the figure and adds
-        one fitted for the current parameters of the sliders.
-        """
-        self.plot = bp.IncidenceNumberPlot()
-        # Keeps traces visibility states fixed when changing sliders
-        self.plot.figure['layout']['legend']['uirevision'] = True
-
-        self.add_data(
-            df=self.current_df,
-            time_label=self._time_label,
-            inc_label=self._inc_label)
-
-        self.plot.figure = self.add_simulation()
-
-        return self.plot.figure
-
     def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
         """Run a simulation of the branchpro model at the given slider values.
 
@@ -440,6 +443,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         data = self.session_data['data_storage']
         simulations = self.session_data['sim_storage']
         times = data['Time']
+
+        # There might be no simulation data if it got just cleared, or this is
+        # the first call --- start a new dataframe in this case
+        if simulations is None:
+            simulations = pd.DataFrame({'Time': times})
 
         # Add the correct R profile to the branchpro model
         br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))

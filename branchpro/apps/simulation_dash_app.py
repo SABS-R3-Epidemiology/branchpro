@@ -31,28 +31,25 @@ df = pd.DataFrame({
             'Incidence Number': small_ffd['inc']
         })
 
+# # TODO:  FIX this
+df = pd.DataFrame({
+            'Time': small_ffd['week'],
+            'Incidence Number': small_ffd['inc']
+        })
+
 french_flu_data = df
-
-br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
-simulationController = bp.SimulationController(
-    br_pro_model, 1, len(small_ffd['week']))
-app.add_simulator(
-    simulationController,
-    magnitude_init_cond=max(df['Incidence Number']))
-app.add_data(df, time_label='Weeks')
-
-sliders = app.get_sliders_ids()
+sliders = ['init_cond', 'r0', 'r1', 't1']
 
 # Add the explanation texts
-fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
-with open(fname) as f:
-    app.add_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
-
-fname = os.path.join(os.path.dirname(__file__),
-                     'data',
-                     'dash_app_collapsible_text.md')
-with open(fname) as f:
-    app.add_collapsed_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+# fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
+# with open(fname) as f:
+#     app.add_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
+#
+# fname = os.path.join(os.path.dirname(__file__),
+#                      'data',
+#                      'dash_app_collapsible_text.md')
+# with open(fname) as f:
+#     app.add_collapsed_text(dcc.Markdown(f.read(), dangerously_allow_html=True))
 
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
@@ -125,23 +122,23 @@ def run_simulation(*args):
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
     if source != 'sim-button':
-        app.purge_simulations()
+        app.clear_simulations()
 
     return app.update_simulation(init_cond, r0, r1, t1)
 
 
-@app.app.callback(
-    Output('collapsedtext', 'is_open'),
-    [Input('showhidebutton', 'n_clicks')],
-    [State('collapsedtext', 'is_open')],
-)
-def toggle_hidden_text(num_clicks, is_it_open):
-    """
-    Switches the visibility of the hidden text.
-    """
-    if num_clicks:
-        return not is_it_open
-    return is_it_open
+# @app.app.callback(
+#     Output('collapsedtext', 'is_open'),
+#     [Input('showhidebutton', 'n_clicks')],
+#     [State('collapsedtext', 'is_open')],
+# )
+# def toggle_hidden_text(num_clicks, is_it_open):
+#     """
+#     Switches the visibility of the hidden text.
+#     """
+#     if num_clicks:
+#         return not is_it_open
+#     return is_it_open
 
 
 if __name__ == "__main__":
