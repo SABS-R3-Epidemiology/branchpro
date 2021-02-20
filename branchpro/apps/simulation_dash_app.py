@@ -155,4 +155,4 @@ def toggle_hidden_text(num_clicks, is_it_open):
 
 
 if __name__ == "__main__":
-    app.app.run_server(debug=True, threaded=False, processes=1)
+    app.app.run_server(debug=True)
