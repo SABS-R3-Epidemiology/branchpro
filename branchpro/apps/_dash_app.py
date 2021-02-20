@@ -14,6 +14,10 @@ class BranchProDashApp:
     """Base class for dash apps for branching processes.
     """
     def __init__(self):
+        # Default CSS styles
+        self.css = [dbc.themes.BOOTSTRAP,
+                    'https://codepen.io/chriddyp/pen/bWLwgP.css']
+
         self.session_data = {}
 
     def refresh_user_data_json(self, **kwargs):

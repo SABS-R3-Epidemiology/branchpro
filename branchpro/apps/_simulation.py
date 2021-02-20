@@ -63,16 +63,11 @@ class IncidenceNumberSimulationApp:
     BranchPro models.
     """
     def __init__(self):
-        self.app = dash.Dash(
-             __name__, external_stylesheets=[
-                dbc.themes.BOOTSTRAP,
-                'https://codepen.io/chriddyp/pen/bWLwgP.css'])
-        self.app.title = 'BranchproSim'
-        self.plot = bp.IncidenceNumberPlot()
+        super().__init__()
+        self.session_data = {'data_storage': None, 'sim_storage': None}
 
-        # Keeps traces visibility states fixed when changing sliders
-        self.plot.figure['layout']['legend']['uirevision'] = True
-        self.sliders = bp._SliderComponent()
+        self.app = dash.Dash(__name__, external_stylesheets=self.css)
+        self.app.title = 'BranchproSim'
 
         self.app.layout = \
             html.Div([
@@ -85,46 +80,47 @@ class IncidenceNumberSimulationApp:
                                 'Add new simulation',
                                 id='sim-button',
                                 n_clicks=0),
-                            dcc.Graph(figure=self.plot.figure, id='myfig')]
-                            ),
-                        dbc.Col(
-                            self.sliders.get_sliders_div(), id='all-sliders')
-                            ],
-                            align='center'
-                            ),
-                    html.H4(['You can upload your own incidence data here. It \
-                        will appear as bars, while the simulation will be a \
-                        line.']),
-                    dcc.Upload(
-                        id='upload-data',
-                        children=html.Div([
-                            'Drag and Drop or ',
-                            html.A(
-                                'Select Files',
-                                style={'text-decoration': 'underline'}),
-                            ' to upload your Incidence Number data.'
+                            dcc.Graph(
+                                figure=bp.IncidenceNumberPlot().figure,
+                                id='myfig')
                         ]),
-                        style={
-                            'width': '100%',
-                            'height': '60px',
-                            'lineHeight': '60px',
-                            'borderWidth': '1px',
-                            'borderStyle': 'dashed',
-                            'borderRadius': '5px',
-                            'textAlign': 'center',
-                            'margin': '10px'
-                        },
-                        # Allow multiple files to be uploaded
-                        multiple=True
-                    ),
-                    html.Div(id='incidence-data-upload'),
-                    html.Div([])], fluid=True),  # Empty div for bottom text
-                mathjax_script])
+                        dbc.Col(
+                            self.update_sliders(), id='all-sliders')
+                    ], align='center'),
+                html.H4([
+                    'You can upload your own incidence data here. It will'
+                    'appear as bars, while the simulation will be a line.'
+                ]),
+                dcc.Upload(
+                    id='upload-data',
+                    children=html.Div([
+                        'Drag and Drop or ',
+                            html.A('Select Files',
+                                style={'text-decoration': 'underline'}),
+                        ' to upload your Incidence Number data.'
+                    ]),
+                    style={
+                        'width': '100%',
+                        'height': '60px',
+                        'lineHeight': '60px',
+                        'borderWidth': '1px',
+                        'borderStyle': 'dashed',
+                        'borderRadius': '5px',
+                        'textAlign': 'center',
+                        'margin': '10px'
+                    },
+                    multiple=True  # Allow multiple files to be uploaded
+                ),
+                html.Div(id='incidence-data-upload'),
+                html.Div([]), # Empty div for bottom text
+                html.Div(id='data_storage', style={'display': 'none'}),
+                html.Div(id='sim_storage', style={'display': 'none'})
+                ], fluid=True),
+            mathjax_script
+            ])
 
         # Set the app index string for mathjax
-        self.app.index_string = index_str_math
-
-        self.current_df = None
+        self.app.index_string = 'fix this'
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
