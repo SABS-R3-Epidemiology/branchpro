@@ -50,25 +50,33 @@ server = app.app.server
 @app.app.callback(
     Output('incidence-data-upload', 'children'),
     Output('data_storage', 'children'),
+    Input('data_storage', 'children'),
     Input('upload-data', 'contents'),
     State('upload-data', 'filename'),
 )
 def load_data(*args):
     """Load data from a file and save it in storage.
     """
-    list_contents, list_names = args
+    current_data, list_contents, list_names = args
 
-    if list_contents is not None:
-        # Run content parser for each file and get message
-        # Only use latest file
-        message, data = app.parse_contents(list_contents[-1], list_names[-1])
-        data = data.to_json()
+    with app.lock:
+        if list_contents is not None:
+            # Run content parser for each file and get message
+            # Only use latest file
+            message, data = app.parse_contents(list_contents[-1], list_names[-1])
 
-    else:
-        message = html.Div(['No data file selected.'])
-        data = french_flu_data.to_json()
+            if data is None:
+                # The file could not be loaded, so keep the current data and
+                # try to prevent updates to any other part of the app
+                return message, dash.no_update
 
-    return message, data
+            data = data.to_json()
+
+        else:
+            message = html.Div(['No data file selected.'])
+            data = french_flu_data.to_json()
+
+        return message, data
 
 
 @app.app.callback(
