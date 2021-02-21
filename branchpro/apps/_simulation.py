@@ -7,6 +7,8 @@
 # notice and full license details.
 #
 
+# import threading
+
 import numpy as np
 import pandas as pd
 import dash
@@ -25,6 +27,9 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     """
     def __init__(self):
         super().__init__()
+
+        # self.lock = threading.Lock()
+
         self.session_data = {'data_storage': None, 'sim_storage': None}
 
         self.app = dash.Dash(__name__, external_stylesheets=self.css)
@@ -227,8 +232,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         Returns
         -------
-        str
-            Simulations storage dataframe in JSON format
+        pandas.DataFrame
+            Simulations storage dataframe
         """
         data = self.session_data['data_storage']
         simulations = self.session_data['sim_storage']
@@ -254,7 +259,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         num_sims = len(simulations.columns)
         simulations['sim{}'.format(num_sims)] = data
 
-        return simulations.to_json()
+        return simulations
 
     def add_data(
             self, df=None, time_label='Time', inc_label='Incidence Number'):

@@ -79,10 +79,11 @@ def update_slider_ranges(*args):
     """Update sliders when a data file is uploaded.
     """
     data = french_flu_data if args[0] is None else args[0]
-    print('update slider is about to refresh')
-    app.refresh_user_data_json(data_storage=data)
-    print('update slider refreshed')
-    return app.update_sliders()
+    with app.lock:
+        print('update slider is about to refresh')
+        app.refresh_user_data_json(data_storage=data)
+        print('update slider refreshed')
+        return app.update_sliders()
 
 
 @app.app.callback(
@@ -94,9 +95,11 @@ def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
     print('update figure is about to refresh')
-    app.refresh_user_data_json(data_storage=args[0], sim_storage=args[1])
-    print('update figure refreshed')
-    return app.update_figure()
+
+    with app.lock:
+        app.refresh_user_data_json(data_storage=args[0], sim_storage=args[1])
+        print('update figure refreshed')
+        return app.update_figure()
 
 
 @app.app.callback(
@@ -111,17 +114,18 @@ def run_simulation(*args):
     """
     n_clicks, sim_json, data_json, init_cond, r0, r1, t1 = args
 
-    app.refresh_user_data_json(data_storage=data_json, sim_storage=sim_json)
-    print('run simulation refreshed')
-    # In all cases except the a click of the add new simulation buttom, we want
-    # to remove all previous simulation traces from the figure
-    ctx = dash.callback_context
-    source = ctx.triggered[0]['prop_id'].split('.')[0]
-    if source != 'sim-button':
-        print('run simulation is about to clear')
-        app.clear_simulations()
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data_json, sim_storage=sim_json)
+        print('run simulation refreshed')
+        # In all cases except the a click of the add new simulation buttom, we want
+        # to remove all previous simulation traces from the figure
+        ctx = dash.callback_context
+        source = ctx.triggered[0]['prop_id'].split('.')[0]
+        if source != 'sim-button':
+            print('run simulation is about to clear')
+            app.clear_simulations()
 
-    return app.update_simulation(init_cond, r0, r1, t1)
+        return app.update_simulation(init_cond, r0, r1, t1).to_json()
 
 
 @app.app.callback(

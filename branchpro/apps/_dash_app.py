@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 
+import threading
 import base64
 import io
 import os
@@ -64,6 +65,8 @@ class BranchProDashApp:
         self.mathjax_html = index_str_math
         self.mathjax_script = mathjax_script
 
+        self.lock = threading.Lock()
+
     def refresh_user_data_json(self, **kwargs):
         """Load the user's session data from JSON.
 
@@ -81,6 +84,7 @@ class BranchProDashApp:
             by the particular app, and each value should be a string containing
             the JSON data accessed from that storage.
         """
+        # with self.lock:
         self.new_session_data = {}
         for k, v in kwargs.items():
             if v is not None:
