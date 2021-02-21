@@ -7,8 +7,6 @@
 # notice and full license details.
 #
 
-# import threading
-
 import numpy as np
 import dash
 import dash_bootstrap_components as dbc
@@ -76,8 +74,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                     ),
                     html.Div(id='incidence-data-upload'),
                     html.Div([]),  # Empty div for bottom text
-                    # dcc.Store(id='data_storage'),
-                    # dcc.Store(id='sim_storage')
                     html.Div(id='data_storage', style={'display': 'none'}),
                     html.Div(id='sim_storage', style={'display': 'none'})
                     ], fluid=True),
@@ -118,7 +114,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         html.Div
             A dash html component containing the sliders
         """
-        data = self.session_data['data_storage']
+        data = self.session_data.get('data_storage')
 
         # Calculate slider values that depend on the data
         if data is not None:
@@ -130,7 +126,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         else:
             # choose values to use if there is no data
             if magnitude_init_cond is None:
-                magnitude_init_cond = 10
+                magnitude_init_cond = 1000
             bounds = (1, 30)
 
         mid_point = round(sum(bounds) / 2)
@@ -159,8 +155,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         plotly.Figure
             Figure with updated data and simulations
         """
-        data = self.session_data['data_storage']
-        simulations = self.session_data['sim_storage']
+        data = self.session_data.get('data_storage')
+        simulations = self.session_data.get('sim_storage')
+
+        if data is None or simulations is None:
+            raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns
         num_simulations = len(simulations.columns) - 1
@@ -187,13 +186,16 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def clear_simulations(self):
         """Remove all previous simulations from sim storage.
         """
-        sim = self.session_data['sim_storage']
-        data = self.session_data['data_storage']
+        simulations = self.session_data.get('sim_storage')
+        data = self.session_data.get('data_storage')
+
+        if data is None:
+            raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns
 
         # Only attempt the purge if there is data there
-        if sim is not None:
+        if simulations is not None:
             self.session_data['sim_storage'] = data[[time_label]]
 
     def add_text(self, text):
@@ -250,8 +252,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         pandas.DataFrame
             Simulations storage dataframe
         """
-        data = self.session_data['data_storage']
-        simulations = self.session_data['sim_storage']
+        data = self.session_data.get('data_storage')
+        simulations = self.session_data.get('sim_storage')
+
+        if data is None:
+            raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns
         times = data[time_label]

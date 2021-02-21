@@ -109,8 +109,8 @@ class BranchProDashApp:
         """Load a text (csv) file into a pandas dataframe.
 
         This method is for loading incidence number data. It expects files to
-        have two columns, the first with title `Time` and the second with title
-        `Incidence Number`.
+        have at least two columns, the first with title ``Time`` and the second
+        with title ``Incidence Number``.
 
         Parameters
         ----------
@@ -121,7 +121,7 @@ class BranchProDashApp:
 
         Returns
         -------
-        html Div
+        html.Div
             A div which contains a message for the user.
         pandas.DataFrame
             A dataframe with the loaded file. If the file load was not
