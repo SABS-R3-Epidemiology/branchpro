@@ -55,9 +55,21 @@ index_str_math = """<!DOCTYPE html>
 
 class BranchProDashApp:
     """Base class for dash apps for branching processes.
+
+    Notes
+    -----
+    When deploying objects of this class in a server environment, it is
+    recommended to use the lock to prevent unpleasant bugs and interference
+    between threads:
+
+    >>> @app.app.callback(...)
+    >>> def callback(...):
+    >>>     with app.lock:
+    >>>         ...  # your callback code here
+    >>>         return ...
     """
     def __init__(self):
-        # Default CSS styles
+        # Default CSS style files
         self.css = [dbc.themes.BOOTSTRAP,
                     'https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -70,7 +82,7 @@ class BranchProDashApp:
     def refresh_user_data_json(self, **kwargs):
         """Load the user's session data from JSON.
 
-        To be called at the beginning of an HTTP request so that this object
+        To be called at the beginning of a callback so that this object
         contains the appropriate information for completing the request.
 
         The inputs are translated from JSON to pandas dataframes, and saved in
@@ -84,7 +96,6 @@ class BranchProDashApp:
             by the particular app, and each value should be a string containing
             the JSON data accessed from that storage.
         """
-        # with self.lock:
         self.new_session_data = {}
         for k, v in kwargs.items():
             if v is not None:
@@ -139,9 +150,13 @@ class BranchProDashApp:
             return html.Div(['Loaded data from: {}'.format(filename)]), df
 
     def _load_text(self, text):
+        """Load text into an HTML div saved at self.text.
+        """
         self.text = html.Div([text])
 
     def _load_collapsed_text(self, text, title):
+        """Load text into a hidden HTML div with button at self.collapsed_text.
+        """
         collapse = html.Div([
                 dbc.Button(
                     title,
@@ -154,38 +169,3 @@ class BranchProDashApp:
                 ),
             ])
         self.collapsed_text = collapse
-
-    def add_text(self, text):
-        """Add a block of text at the top of the app.
-
-        This can be used to add introductory text that everyone looking at the
-        app will see right away.
-
-        Child classes should override this method with one that places the text
-        into their layout.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        """
-        raise NotImplementedError
-
-    def add_collapsed_text(self, text, title='More details...'):
-        """Add a block of text at the top of the app.
-
-        By default, this text will be hidden. The user can click on a button
-        with the specified title in order to view the text.
-
-        This method saves the text in an HTML div at self.collapsed_text. Child
-        classes should override this method with one that places the text into
-        the layout.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        title : str
-            str which will be displayed on the show/hide button
-        """
-        raise NotImplementedError

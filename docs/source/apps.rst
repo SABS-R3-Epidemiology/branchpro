@@ -1,5 +1,5 @@
 ******************
-Visualisation Apps 
+Visualisation Apps
 ******************
 
 .. currentmodule:: branchpro
@@ -9,6 +9,7 @@ Overview:
 - :class:`IncidenceNumberPlot`
 - :class:`ReproductionNumberPlot`
 - :class:`_SliderComponent`
+- :class:`BranchProDashApp`
 - :class:`IncidenceNumberSimulationApp`
 - :class:`BranchProInferenceApp`
 
@@ -30,6 +31,14 @@ Sliders
 
 .. autoclass:: _SliderComponent
   :members: add_slider, get_sliders_div, slider_ids
+
+
+Apps
+****
+
+.. autoclass:: BranchProDashApp
+  :members: refresh_user_data_json, parse_contents
+
 
 Simulation Apps
 ***************

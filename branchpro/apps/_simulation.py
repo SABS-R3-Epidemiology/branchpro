@@ -10,7 +10,6 @@
 # import threading
 
 import numpy as np
-import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -27,8 +26,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     """
     def __init__(self):
         super().__init__()
-
-        # self.lock = threading.Lock()
 
         self.session_data = {'data_storage': None, 'sim_storage': None}
 
@@ -187,15 +184,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def clear_simulations(self):
         """Remove all previous simulations from sim storage.
         """
-        try:
-            sim = self.session_data['sim_storage']
-            k = self.session_data.keys()
-            data = self.session_data['data_storage']
-        except KeyError:
-            print(self.session_data)
-            print(k)
-            print('\n\n\n\n')
-            raise KeyError
+        sim = self.session_data['sim_storage']
+        data = self.session_data['data_storage']
 
         time_label, inc_label = data.columns
 
@@ -204,10 +194,32 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             self.session_data['sim_storage'] = data[[time_label]]
 
     def add_text(self, text):
+        """Add a block of text at the top of the app.
+
+        This can be used to add introductory text that everyone looking at the
+        app will see right away.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
+        """
         self._load_text(text)
         self.app.layout.children[0].children[1].children.append(self.text)
 
     def add_collapsed_text(self, text, title='More details...'):
+        """Add a block of text at the top of the app.
+
+        By default, this text will be hidden. The user can click on a button
+        with the specified title in order to view the text.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
+        title : str
+            str which will be displayed on the show/hide button
+        """
         self._load_collapsed_text(text, title)
         self.app.layout.children[0].children[-3].children.append(
             self.collapsed_text)
@@ -260,114 +272,3 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         simulations['sim{}'.format(num_sims)] = data
 
         return simulations
-
-    def add_data(
-            self, df=None, time_label='Time', inc_label='Incidence Number'):
-        """
-        Adds incidence data to the plot in the dash app.
-
-        Parameters
-        ----------
-        df
-            (pandas DataFrame) contains numbers of new cases by time unit.
-            Data stored in columns of time and incidence number, respectively.
-        time_label
-            label key given to the temporal data in the dataframe.
-        inc_label
-            label key given to the incidental data in the dataframe.
-        """
-        if df is not None:
-            self.current_df = df
-
-        self.plot.add_data(
-            self.current_df, time_key=time_label, inc_key=inc_label)
-
-        # Save the labels incidence figure for later update
-        self._time_label = time_label
-        self._inc_label = inc_label
-
-    def add_simulator(self,
-                      simulator,
-                      init_cond=10.0,
-                      r0=2.0,
-                      r1=0.5,
-                      magnitude_init_cond=100.0):
-        """
-        Simulates an instance of a model, adds it as a line to the plot and
-        adds sliders to the app.
-
-        Parameters
-        ----------
-        simulator
-            (SimulatorController) a BranchPro model and the time bounds
-            between which you run the simulator.
-        init_cond
-            (int) start position on the slider for the number of initial
-            cases for the Branch Pro model in the simulator.
-        r0
-            (float) start position on the slider for the initial reproduction
-            number for the Branch Pro model in the simulator.
-        r1
-            (float) start position on the slider for the second reproduction
-            number for the Branch Pro model in the simulator.
-        magnitude_init_cond
-            (int) maximal start position on the slider for the number of
-            initial cases for the Branch Pro model in the simulator.
-        """
-        if not issubclass(type(simulator), bp.SimulationController):
-            raise TypeError('Simulatior needs to be a SimulationController')
-
-        model = simulator.model
-
-        if not issubclass(type(model), bp.BranchProModel):
-            raise TypeError('Models needs to be a BranchPro')
-
-        bounds = simulator.get_time_bounds()
-        mid_point = round(sum(bounds)/2)
-
-        self.sliders.add_slider(
-            'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
-            1, as_integer=True)
-        self.sliders.add_slider('Initial R', 'r0', r0, 0.1, 10.0, 0.01)
-        self.sliders.add_slider('Second R', 'r1', r1, 0.1, 10.0, 0.01)
-        self.sliders.add_slider(
-            'Time of change', 't1', mid_point, bounds[0], bounds[1], 1,
-            as_integer=True)
-
-        new_rs = [r0, r1]
-        start_times = [0, mid_point]
-        simulator.model.set_r_profile(new_rs, start_times)
-
-        self._init_cond = init_cond
-
-        data = simulator.run(self._init_cond)
-        df = pd.DataFrame({
-            'Time': simulator.get_regime(),
-            'Incidence Number': data})
-
-        self.plot.add_simulation(df)
-
-        self.simulator = simulator
-
-        # Save the simulated figure for later update
-        self._graph = self.plot.figure['data'][-1]
-
-    def get_sliders_ids(self):
-        """
-        Returns the IDs of all sliders accompaning the figure in the
-        app.
-        """
-        return self.sliders.slider_ids()
-
-    def add_simulation(self):
-        """
-        Adds new simulated graph in the figure for the current slider values.
-        """
-        data = self.simulator.run(self._init_cond)
-        df = pd.DataFrame({
-            'Time': self.simulator.get_regime(),
-            'Incidence Number': data})
-
-        self.plot.add_simulation(df)
-
-        return self.plot.figure
