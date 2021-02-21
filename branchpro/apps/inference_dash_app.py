@@ -63,8 +63,8 @@ posterior = bp.BranchProPosterior(
 app.add_posterior(posterior)
 app.add_ground_truth_rt(r_df, time_label='Days')
 
-sliders = app.get_sliders_ids()
-
+# sliders = app.get_sliders_ids()
+sliders = ['mean', 'stdev', 'tau', 'central_prob']
 
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__),

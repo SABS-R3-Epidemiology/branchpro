@@ -9,35 +9,32 @@
 from math import floor
 
 import pandas as pd
-import dash_defer_js_import as dji  # For mathjax
+import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
 import branchpro as bp
-from branchpro.apps import IncidenceNumberSimulationApp
+from branchpro.apps import BranchProDashApp
 
 
-# Import the mathjax
-mathjax_script = dji.Import(
-    src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js'
-        '?config=TeX-AMS-MML_SVG')
-
-
-class BranchProInferenceApp(IncidenceNumberSimulationApp):
+class BranchProInferenceApp(BranchProDashApp):
     """BranchProInferenceApp Class:
     Class for the inference dash app with figure and sliders for the
     BranchPro models.
     """
     def __init__(self):
         super(BranchProInferenceApp, self).__init__()
+        self.app = dash.Dash(__name__, external_stylesheets=self.css)
         self.app.title = 'BranchproInf'
-        self.plot1 = self.plot
+        self.plot1 = bp.IncidenceNumberPlot()
         self.plot2 = bp.ReproductionNumberPlot()
 
         # Keeps traces visibility states fixed when changing sliders
         # in the second figure
         self.plot2.figure['layout']['legend']['uirevision'] = True
+
+        self.sliders = bp._SliderComponent()
 
         self.app.layout = html.Div([
             dbc.Container(
@@ -54,13 +51,80 @@ class BranchProInferenceApp(IncidenceNumberSimulationApp):
                         [
                             dbc.Col(dcc.Graph(
                                 figure=self.plot2.figure, id='fig2')),
-                            dbc.Col(self.sliders.get_sliders_div())
+                            dbc.Col(self.update_sliders())
                         ],
                         align='center',
                     ),
                     html.Div([])],  # Empty div for bottom text
                 fluid=True),
-            mathjax_script])
+            self.mathjax_script])
+
+    def add_text(self, text):
+        """Add a block of text at the top of the app.
+
+        This can be used to add introductory text that everyone looking at the
+        app will see right away.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
+        """
+        self._load_text(text)
+        self.app.layout.children[0].children[1].children.append(self.text)
+
+    def add_collapsed_text(self, text, title='More details...'):
+        """Add a block of text at the top of the app.
+
+        By default, this text will be hidden. The user can click on a button
+        with the specified title in order to view the text.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
+        title : str
+            str which will be displayed on the show/hide button
+        """
+        self._load_collapsed_text(text, title)
+        self.app.layout.children[0].children[-1].children.append(
+            self.collapsed_text)
+
+    def update_sliders(self,
+                       init_cond=10.0,
+                       r0=2.0,
+                       r1=0.5,
+                       magnitude_init_cond=None):
+        """Generate sliders for the app.
+
+        This method tunes the bounds of the sliders to the time period and
+        magnitude of the data.
+
+        Parameters
+        ----------
+        init_cond : int
+            start position on the slider for the number of initial cases for
+            the Branch Pro model in the simulator.
+        r0 : float
+            start position on the slider for the initial reproduction number
+            for the Branch Pro model in the simulator.
+        r1 : float
+            start position on the slider for the second reproduction number for
+            the Branch Pro model in the simulator.
+        magnitude_init_cond : int
+            maximal start position on the slider for the number of initial
+            cases for the Branch Pro model in the simulator. By default, it
+            will be set to the maximum value observed in the data.
+
+        Returns
+        -------
+        html.Div
+            A dash html component containing the sliders
+        """
+        # Make new sliders
+        sliders = bp._SliderComponent()
+
+        return sliders.get_sliders_div()
 
     def add_ground_truth_rt(self, df, time_label='Time Points', r_label='R_t'):
         """
