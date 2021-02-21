@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 
+import copy
 import numpy as np
 import dash
 import dash_bootstrap_components as dbc
@@ -164,6 +165,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         time_label, inc_label = data.columns
         num_simulations = len(simulations.columns) - 1
 
+        # Make a new figure
         plot = bp.IncidenceNumberPlot()
         plot.add_data(data, time_key=time_label, inc_key=inc_label)
 
@@ -182,6 +184,45 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 plot.figure['data'][-1]['showlegend'] = False
 
         return plot.figure
+
+    def update_figure_add_simulation(self, figure):
+        """Add the most recent simulation to the figure.
+        """
+        data = self.session_data.get('data_storage')
+        simulations = self.session_data.get('sim_storage')
+
+        if data is None or simulations is None:
+            raise dash.exceptions.PreventUpdate()
+
+        time_label, inc_label = data.columns
+        num_sims = len(simulations.columns) - 1
+
+        df = simulations[[time_label, 'sim{}'.format(num_sims)]]
+        df.columns = [time_label, inc_label]
+        figure['data'] = figure['data'] + [copy.deepcopy(figure['data'][-1])]
+        figure['data'][-1]['y'] = df[inc_label].to_list()
+        figure['data'][-1]['line']['color'] = 'rgba(255,0,0,1.0)'
+
+        for i in range(len(figure['data']) - 2):
+            # Change opacity of all traces in the figure but for the
+            # first - the barplot of incidences
+            # last - the latest simulation
+            figure['data'][i+1]['line']['color'] = 'rgba(255,0,0,0.25)'
+            figure['data'][i+1]['showlegend'] = False
+
+        return figure
+
+    def update_figure_change_values(self, figure):
+        """Change the y values of the simulation trace.
+        """
+        simulations = self.session_data.get('sim_storage')
+
+        if simulations is None:
+            raise dash.exceptions.PreventUpdate()
+
+        figure['data'][-1]['y'] = simulations['sim{}'.format(len(simulations.columns) - 1)]
+
+        return figure
 
     def clear_simulations(self):
         """Remove all previous simulations from sim storage.

@@ -90,31 +90,46 @@ def update_slider_ranges(*args):
         app.refresh_user_data_json(data_storage=data)
         return app.update_sliders()
 
-
 @app.app.callback(
     Output('myfig', 'figure'),
     Input('data_storage', 'children'),
     Input('sim_storage', 'children'),
+    State('myfig', 'figure'),
 )
 def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
+    ctx = dash.callback_context
+    source = ctx.triggered[0]['prop_id'].split('.')[0]
+    current_figure = args[2]
+
     with app.lock:
         app.refresh_user_data_json(data_storage=args[0], sim_storage=args[1])
-        return app.update_figure()
+
+        new_figure_needed = False
+        if source == 'data_storage' or \
+                (len(current_figure['data']) > 2 and \
+                 len(app.session_data['sim_storage'].columns) == 2):
+            return app.update_figure()
+
+        elif len(current_figure['data']) == 2 and len(app.session_data['sim_storage'].columns) == 2:
+            return app.update_figure_change_values(current_figure)
+
+        else:
+            return app.update_figure_add_simulation(current_figure)
 
 
 @app.app.callback(
     Output('sim_storage', 'children'),
     Input('sim-button', 'n_clicks'),
-    Input('sim_storage', 'children'),
     Input('data_storage', 'children'),
     [Input(s, 'value') for s in sliders],
+    State('sim_storage', 'children'),
 )
 def run_simulation(*args):
     """Run simulation based on slider values, simulation button, or new data.
     """
-    n_clicks, sim_json, data_json, init_cond, r0, r1, t1 = args
+    n_clicks, data_json, init_cond, r0, r1, t1, sim_json = args
 
     with app.lock:
         app.refresh_user_data_json(
