@@ -44,10 +44,10 @@ Simulation Apps
 ***************
 
 .. autoclass:: IncidenceNumberSimulationApp
-  :members: add_data, add_simulator, get_sliders_ids, update_simulation
+  :members: update_sliders, update_figure, update_simulation, clear_simulations, add_text, add_collapsed_text,
 
 Inference Apps
 ***************
 
 .. autoclass:: BranchProInferenceApp
-  :members: add_ground_truth_rt, add_posterior, get_sliders_ids, update_inference
+  :members: add_ground_truth_rt, add_posterior, update_inference

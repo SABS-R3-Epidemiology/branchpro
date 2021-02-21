@@ -151,6 +151,9 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def update_figure(self):
         """Generate a plotly figure of incidence numbers and simulated cases.
 
+        This method uses the information saved in self.session_data to populate
+        the figure.
+
         Returns
         -------
         plotly.Figure
