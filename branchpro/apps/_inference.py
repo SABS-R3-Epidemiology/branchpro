@@ -25,8 +25,12 @@ class BranchProInferenceApp(BranchProDashApp):
     """
     def __init__(self):
         super(BranchProInferenceApp, self).__init__()
+
         self.app = dash.Dash(__name__, external_stylesheets=self.css)
         self.app.title = 'BranchproInf'
+
+        self.session_data = {'data_storage': None, 'posterior_storage': None}
+
         self.plot1 = bp.IncidenceNumberPlot()
         self.plot2 = bp.ReproductionNumberPlot()
 
@@ -39,7 +43,7 @@ class BranchProInferenceApp(BranchProDashApp):
         self.app.layout = html.Div([
             dbc.Container(
                 [
-                    html.H1('Branching Processes'),
+                    html.H1('Branching Processes', id='page-title'),
                     html.Div([]),  # Empty div for top explanation texts
                     html.H2('Incidence Data'),
                     dbc.Row(
@@ -55,9 +59,15 @@ class BranchProInferenceApp(BranchProDashApp):
                         ],
                         align='center',
                     ),
-                    html.Div([])],  # Empty div for bottom text
+                    html.Div([]),  # Empty div for bottom text
+                    html.Div(id='data_storage', style={'display': 'none'}),
+                    html.Div(id='posterior_storage', style={'display': 'none'})
+                    ],
                 fluid=True),
             self.mathjax_script])
+
+        # Set the app index string for mathjax
+        self.app.index_string = self.mathjax_html
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
@@ -87,44 +97,86 @@ class BranchProInferenceApp(BranchProDashApp):
             str which will be displayed on the show/hide button
         """
         self._load_collapsed_text(text, title)
-        self.app.layout.children[0].children[-1].children.append(
+        self.app.layout.children[0].children[-3].children.append(
             self.collapsed_text)
 
     def update_sliders(self,
-                       init_cond=10.0,
-                       r0=2.0,
-                       r1=0.5,
-                       magnitude_init_cond=None):
+                       mean=5.0,
+                       stdev=5.0,
+                       tau=6,
+                       central_prob=.95):
         """Generate sliders for the app.
-
-        This method tunes the bounds of the sliders to the time period and
-        magnitude of the data.
 
         Parameters
         ----------
-        init_cond : int
-            start position on the slider for the number of initial cases for
-            the Branch Pro model in the simulator.
-        r0 : float
-            start position on the slider for the initial reproduction number
-            for the Branch Pro model in the simulator.
-        r1 : float
-            start position on the slider for the second reproduction number for
-            the Branch Pro model in the simulator.
-        magnitude_init_cond : int
-            maximal start position on the slider for the number of initial
-            cases for the Branch Pro model in the simulator. By default, it
-            will be set to the maximum value observed in the data.
+        mean
+            (float) start position on the slider for the mean of the
+            prior for the Branch Pro model in the posterior.
+        stdev
+            (float) start position on the slider for the standard deviation of
+            the prior for the Branch Pro model in the posterior.
+        tau
+            (int) start position on the slider for the tau window used in the
+            running of the inference of the reproduction numbers of the Branch
+            Pro model in the posterior.
+        central_prob
+            (float) start position on the slider for the level of the computed
+            credible interval of the estimated R number values.
 
         Returns
         -------
         html.Div
             A dash html component containing the sliders
         """
+        data = self.session_data['data_storage']
+        if data is not None:
+            times = data['Time']
+            max_tau = floor(times.max() - times.min() + 1)/3
+        else:
+            max_tau = 7
+
         # Make new sliders
         sliders = bp._SliderComponent()
 
+        sliders.add_slider(
+            'Prior Mean', 'mean', mean, 0.1, 10.0, 0.01)
+        sliders.add_slider(
+            'Prior Standard Deviation', 'stdev', stdev, 0.1, 10.0, 0.01)
+        sliders.add_slider(
+            'Inference Sliding Window', 'tau', tau, 0, max_tau, 1,
+            as_integer=True)
+        sliders.add_slider(
+            'Central Posterior Probability', 'central_prob', central_prob, 0.1,
+            0.99, 0.01)
+
         return sliders.get_sliders_div()
+
+    def update_posterior(self, mean, stdev, tau, central_prob):
+        new_alpha = (mean / stdev) ** 2
+        new_beta = mean / (stdev ** 2)
+        new_prior_parameters = (new_alpha, new_beta)
+
+        data = self.session_data['data_storage']
+
+        posterior = bp.BranchProPosterior(
+            data, self.serial_interval, new_alpha, new_beta, time_key='Days')
+
+        posterior.run_inference(tau)
+        df = posterior.get_intervals(central_prob)
+
+        return df
+
+    def update_inference_figure(self):
+        data = self.session_data['data_storage']
+        posterior = self.session_data['posterior_storage']
+
+        plot = bp.ReproductionNumberPlot()
+        plot.add_interval_rt(posterior)
+
+        if 'R_t' in data.columns:
+            plot.add_ground_truth_rt(data[['Days', 'R_t']], time_key='Days', r_key='R_t')
+
+        return plot.figure
 
     def add_ground_truth_rt(self, df, time_label='Time Points', r_label='R_t'):
         """

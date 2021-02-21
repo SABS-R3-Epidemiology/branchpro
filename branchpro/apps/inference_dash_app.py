@@ -50,7 +50,8 @@ times = np.arange(num_timepoints)
 cases = model.simulate(parameters, times)
 data = pd.DataFrame({
             'Days': times,
-            'Incidence Number': cases
+            'Incidence Number': cases,
+            'R_t': [np.nan] + list(model.get_r_profile())
         })
 
 r_df = pd.DataFrame({
@@ -82,19 +83,51 @@ with open(fname) as f:
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 
+app.serial_interval = serial_interval
+
+
 
 @app.app.callback(
-        Output('fig2', 'figure'),
-        [Input(s, 'value') for s in sliders])
-def update_simulation(*args):
-    """
-    Simulates the model for the current slider values and updates the
-    plot in the figure.
-    """
-    parameters = args
-    fig = app.update_inference(*parameters)
+    Output('data_storage', 'children'),
+    Input('page-title', 'children'),
+)
+def update_data(*args):
+    """Load incidence number data into app storage.
 
-    return fig
+    Currently, this callback is triggered by the page title, and thus only runs
+    once on page load, whereupon it saves the default data defined in the
+    script above.
+    """
+    return data.to_json()
+
+
+@app.app.callback(
+    Output('fig2', 'figure'),
+    Input('data_storage', 'children'),
+    Input('posterior_storage', 'children'),
+)
+def update_figure(*args):
+    """Handles all updates to the inference figure.
+    """
+    with app.lock:
+        app.refresh_user_data_json(
+            data_storage=args[0], posterior_storage=args[1])
+        return app.update_inference_figure()
+
+
+@app.app.callback(
+    Output('posterior_storage', 'children'),
+    Input('data_storage', 'children'),
+    [Input(s, 'value') for s in sliders],
+)
+def calculate_posterior(*args):
+    """Calculate the posterior distribution.
+    """
+    data_json, mean, stdev, tau, central_prob = args
+
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data_json)
+        return app.update_posterior(mean, stdev, tau, central_prob).to_json()
 
 
 @app.app.callback(
