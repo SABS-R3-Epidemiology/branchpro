@@ -120,7 +120,7 @@ class BranchProInferenceApp(BranchProDashApp):
         html.Div
             A dash html component containing the sliders
         """
-        data = self.session_data['data_storage']
+        data = self.session_data.get('data_storage'])
         if data is not None:
             time_label, inc_label = data.columns[:2]
             times = data[time_label]
@@ -171,7 +171,11 @@ class BranchProInferenceApp(BranchProDashApp):
         new_alpha = (mean / stdev) ** 2
         new_beta = mean / (stdev ** 2)
 
-        data = self.session_data['data_storage']
+        data = self.session_data.get('data_storage')
+
+        if data is None:
+            raise dash.exceptions.PreventUpdate()
+
         time_label, inc_label = data.columns[:2]
 
         posterior = bp.BranchProPosterior(
@@ -193,8 +197,12 @@ class BranchProInferenceApp(BranchProDashApp):
         plotly.Figure
             Figure with updated posterior distribution
         """
-        data = self.session_data['data_storage']
-        posterior = self.session_data['posterior_storage']
+        data = self.session_data.get('data_storage')
+        posterior = self.session_data.get('posterior_storage')
+
+        if data is None or posterior is None:
+            raise dash.exceptions.PreventUpdate()
+
         time_label, inc_label = data.columns[:2]
 
         plot = bp.ReproductionNumberPlot()
@@ -219,7 +227,11 @@ class BranchProInferenceApp(BranchProDashApp):
         plotly.Figure
             Figure with updated data
         """
-        data = self.session_data['data_storage']
+        data = self.session_data.get('data_storage')
+
+        if data is None:
+            raise dash.exceptions.PreventUpdate()
+
         time_label, inc_label = data.columns[:2]
 
         plot = bp.IncidenceNumberPlot()

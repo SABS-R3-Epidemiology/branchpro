@@ -54,11 +54,6 @@ data = pd.DataFrame({
             'R_t': [np.nan] + list(model.get_r_profile())
         })
 
-r_df = pd.DataFrame({
-            'Days': times[1:],
-            'R_t': model.get_r_profile()
-        })
-
 sliders = ['mean', 'stdev', 'tau', 'central_prob']
 
 # Add the explanation texts
@@ -103,8 +98,7 @@ def update_data_figure(*args):
     """Handles all updates to the data figure.
     """
     with app.lock:
-        app.refresh_user_data_json(
-            data_storage=args[0])
+        app.refresh_user_data_json(data_storage=args[0])
         return app.update_data_figure()
 
 
