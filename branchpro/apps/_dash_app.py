@@ -62,11 +62,13 @@ class BranchProDashApp:
     recommended to use the lock to prevent unpleasant bugs and interference
     between threads:
 
-    >>> @app.app.callback(...)
-    >>> def callback(...):
-    >>>     with app.lock:
-    >>>         ...  # your callback code here
-    >>>         return ...
+    .. code-block:: python
+
+        @app.app.callback(...)
+        def callback(...):
+            with app.lock:
+                ...  # your callback code here
+                return ...
     """
     def __init__(self):
         # Default CSS style files
