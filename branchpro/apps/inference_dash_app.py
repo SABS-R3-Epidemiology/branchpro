@@ -59,12 +59,6 @@ r_df = pd.DataFrame({
             'R_t': model.get_r_profile()
         })
 
-posterior = bp.BranchProPosterior(
-    data, serial_interval, 1, 0.2, time_key='Days')
-app.add_posterior(posterior)
-app.add_ground_truth_rt(r_df, time_label='Days')
-
-# sliders = app.get_sliders_ids()
 sliders = ['mean', 'stdev', 'tau', 'central_prob']
 
 # Add the explanation texts
@@ -83,8 +77,8 @@ with open(fname) as f:
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 
+# Serial interval is currently fixed and constant
 app.serial_interval = serial_interval
-
 
 
 @app.app.callback(
@@ -94,20 +88,33 @@ app.serial_interval = serial_interval
 def update_data(*args):
     """Load incidence number data into app storage.
 
-    Currently, this callback is triggered by the page title, and thus only runs
-    once on page load, whereupon it saves the default data defined in the
-    script above.
+    Currently, this only runs once at page load, whereupon it saves the default
+    data defined in the script above. When data upload functionality is added
+    to the inference app, it can go here.
     """
     return data.to_json()
 
 
 @app.app.callback(
-    Output('fig2', 'figure'),
+    Output('data-fig', 'figure'),
+    Input('data_storage', 'children'),
+)
+def update_data_figure(*args):
+    """Handles all updates to the data figure.
+    """
+    with app.lock:
+        app.refresh_user_data_json(
+            data_storage=args[0])
+        return app.update_data_figure()
+
+
+@app.app.callback(
+    Output('posterior-fig', 'figure'),
     Input('data_storage', 'children'),
     Input('posterior_storage', 'children'),
 )
-def update_figure(*args):
-    """Handles all updates to the inference figure.
+def update_posterior_figure(*args):
+    """Handles all updates to the posterior figure.
     """
     with app.lock:
         app.refresh_user_data_json(
