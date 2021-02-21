@@ -50,14 +50,13 @@ server = app.app.server
 @app.app.callback(
     Output('incidence-data-upload', 'children'),
     Output('data_storage', 'children'),
-    Input('data_storage', 'children'),
     Input('upload-data', 'contents'),
     State('upload-data', 'filename'),
 )
 def load_data(*args):
     """Load data from a file and save it in storage.
     """
-    current_data, list_contents, list_names = args
+    list_contents, list_names = args
 
     with app.lock:
         if list_contents is not None:
