@@ -120,7 +120,7 @@ class BranchProInferenceApp(BranchProDashApp):
         html.Div
             A dash html component containing the sliders
         """
-        data = self.session_data.get('data_storage'])
+        data = self.session_data.get('data_storage')
         if data is not None:
             time_label, inc_label = data.columns[:2]
             times = data[time_label]
