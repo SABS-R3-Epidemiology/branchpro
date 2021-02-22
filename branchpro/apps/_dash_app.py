@@ -151,14 +151,43 @@ class BranchProDashApp:
         else:
             return html.Div(['Loaded data from: {}'.format(filename)]), df
 
-    def _load_text(self, text):
-        """Load text into an HTML div saved at self.text.
-        """
-        self.text = html.Div([text])
+    def add_text(self, text):
+        """Add a block of text at the top of the app.
 
-    def _load_collapsed_text(self, text, title):
-        """Load text into a hidden HTML div with button at self.collapsed_text.
+        This can be used to add introductory text that everyone looking at the
+        app will see right away.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
         """
+        if not hasattr(self, 'main_text'):
+            raise NotImplementedError(
+                'Child class must implement the self.main_text attribute to'
+                'use this method.')
+
+        text = html.Div([text])
+        self.main_text.append(text)
+
+    def add_collapsed_text(self, text, title='More details...'):
+        """Add a block of text at the top of the app.
+
+        By default, this text will be hidden. The user can click on a button
+        with the specified title in order to view the text.
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the html div
+        title : str
+            str which will be displayed on the show/hide button
+        """
+        if not hasattr(self, 'collapsed_text'):
+            raise NotImplementedError(
+                'Child class must implement the self.collapsed_text attribute'
+                'to use this method.')
+
         collapse = html.Div([
                 dbc.Button(
                     title,
@@ -170,4 +199,4 @@ class BranchProDashApp:
                     id='collapsedtext',
                 ),
             ])
-        self.collapsed_text = collapse
+        self.collapsed_text.append(collapse)

@@ -7,7 +7,6 @@
 # notice and full license details.
 #
 
-import copy
 import numpy as np
 import dash
 import dash_bootstrap_components as dbc
@@ -26,7 +25,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def __init__(self):
         super().__init__()
 
-        self.session_data = {'data_storage': None, 'sim_storage': None}
+        self.session_data = {'data_storage': None}
 
         self.app = dash.Dash(__name__, external_stylesheets=self.css)
         self.app.title = 'BranchproSim'
@@ -83,6 +82,10 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Set the app index string for mathjax
         self.app.index_string = self.mathjax_html
+
+        # Save the locations of texts from the layout
+        self.main_text = self.app.layout.children[0].children[1].children
+        self.collapsed_text = self.app.layout.children[0].children[-3].children
 
     def update_sliders(self,
                        init_cond=10.0,
@@ -145,11 +148,16 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         return sliders.get_sliders_div()
 
-    def update_figure(self):
+    def update_figure(self, simulations=None):
         """Generate a plotly figure of incidence numbers and simulated cases.
 
         This method uses the information saved in self.session_data to populate
-        the figure.
+        the figure with data.
+
+        Parameters
+        ----------
+        simulations : pd.DataFrame
+            Simulation trajectories to add to the figure.
 
         Returns
         -------
@@ -157,9 +165,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Figure with updated data and simulations
         """
         data = self.session_data.get('data_storage')
-        simulations = self.session_data.get('sim_storage')
 
-        if data is None or simulations is None:
+        if data is None:
             raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns
@@ -173,7 +180,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         plot.figure['layout']['legend']['uirevision'] = True
 
         for sim in range(num_simulations):
-            df = simulations[[time_label, 'sim{}'.format(sim + 1)]]
+            df = simulations.iloc[:, [0, sim+1]]
             df.columns = [time_label, inc_label]
             plot.add_simulation(df, time_key=time_label, inc_key=inc_label)
 
@@ -184,91 +191,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 plot.figure['data'][-1]['showlegend'] = False
 
         return plot.figure
-
-    def update_figure_add_simulation(self, figure):
-        """Add the most recent simulation to the figure.
-        """
-        data = self.session_data.get('data_storage')
-        simulations = self.session_data.get('sim_storage')
-
-        if data is None or simulations is None:
-            raise dash.exceptions.PreventUpdate()
-
-        time_label, inc_label = data.columns
-        num_sims = len(simulations.columns) - 1
-
-        df = simulations[[time_label, 'sim{}'.format(num_sims)]]
-        df.columns = [time_label, inc_label]
-        figure['data'] = figure['data'] + [copy.deepcopy(figure['data'][-1])]
-        figure['data'][-1]['y'] = df[inc_label].to_list()
-        figure['data'][-1]['line']['color'] = 'rgba(255,0,0,1.0)'
-
-        for i in range(len(figure['data']) - 2):
-            # Change opacity of all traces in the figure but for the
-            # first - the barplot of incidences
-            # last - the latest simulation
-            figure['data'][i+1]['line']['color'] = 'rgba(255,0,0,0.25)'
-            figure['data'][i+1]['showlegend'] = False
-
-        return figure
-
-    def update_figure_change_values(self, figure):
-        """Change the y values of the simulation trace.
-        """
-        simulations = self.session_data.get('sim_storage')
-
-        if simulations is None:
-            raise dash.exceptions.PreventUpdate()
-
-        figure['data'][-1]['y'] = simulations['sim{}'.format(len(simulations.columns) - 1)]
-
-        return figure
-
-    def clear_simulations(self):
-        """Remove all previous simulations from sim storage.
-        """
-        simulations = self.session_data.get('sim_storage')
-        data = self.session_data.get('data_storage')
-
-        if data is None:
-            raise dash.exceptions.PreventUpdate()
-
-        time_label, inc_label = data.columns
-
-        # Only attempt the purge if there is data there
-        if simulations is not None:
-            self.session_data['sim_storage'] = data[[time_label]]
-
-    def add_text(self, text):
-        """Add a block of text at the top of the app.
-
-        This can be used to add introductory text that everyone looking at the
-        app will see right away.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        """
-        self._load_text(text)
-        self.app.layout.children[0].children[1].children.append(self.text)
-
-    def add_collapsed_text(self, text, title='More details...'):
-        """Add a block of text at the top of the app.
-
-        By default, this text will be hidden. The user can click on a button
-        with the specified title in order to view the text.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        title : str
-            str which will be displayed on the show/hide button
-        """
-        self._load_collapsed_text(text, title)
-        self.app.layout.children[0].children[-3].children.append(
-            self.collapsed_text)
 
     def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
         """Run a simulation of the branchpro model at the given slider values.
@@ -294,7 +216,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Simulations storage dataframe
         """
         data = self.session_data.get('data_storage')
-        simulations = self.session_data.get('sim_storage')
 
         if data is None:
             raise dash.exceptions.PreventUpdate()
@@ -302,10 +223,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         time_label, inc_label = data.columns
         times = data[time_label]
 
-        # There might be no simulation data if it got just cleared, or this is
-        # the first call --- start a new dataframe in this case
-        if simulations is None:
-            simulations = data[[time_label]]
+        # Make a new dataframe to save the simulation result
+        simulations = data[[time_label]]
 
         # Add the correct R profile to the branchpro model
         br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))
@@ -317,7 +236,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         data = simulation_controller.run(new_init_cond)
 
         # Add data to simulations storage
-        num_sims = len(simulations.columns)
-        simulations['sim{}'.format(num_sims)] = data
+        simulations[inc_label] = data
 
         return simulations

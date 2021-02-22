@@ -10,6 +10,7 @@
 with fixed example data. To run the app, use ``python dash_app.py``.
 """
 
+import copy
 import os
 
 import pandas as pd
@@ -90,59 +91,58 @@ def update_slider_ranges(*args):
         app.refresh_user_data_json(data_storage=data)
         return app.update_sliders()
 
+
 @app.app.callback(
     Output('myfig', 'figure'),
-    Input('data_storage', 'children'),
-    Input('sim_storage', 'children'),
+    Input('all-sliders', 'children'),
+    [Input(s, 'value') for s in sliders],
+    Input('sim-button', 'n_clicks'),
     State('myfig', 'figure'),
+    State('data_storage', 'children'),
 )
 def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
+    _, init_cond, r0, r1, t1, _, fig, data_json = args
+
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
-    current_figure = args[2]
 
     with app.lock:
-        app.refresh_user_data_json(data_storage=args[0], sim_storage=args[1])
+        app.refresh_user_data_json(data_storage=data_json)
+        new_sim = app.update_simulation(init_cond, r0, r1, t1)
 
-        new_figure_needed = False
-        if source == 'data_storage' or \
-                (len(current_figure['data']) > 2 and \
-                 len(app.session_data['sim_storage'].columns) == 2):
-            return app.update_figure()
+        if len(fig['data']) == 0 or source == 'all-sliders':
+            # Either this figure is empty or the sliders are new. Both cases
+            # demand a new incidence number plot be generated.
+            return app.update_figure(simulations=new_sim)
 
-        elif len(current_figure['data']) == 2 and len(app.session_data['sim_storage'].columns) == 2:
-            return app.update_figure_change_values(current_figure)
+        elif source in sliders:
+            # Clear all data except one simulation trace
+            fig['data'] = [fig['data'][0], fig['data'][-1]]
+
+            # Set the y data of that trace equal to an updated simulation
+            fig['data'][-1]['y'] = new_sim.iloc[:, -1]
+
+            return fig
+
+        elif source == 'sim-button':
+            # Add one extra simulation, and set its y data
+            fig['data'].append(copy.deepcopy(fig['data'][-1]))
+            fig['data'][-1]['y'] = new_sim.iloc[:, -1]
+
+            for i in range(len(fig['data'])-2):
+                # Change opacity of all traces in the figure but for the
+                # first - the barplot of incidences
+                # last - the latest simulation
+                fig['data'][i+1]['line']['color'] = 'rgba(255,0,0,0.25)'
+                fig['data'][i+1]['showlegend'] = False
+
+            return fig
 
         else:
-            return app.update_figure_add_simulation(current_figure)
-
-
-@app.app.callback(
-    Output('sim_storage', 'children'),
-    Input('sim-button', 'n_clicks'),
-    Input('data_storage', 'children'),
-    [Input(s, 'value') for s in sliders],
-    State('sim_storage', 'children'),
-)
-def run_simulation(*args):
-    """Run simulation based on slider values, simulation button, or new data.
-    """
-    n_clicks, data_json, init_cond, r0, r1, t1, sim_json = args
-
-    with app.lock:
-        app.refresh_user_data_json(
-            data_storage=data_json, sim_storage=sim_json)
-
-        # In all cases except a click of the add new simulation buttom, we
-        # want to remove all previous simulation traces from the figure
-        ctx = dash.callback_context
-        source = ctx.triggered[0]['prop_id'].split('.')[0]
-        if source != 'sim-button':
-            app.clear_simulations()
-
-        return app.update_simulation(init_cond, r0, r1, t1).to_json()
+            # Input not recognized
+            raise dash.exceptions.PreventUpdate()
 
 
 @app.app.callback(

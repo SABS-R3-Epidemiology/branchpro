@@ -61,36 +61,9 @@ class BranchProInferenceApp(BranchProDashApp):
         # Set the app index string for mathjax
         self.app.index_string = self.mathjax_html
 
-    def add_text(self, text):
-        """Add a block of text at the top of the app.
-
-        This can be used to add introductory text that everyone looking at the
-        app will see right away.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        """
-        self._load_text(text)
-        self.app.layout.children[0].children[1].children.append(self.text)
-
-    def add_collapsed_text(self, text, title='More details...'):
-        """Add a block of text at the top of the app.
-
-        By default, this text will be hidden. The user can click on a button
-        with the specified title in order to view the text.
-
-        Parameters
-        ----------
-        text : str
-            The text to add to the html div
-        title : str
-            str which will be displayed on the show/hide button
-        """
-        self._load_collapsed_text(text, title)
-        self.app.layout.children[0].children[-3].children.append(
-            self.collapsed_text)
+        # Save the locations of texts from the layout
+        self.main_text = self.app.layout.children[0].children[1].children
+        self.collapsed_text = self.app.layout.children[0].children[-3].children
 
     def update_sliders(self,
                        mean=5.0,
