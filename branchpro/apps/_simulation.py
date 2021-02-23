@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 
+import copy
 import numpy as np
 import dash
 import dash_bootstrap_components as dbc
@@ -148,22 +149,57 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         return sliders.get_sliders_div()
 
-    def update_figure(self, simulations=None):
+    def update_figure(self,
+                      fig=None,
+                      simulations=None,
+                      source=None):
         """Generate a plotly figure of incidence numbers and simulated cases.
 
-        This method uses the information saved in self.session_data to populate
-        the figure with data.
+        By default, this method uses the information saved in self.session_data
+        to populate the figure with data. If a current figure and dash callback
+        source are passed, it will try to just update the existing figure for
+        speed improvements.
 
         Parameters
         ----------
+        fig : dict
+            Current copy of the figure
         simulations : pd.DataFrame
             Simulation trajectories to add to the figure.
+        source : str
+            Dash callback source
 
         Returns
         -------
         plotly.Figure
             Figure with updated data and simulations
         """
+        if fig is not None and simulations is not None:
+            # Check if there is a faster way to update the figure
+            if len(fig['data']) > 0 and source in ['init_cond', 'r0', 'r1',
+                                                   't1']:
+                # Clear all traces except one simulation and the data
+                fig['data'] = [fig['data'][0], fig['data'][-1]]
+
+                # Set the y values of that trace equal to an updated simulation
+                fig['data'][-1]['y'] = simulations.iloc[:, -1]
+
+                return fig
+
+            elif len(fig['data']) > 0 and source == 'sim-button':
+                # Add one extra simulation, and set its y values
+                fig['data'].append(copy.deepcopy(fig['data'][-1]))
+                fig['data'][-1]['y'] = simulations.iloc[:, -1]
+
+                for i in range(len(fig['data'])-2):
+                    # Change opacity of all traces in the figure but for the
+                    # first - the barplot of incidences
+                    # last - the latest simulation
+                    fig['data'][i+1]['line']['color'] = 'rgba(255,0,0,0.25)'
+                    fig['data'][i+1]['showlegend'] = False
+
+                return fig
+
         data = self.session_data.get('data_storage')
 
         if data is None:

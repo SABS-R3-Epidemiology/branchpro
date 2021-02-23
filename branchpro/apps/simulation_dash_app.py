@@ -10,7 +10,6 @@
 with fixed example data. To run the app, use ``python dash_app.py``.
 """
 
-import copy
 import os
 
 import pandas as pd
@@ -63,7 +62,8 @@ def load_data(*args):
         if list_contents is not None:
             # Run content parser for each file and get message
             # Only use latest file
-            message, data = app.parse_contents(list_contents[-1], list_names[-1])
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1])
 
             if data is None:
                 # The file could not be loaded, so keep the current data and
@@ -111,38 +111,7 @@ def update_figure(*args):
     with app.lock:
         app.refresh_user_data_json(data_storage=data_json)
         new_sim = app.update_simulation(init_cond, r0, r1, t1)
-
-        if len(fig['data']) == 0 or source == 'all-sliders':
-            # Either this figure is empty or the sliders are new. Both cases
-            # demand a new incidence number plot be generated.
-            return app.update_figure(simulations=new_sim)
-
-        elif source in sliders:
-            # Clear all data except one simulation trace
-            fig['data'] = [fig['data'][0], fig['data'][-1]]
-
-            # Set the y data of that trace equal to an updated simulation
-            fig['data'][-1]['y'] = new_sim.iloc[:, -1]
-
-            return fig
-
-        elif source == 'sim-button':
-            # Add one extra simulation, and set its y data
-            fig['data'].append(copy.deepcopy(fig['data'][-1]))
-            fig['data'][-1]['y'] = new_sim.iloc[:, -1]
-
-            for i in range(len(fig['data'])-2):
-                # Change opacity of all traces in the figure but for the
-                # first - the barplot of incidences
-                # last - the latest simulation
-                fig['data'][i+1]['line']['color'] = 'rgba(255,0,0,0.25)'
-                fig['data'][i+1]['showlegend'] = False
-
-            return fig
-
-        else:
-            # Input not recognized
-            raise dash.exceptions.PreventUpdate()
+        return app.update_figure(fig=fig, simulations=new_sim, source=source)
 
 
 @app.app.callback(

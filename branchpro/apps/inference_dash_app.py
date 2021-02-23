@@ -104,15 +104,15 @@ def update_data_figure(*args):
 
 @app.app.callback(
     Output('posterior-fig', 'figure'),
-    Input('data_storage', 'children'),
     Input('posterior_storage', 'children'),
+    State('data_storage', 'children'),
 )
 def update_posterior_figure(*args):
     """Handles all updates to the posterior figure.
     """
     with app.lock:
         app.refresh_user_data_json(
-            data_storage=args[0], posterior_storage=args[1])
+            data_storage=args[1], posterior_storage=args[0])
         return app.update_inference_figure()
 
 
