@@ -76,7 +76,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                     html.Div(id='incidence-data-upload'),
                     html.Div([]),  # Empty div for bottom text
                     html.Div(id='data_storage', style={'display': 'none'}),
-                    html.Div(id='sim_storage', style={'display': 'none'})
                     ], fluid=True),
                 self.mathjax_script
                 ])
@@ -86,7 +85,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Save the locations of texts from the layout
         self.main_text = self.app.layout.children[0].children[1].children
-        self.collapsed_text = self.app.layout.children[0].children[-3].children
+        self.collapsed_text = self.app.layout.children[0].children[-2].children
 
     def update_sliders(self,
                        init_cond=10.0,

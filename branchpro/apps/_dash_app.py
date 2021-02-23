@@ -59,8 +59,7 @@ class BranchProDashApp:
     Notes
     -----
     When deploying objects of this class in a server environment, it is
-    recommended to use the lock to prevent unpleasant bugs and interference
-    between threads:
+    recommended to use the lock to prevent interference between threads.
 
     .. code-block:: python
 

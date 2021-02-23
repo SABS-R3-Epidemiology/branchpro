@@ -37,17 +37,17 @@ Apps
 ****
 
 .. autoclass:: BranchProDashApp
-  :members: refresh_user_data_json, parse_contents
+  :members: refresh_user_data_json, parse_contents, add_text, add_collapsed_text
 
 
 Simulation Apps
 ***************
 
 .. autoclass:: IncidenceNumberSimulationApp
-  :members: update_sliders, update_figure, update_simulation, clear_simulations, add_text, add_collapsed_text
+  :members: update_sliders, update_figure, update_simulation
 
 Inference Apps
 ***************
 
 .. autoclass:: BranchProInferenceApp
-  :members: update_sliders, update_posterior, update_inference_figure, update_data_figure, add_text, add_collapsed_text
+  :members: update_sliders, update_posterior, update_inference_figure, update_data_figure
