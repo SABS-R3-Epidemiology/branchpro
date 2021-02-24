@@ -1,7 +1,8 @@
 [run]
 source = branchpro
-omit = 
+omit =
     branchpro/tests/*
+    branchpro/apps/_dash_app.py
     branchpro/apps/_simulation.py
     branchpro/apps/simulation_dash_app.py
     branchpro/apps/_inference.py

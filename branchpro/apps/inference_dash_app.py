@@ -50,21 +50,11 @@ times = np.arange(num_timepoints)
 cases = model.simulate(parameters, times)
 data = pd.DataFrame({
             'Days': times,
-            'Incidence Number': cases
+            'Incidence Number': cases,
+            'R_t': [np.nan] + list(model.get_r_profile())
         })
 
-r_df = pd.DataFrame({
-            'Days': times[1:],
-            'R_t': model.get_r_profile()
-        })
-
-posterior = bp.BranchProPosterior(
-    data, serial_interval, 1, 0.2, time_key='Days')
-app.add_posterior(posterior)
-app.add_ground_truth_rt(r_df, time_label='Days')
-
-sliders = app.get_sliders_ids()
-
+sliders = ['mean', 'stdev', 'tau', 'central_prob']
 
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__),
@@ -82,19 +72,63 @@ with open(fname) as f:
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 
+# Serial interval is currently fixed and constant
+app.serial_interval = serial_interval
+
 
 @app.app.callback(
-        Output('fig2', 'figure'),
-        [Input(s, 'value') for s in sliders])
-def update_simulation(*args):
-    """
-    Simulates the model for the current slider values and updates the
-    plot in the figure.
-    """
-    parameters = args
-    fig = app.update_inference(*parameters)
+    Output('data_storage', 'children'),
+    Input('page-title', 'children'),
+)
+def update_data(*args):
+    """Load incidence number data into app storage.
 
-    return fig
+    Currently, this only runs once at page load, whereupon it saves the default
+    data defined in the script above. When data upload functionality is added
+    to the inference app, it can go here.
+    """
+    return data.to_json()
+
+
+@app.app.callback(
+    Output('data-fig', 'figure'),
+    Input('data_storage', 'children'),
+)
+def update_data_figure(*args):
+    """Handles all updates to the data figure.
+    """
+    with app.lock:
+        app.refresh_user_data_json(data_storage=args[0])
+        return app.update_data_figure()
+
+
+@app.app.callback(
+    Output('posterior-fig', 'figure'),
+    Input('posterior_storage', 'children'),
+    State('data_storage', 'children'),
+)
+def update_posterior_figure(*args):
+    """Handles all updates to the posterior figure.
+    """
+    with app.lock:
+        app.refresh_user_data_json(
+            data_storage=args[1], posterior_storage=args[0])
+        return app.update_inference_figure()
+
+
+@app.app.callback(
+    Output('posterior_storage', 'children'),
+    Input('data_storage', 'children'),
+    [Input(s, 'value') for s in sliders],
+)
+def calculate_posterior(*args):
+    """Calculate the posterior distribution.
+    """
+    data_json, mean, stdev, tau, central_prob = args
+
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data_json)
+        return app.update_posterior(mean, stdev, tau, central_prob).to_json()
 
 
 @app.app.callback(

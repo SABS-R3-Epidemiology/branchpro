@@ -12,10 +12,10 @@ with fixed example data. To run the app, use ``python dash_app.py``.
 
 import os
 
-import numpy as np
 import pandas as pd
 import dash
 import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 import branchpro as bp
@@ -25,20 +25,12 @@ from branchpro.apps import IncidenceNumberSimulationApp
 app = IncidenceNumberSimulationApp()
 full_ffd = bp.DatasetLibrary().french_flu()
 small_ffd = full_ffd.query('year == 2020')
-df = pd.DataFrame({
+french_flu_data = pd.DataFrame({
             'Weeks': small_ffd['week'],
             'Incidence Number': small_ffd['inc']
         })
 
-br_pro_model = bp.BranchProModel(2, np.array([1, 2, 3, 2, 1]))
-simulationController = bp.SimulationController(
-    br_pro_model, 1, len(small_ffd['week']))
-app.add_simulator(
-    simulationController,
-    magnitude_init_cond=max(df['Incidence Number']))
-app.add_data(df, time_label='Weeks')
-
-sliders = app.get_sliders_ids()
+sliders = ['init_cond', 'r0', 'r1', 't1']
 
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
@@ -56,88 +48,70 @@ server = app.app.server
 
 
 @app.app.callback(
-        Output('incidence-data-upload', 'children'),
-        Input('upload-data', 'contents'),
-        State('upload-data', 'filename')
-        )
-def update_current_df(*args):
+    Output('incidence-data-upload', 'children'),
+    Output('data_storage', 'children'),
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+)
+def load_data(*args):
+    """Load data from a file and save it in storage.
     """
-    Update when a data file is uploaded.
-    """
-    list_of_contents, list_of_names = args
+    list_contents, list_names = args
 
-    if list_of_contents is not None:
-        # Run content parser for each file and get message
-        # Only use latest file
-        message = app.parse_contents(
-            list_of_contents[-1], list_of_names[-1])
+    with app.lock:
+        if list_contents is not None:
+            # Run content parser for each file and get message
+            # Only use latest file
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1])
 
-        if app.current_df is not None:
-            # Make new empty plot and add data
-            app.plot = bp.IncidenceNumberPlot()
-            app.add_data(app.current_df)
+            if data is None:
+                # The file could not be loaded, so keep the current data and
+                # try to prevent updates to any other part of the app
+                return message, dash.no_update
 
-            # Clear sliders - prevents from doubling sliders upon
-            # page reload
-            app.sliders = bp._SliderComponent()
+            data = data.to_json()
 
-            # Make a new simulation controller for this data
-            simulationController = bp.SimulationController(
-                br_pro_model, 1, len(app.current_df['Time']))
-            app.add_simulator(
-                simulationController,
-                magnitude_init_cond=max(app.current_df['Incidence Number']))
+        else:
+            message = html.Div(['No data file selected.'])
+            data = french_flu_data.to_json()
 
-        return message
+        return message, data
 
 
 @app.app.callback(
     Output('all-sliders', 'children'),
-    Input('incidence-data-upload', 'children')
+    Input('data_storage', 'children'),
 )
-def update_sliders(*args):
+def update_slider_ranges(*args):
+    """Update sliders when a data file is uploaded.
     """
-    Update sliders when a data file is uploaded.
-    """
-    data = app.current_df
-    if data is not None:
-        # Send the new sliders div to the callback output
-        return app.sliders.get_sliders_div()
-    else:
-        # There is no loaded data, so make no change to the output
-        raise dash.exceptions.PreventUpdate()
+    data = french_flu_data if args[0] is None else args[0]
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data)
+        return app.update_sliders()
 
 
 @app.app.callback(
-        Output('myfig', 'figure'),
-        [Input(s, 'value') for s in sliders],
-        Input('sim-button', 'n_clicks'),
-        )
-def manage_simulation(*args):
+    Output('myfig', 'figure'),
+    Input('all-sliders', 'children'),
+    [Input(s, 'value') for s in sliders],
+    Input('sim-button', 'n_clicks'),
+    State('myfig', 'figure'),
+    State('data_storage', 'children'),
+)
+def update_figure(*args):
+    """Handles all updates to the incidence number figure.
     """
-    Simulates the model for the current slider values or adds a new
-    simulation for the current slider values and updates the
-    plot in the figure.
-    """
+    _, init_cond, r0, r1, t1, _, fig, data_json = args
+
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
-    if source == 'sim-button':
-        fig = app.add_simulation()
-        for i in range(len(app.plot.figure['data'])-2):
-            # Change opacity of all traces in the figure but for the
-            # first - the barplot of incidences
-            # last - the latest simulation
-            app.plot.figure['data'][i+1]['line'].color = 'rgba(255,0,0,0.25)'
-            app.plot.figure['data'][i+1]['showlegend'] = False
-    elif source in sliders:
-        parameters = args[:-1]
-        fig = app.update_simulation(*parameters)
-        fig = app.clear_simulations()
-    else:
-        # The input source is not recognized, so make no change to the output
-        raise dash.exceptions.PreventUpdate()
 
-    return fig
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data_json)
+        new_sim = app.update_simulation(init_cond, r0, r1, t1)
+        return app.update_figure(fig=fig, simulations=new_sim, source=source)
 
 
 @app.app.callback(
@@ -155,4 +129,4 @@ def toggle_hidden_text(num_clicks, is_it_open):
 
 
 if __name__ == "__main__":
-    app.app.run_server(debug=True, threaded=False, processes=1)
+    app.app.run_server(debug=True)
