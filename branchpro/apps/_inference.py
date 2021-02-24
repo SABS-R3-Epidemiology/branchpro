@@ -123,7 +123,7 @@ class BranchProInferenceApp(BranchProDashApp):
         if data is not None:
             time_label, inc_label = data.columns[:2]
             times = data[time_label]
-            max_tau = floor(times.max() - times.min() + 1)/3
+            max_tau = floor((times.max() - times.min() + 1)/3)
             if tau > max_tau:
                 # If default value of tau exceeds maximum accepted
                 # choose tau to be this maximum value
