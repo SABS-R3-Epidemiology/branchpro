@@ -117,7 +117,6 @@ def update_figure(*args):
             overflow = True
         else:
             overflow = False
-        print(overflow)
         return (app.update_figure(fig=fig, simulations=new_sim, source=source),
                 overflow)
 
