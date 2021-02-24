@@ -44,7 +44,7 @@ class BranchProInferenceApp(BranchProDashApp):
                     ),
                     html.H4([
                         'You can upload your own incidence data here. It will'
-                        'appear as bars, while the simulation will be a line.'
+                        'appear as bars.'
                     ]),
                     dcc.Upload(
                         id='upload-data',
