@@ -267,7 +267,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Generate one simulation trajectory from this model
         simulation_controller = bp.SimulationController(
-            br_pro_model, 1, len(times))
+            br_pro_model, 1, max(times))
         data = simulation_controller.run(new_init_cond)
 
         # Add data to simulations storage
