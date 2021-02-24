@@ -12,6 +12,7 @@ with fixed example data. To run the app, use ``python dash_app.py``.
 
 import os
 
+import numpy as np
 import pandas as pd
 import dash
 import dash_core_components as dcc
@@ -94,6 +95,7 @@ def update_slider_ranges(*args):
 
 @app.app.callback(
     Output('myfig', 'figure'),
+    Output('confirm', 'displayed'),
     Input('all-sliders', 'children'),
     [Input(s, 'value') for s in sliders],
     Input('sim-button', 'n_clicks'),
@@ -111,7 +113,13 @@ def update_figure(*args):
     with app.lock:
         app.refresh_user_data_json(data_storage=data_json)
         new_sim = app.update_simulation(init_cond, r0, r1, t1)
-        return app.update_figure(fig=fig, simulations=new_sim, source=source)
+        if np.all(new_sim.iloc[:, -1] == -1):
+            overflow = True
+        else:
+            overflow = False
+        print(overflow)
+        return (app.update_figure(fig=fig, simulations=new_sim, source=source),
+                overflow)
 
 
 @app.app.callback(
