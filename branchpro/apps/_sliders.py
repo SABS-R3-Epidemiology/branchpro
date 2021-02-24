@@ -25,7 +25,7 @@ class _SliderComponent():
 
     def add_slider(
             self, label, new_id, init_val, min_val, max_val, step_size,
-            as_integer=False):
+            as_integer=False, invisible=False):
         """
         Creates a new slider with label for the Dash app plot.
 
@@ -45,6 +45,8 @@ class _SliderComponent():
             Incremement between slider values.
         as_integer
             (boolean) display decimals or not for the marks of sliders.
+        invisible
+            (boolean) hides slider object.
         """
         mark_list = np.arange(
                                 start=min_val,
@@ -66,6 +68,10 @@ class _SliderComponent():
         else:
             locks = ['{:.2f}'.format(r) for r in mark_list]
 
+        style = {'marginBottom': '2em'}
+        if invisible:
+            style['display'] = 'none'
+
         new_slider = html.Div([
                         html.Label(label),
                         daq.Slider(
@@ -81,7 +87,7 @@ class _SliderComponent():
                             step=step_size,
                             size=725
                         )
-                    ], style={'marginBottom': '2em'})
+                    ], style=style)
         self._sliders += [new_slider]
         self._slider_ids.append(new_id)
 

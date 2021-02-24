@@ -7,6 +7,7 @@
 # notice and full license details.
 #
 from math import floor
+import pandas as pd
 
 import dash
 import dash_bootstrap_components as dbc
@@ -41,13 +42,38 @@ class BranchProInferenceApp(BranchProDashApp):
                                 figure=bp.IncidenceNumberPlot().figure,
                                 id='data-fig'))
                     ),
+                    html.H4([
+                        'You can upload your own incidence data here. It will'
+                        'appear as bars, while the simulation will be a line.'
+                    ]),
+                    dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                            'Drag and Drop or ',
+                            html.A('Select Files',
+                                   style={'text-decoration': 'underline'}),
+                            ' to upload your Incidence Number data.'
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                        multiple=True  # Allow multiple files to be uploaded
+                    ),
+                    html.Div(id='incidence-data-upload'),
                     html.H2('Plot of R values'),
                     dbc.Row(
                         [
                             dbc.Col(dcc.Graph(
                                 figure=bp.ReproductionNumberPlot().figure,
                                 id='posterior-fig')),
-                            dbc.Col(self.update_sliders())
+                            dbc.Col(self.update_sliders(), id='all-sliders')
                         ],
                         align='center',
                     ),
@@ -98,10 +124,24 @@ class BranchProInferenceApp(BranchProDashApp):
             time_label, inc_label = data.columns[:2]
             times = data[time_label]
             max_tau = floor(times.max() - times.min() + 1)/3
+            if tau > max_tau:
+                # If default value of tau exceeds maximum accepted
+                # choose tau to be this maximum value
+                tau = max_tau
         else:
             max_tau = 7
 
         sliders = bp._SliderComponent()
+        if (data is not None) and ('Imported Cases' in data.columns):
+            # Add slider for epsilon only when imported cases are detected
+            # in the data with default assuming equal R numbers for local
+            # and imported cases
+            sliders.add_slider(
+                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01)
+        else:
+            sliders.add_slider(
+                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01, invisible=True)
+
         sliders.add_slider(
             'Prior Mean', 'mean', mean, 0.1, 10.0, 0.01)
         sliders.add_slider(
@@ -115,7 +155,7 @@ class BranchProInferenceApp(BranchProDashApp):
 
         return sliders.get_sliders_div()
 
-    def update_posterior(self, mean, stdev, tau, central_prob):
+    def update_posterior(self, mean, stdev, tau, central_prob, epsilon=None):
         """Update the posterior distribution based on slider values.
 
         Parameters
@@ -133,6 +173,10 @@ class BranchProInferenceApp(BranchProDashApp):
         central_prob
             (float) updated position on the slider for the level of the
             computed credible interval of the estimated R number values.
+        epsilon
+            (float) updated position on the slider for the constant of
+            proportionality between local and imported cases for the Branch Pro
+            model in the posterior.
 
         Returns
         -------
@@ -151,19 +195,44 @@ class BranchProInferenceApp(BranchProDashApp):
 
         time_label, inc_label = data.columns[:2]
 
-        posterior = bp.BranchProPosterior(
-            data,
-            self.serial_interval,
-            new_alpha,
-            new_beta,
-            time_key=time_label,
-            inc_key=inc_label)
+        if 'Imported Cases' in data.columns:
+            # Separate data into local and imported cases
+            imported_data = pd.DataFrame({
+                time_label: data[time_label],
+                inc_label: data['Imported Cases']
+            })
+
+            # Posterior follows the LocImp behaviour
+            posterior = bp.LocImpBranchProPosterior(
+                data,
+                imported_data,
+                epsilon,
+                self.serial_interval,
+                new_alpha,
+                new_beta,
+                time_key=time_label,
+                inc_key=inc_label)
+        else:
+            # Posterior follows the simple behaviour
+            posterior = bp.BranchProPosterior(
+                data,
+                self.serial_interval,
+                new_alpha,
+                new_beta,
+                time_key=time_label,
+                inc_key=inc_label)
 
         posterior.run_inference(tau)
         return posterior.get_intervals(central_prob)
 
-    def update_inference_figure(self):
+    def update_inference_figure(self,
+                                source=None):
         """Update the inference figure based on currently stored information.
+
+        Parameters
+        ----------
+        source : str
+            Dash callback source
 
         Returns
         -------
@@ -208,7 +277,31 @@ class BranchProInferenceApp(BranchProDashApp):
         time_label, inc_label = data.columns[:2]
 
         plot = bp.IncidenceNumberPlot()
-        plot.add_data(data, time_key=time_label, inc_key=inc_label)
+
+        if 'Imported Cases' in data.columns:
+            # Separate data into local and imported cases
+            imported_data = pd.DataFrame({
+                time_label: data[time_label],
+                inc_label: data['Imported Cases']
+            })
+
+            # Bar plot of local cases
+            plot.add_data(
+                data,
+                time_key=time_label,
+                inc_key=inc_label,
+                name='Local Cases')
+
+            # Bar plot of imported cases
+            plot.add_data(
+                imported_data,
+                time_key=time_label,
+                inc_key=inc_label,
+                name='Imported Cases')
+
+        else:
+            # If no imported cases are present
+            plot.add_data(data, time_key=time_label, inc_key=inc_label)
 
         # Keeps traces visibility states fixed when changing sliders
         plot.figure['layout']['legend']['uirevision'] = True
