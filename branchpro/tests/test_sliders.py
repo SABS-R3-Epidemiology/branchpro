@@ -42,7 +42,10 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(sliders._sliders[1].children[1].value, 0)
         self.assertEqual(
             sliders._sliders[1].children[1].marks,
-            {ri: '{:.0f}'.format(ri) for ri in np.linspace(0, 15, 10)}
+            {
+                ri: '{:.0f}'.format(ri) for ri in np.round(
+                    np.linspace(0, 15, 10), 2)
+            }
             )
         self.assertEqual(sliders._sliders[1].children[1].step, 1)
 
