@@ -105,6 +105,7 @@ class ReproductionNumberPlot():
             fillcolor='indigo',
             line_color='indigo',
             opacity=0.5,
+            mode='lines',
             name='Credible interval {:.8f}'.format(df[cp_key][0]).rstrip('0'),
         )
 

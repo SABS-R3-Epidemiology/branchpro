@@ -91,13 +91,13 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         inference2 = bp.BranchProPosterior(df, ser_int2, 1, 0.2)
         inference2.run_inference(tau=2)
 
-        self.assertEqual(len(inference1.inference_estimates), 4)
-        self.assertEqual(len(inference1.inference_times), 4)
-        self.assertEqual(len(inference1.inference_posterior.mean()), 4)
+        self.assertEqual(len(inference1.inference_estimates), 3)
+        self.assertEqual(len(inference1.inference_times), 3)
+        self.assertEqual(len(inference1.inference_posterior.mean()), 3)
 
-        self.assertEqual(len(inference2.inference_estimates), 4)
-        self.assertEqual(len(inference2.inference_times), 4)
-        self.assertEqual(len(inference2.inference_posterior.mean()), 4)
+        self.assertEqual(len(inference2.inference_estimates), 3)
+        self.assertEqual(len(inference2.inference_times), 3)
+        self.assertEqual(len(inference2.inference_posterior.mean()), 3)
 
     def test_get_intervals(self):
         df = pd.DataFrame({
@@ -110,15 +110,15 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         inference.run_inference(tau=2)
         intervals_df = inference.get_intervals(.95)
 
-        self.assertEqual(len(intervals_df['Time Points']), 4)
-        self.assertEqual(len(intervals_df['Mean']), 4)
-        self.assertEqual(len(intervals_df['Lower bound CI']), 4)
-        self.assertEqual(len(intervals_df['Upper bound CI']), 4)
+        self.assertEqual(len(intervals_df['Time Points']), 3)
+        self.assertEqual(len(intervals_df['Mean']), 3)
+        self.assertEqual(len(intervals_df['Lower bound CI']), 3)
+        self.assertEqual(len(intervals_df['Upper bound CI']), 3)
 
         self.assertListEqual(
-            intervals_df['Mean'].to_list(), [5.0] * 4)
+            intervals_df['Mean'].to_list(), [5.0] * 3)
         self.assertEqual(
-            intervals_df['Central Probability'].to_list(), [.95] * 4)
+            intervals_df['Central Probability'].to_list(), [.95] * 3)
 
 
 class TestLocImpBranchProPosteriorClass(unittest.TestCase):
@@ -210,10 +210,10 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
             local_df, imp_df, 0.3, ser_int2, 1, 0.2)
         inference2.run_inference(tau=2)
 
-        self.assertEqual(len(inference1.inference_estimates), 4)
-        self.assertEqual(len(inference1.inference_times), 4)
-        self.assertEqual(len(inference1.inference_posterior.mean()), 4)
+        self.assertEqual(len(inference1.inference_estimates), 3)
+        self.assertEqual(len(inference1.inference_times), 3)
+        self.assertEqual(len(inference1.inference_posterior.mean()), 3)
 
-        self.assertEqual(len(inference2.inference_estimates), 4)
-        self.assertEqual(len(inference2.inference_times), 4)
-        self.assertEqual(len(inference2.inference_posterior.mean()), 4)
+        self.assertEqual(len(inference2.inference_estimates), 3)
+        self.assertEqual(len(inference2.inference_times), 3)
+        self.assertEqual(len(inference2.inference_posterior.mean()), 3)

@@ -16,13 +16,15 @@ import os
 import numpy as np
 import pandas as pd
 import scipy.stats
+import dash
 import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 import branchpro as bp
 from branchpro.apps import BranchProInferenceApp
 
-
+np.random.seed(100)
 app = BranchProInferenceApp()
 
 # Generate synthetic data
@@ -48,13 +50,13 @@ parameters = 10  # initial number of cases
 times = np.arange(num_timepoints)
 
 cases = model.simulate(parameters, times)
-data = pd.DataFrame({
+example_data = pd.DataFrame({
             'Days': times,
             'Incidence Number': cases,
             'R_t': [np.nan] + list(model.get_r_profile())
         })
 
-sliders = ['mean', 'stdev', 'tau', 'central_prob']
+sliders = ['epsilon', 'mean', 'stdev', 'tau', 'central_prob']
 
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__),
@@ -77,17 +79,35 @@ app.serial_interval = serial_interval
 
 
 @app.app.callback(
+    Output('incidence-data-upload', 'children'),
     Output('data_storage', 'children'),
-    Input('page-title', 'children'),
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
 )
-def update_data(*args):
-    """Load incidence number data into app storage.
-
-    Currently, this only runs once at page load, whereupon it saves the default
-    data defined in the script above. When data upload functionality is added
-    to the inference app, it can go here.
+def load_data(*args):
+    """Load data from a file and save it in storage.
     """
-    return data.to_json()
+    list_contents, list_names = args
+
+    with app.lock:
+        if list_contents is not None:
+            # Run content parser for each file and get message
+            # Only use latest file
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1])
+
+            if data is None:
+                # The file could not be loaded, so keep the current data and
+                # try to prevent updates to any other part of the app
+                return message, dash.no_update
+
+            data = data.to_json()
+
+        else:
+            message = html.Div(['No data file selected.'])
+            data = example_data.to_json()
+
+        return message, data
 
 
 @app.app.callback(
@@ -100,6 +120,19 @@ def update_data_figure(*args):
     with app.lock:
         app.refresh_user_data_json(data_storage=args[0])
         return app.update_data_figure()
+
+
+@app.app.callback(
+    Output('all-sliders', 'children'),
+    Input('data_storage', 'children'),
+)
+def update_slider_ranges(*args):
+    """Update sliders when a data file is uploaded.
+    """
+    data = example_data if args[0] is None else args[0]
+    with app.lock:
+        app.refresh_user_data_json(data_storage=data)
+        return app.update_sliders()
 
 
 @app.app.callback(
@@ -118,17 +151,18 @@ def update_posterior_figure(*args):
 
 @app.app.callback(
     Output('posterior_storage', 'children'),
-    Input('data_storage', 'children'),
     [Input(s, 'value') for s in sliders],
+    State('data_storage', 'children'),
 )
 def calculate_posterior(*args):
     """Calculate the posterior distribution.
     """
-    data_json, mean, stdev, tau, central_prob = args
+    epsilon, mean, stdev, tau, central_prob, data_json = args
 
     with app.lock:
         app.refresh_user_data_json(data_storage=data_json)
-        return app.update_posterior(mean, stdev, tau, central_prob).to_json()
+        return app.update_posterior(
+            mean, stdev, tau, central_prob, epsilon).to_json()
 
 
 @app.app.callback(

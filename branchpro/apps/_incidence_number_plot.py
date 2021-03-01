@@ -26,7 +26,8 @@ class IncidenceNumberPlot():
             if (x_label != time_key) or (y_label != inc_key):
                 warnings.warn('Labels do not match. They will be updated.')
 
-    def add_data(self, df, time_key='Time', inc_key='Incidence Number'):
+    def add_data(self, df, time_key='Time',
+                 inc_key='Incidence Number', name='Cases'):
         """
         Supplies data to the figure which will be used for the bar plot.
 
@@ -39,6 +40,8 @@ class IncidenceNumberPlot():
             x-axis label for the bar plot.
         inc_key
             y-axis label for the bar plot.
+        neme
+            name given to the data in the bar plot.
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
@@ -47,7 +50,7 @@ class IncidenceNumberPlot():
         trace = go.Bar(
             y=df[inc_key],
             x=df[time_key],
-            name='Cases',
+            name=name,
         )
 
         self.figure.add_trace(trace)

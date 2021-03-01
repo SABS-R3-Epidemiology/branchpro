@@ -84,7 +84,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][0]['x']]
                 ),
             np.array(
-                [np.array([3, 4, 5, 6])]
+                [np.array([4, 5, 6])]
                 )
         )
 
@@ -93,7 +93,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][0]['y']]
                 ),
             np.array(
-                [np.array([5.0] * 4)]
+                [np.array([5.0] * 3)]
                 )
         )
         npt.assert_array_equal(
@@ -101,7 +101,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][1]['x']]
                 ),
             np.array(
-                [np.array([3, 4, 5, 6, 6, 5, 4, 3])]
+                [np.array([4, 5, 6, 6, 5, 4])]
                 )
         )
 
@@ -110,7 +110,7 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
                 [my_plot.figure['data'][1]['y']]
                 ),
             np.array(
-                [np.array([18.444397] * 4 + [0.126589] * 4)]
+                [np.array([18.444397] * 3 + [0.126589] * 3)]
                 )
         )
 
@@ -126,11 +126,11 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
             my_plot.add_ground_truth_rt(df)
 
             dfs1 = pd.DataFrame({
-                't': [3, 4, 5, 6],
-                'Mean': [5.0] * 4,
-                'Lower bound CI': [5.0] * 4,
-                'Upper bound CI': [5.0] * 4,
-                'Central Probability': [.95] * 4
+                't': [4, 5, 6],
+                'Mean': [5.0] * 3,
+                'Lower bound CI': [5.0] * 3,
+                'Upper bound CI': [5.0] * 3,
+                'Central Probability': [.95] * 3
                 })
             my_plot.add_interval_rt(dfs1, time_key='t')
 
@@ -143,11 +143,11 @@ class TestReproductionNumberPlotClass(unittest.TestCase):
             my_plot.add_ground_truth_rt(df)
 
             dfs2 = pd.DataFrame({
-                'Time Points': [3, 4, 5, 6],
-                'r': [5.0] * 4,
-                'Lower bound CI': [5.0] * 4,
-                'Upper bound CI': [5.0] * 4,
-                'Central Probability': [.95] * 4
+                'Time Points': [4, 5, 6],
+                'r': [5.0] * 3,
+                'Lower bound CI': [5.0] * 3,
+                'Upper bound CI': [5.0] * 3,
+                'Central Probability': [.95] * 3
                 })
             my_plot.add_interval_rt(dfs2, r_key='r')
 
