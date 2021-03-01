@@ -150,6 +150,52 @@ class BranchProDashApp:
         else:
             return html.Div(['Loaded data from: {}'.format(filename)]), df
 
+    def parse_interval_contents(self, contents, filename):
+        """Load a text (csv) file into a list.
+
+        This method is for loading serial interval data. It expects files to
+        have one column .
+
+        Parameters
+        ----------
+        contents : str
+            File contents in binary encoding
+        filename : str
+            Name of the file
+
+        Returns
+        -------
+        html.Div
+            A div which contains a message for the user.
+        numpy.array
+            An array with the loaded file. If the file load was not
+            successful, it will be None.
+        """
+        content_type, content_string = contents.split(',')
+        _, extension = os.path.splitext(filename)
+
+        decoded = base64.b64decode(content_string)
+        try:
+            if extension in ['.csv', '.txt']:
+                # Assume that the user uploaded a CSV or TXT file
+                serial_interval = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8'))).values[:, 0]
+            else:
+                return html.Div(['File type must be CSV or TXT.']), None
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ]), None
+
+        print(serial_interval.shape)
+        if serial_interval.ndim != 1:
+            return html.Div(
+                ['Incorrect format; file must be 1-dimensional']), None
+        else:
+            return (html.Div(['Loaded data from: {}'.format(filename)]),
+                    serial_interval)
+
     def add_text(self, text):
         """Add a block of text at the top of the app.
 
