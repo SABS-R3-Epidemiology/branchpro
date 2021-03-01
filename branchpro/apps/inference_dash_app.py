@@ -151,13 +151,13 @@ def update_posterior_figure(*args):
 
 @app.app.callback(
     Output('posterior_storage', 'children'),
-    Input('data_storage', 'children'),
     [Input(s, 'value') for s in sliders],
+    State('data_storage', 'children'),
 )
 def calculate_posterior(*args):
     """Calculate the posterior distribution.
     """
-    data_json, epsilon, mean, stdev, tau, central_prob = args
+    epsilon, mean, stdev, tau, central_prob, data_json = args
 
     with app.lock:
         app.refresh_user_data_json(data_storage=data_json)

@@ -43,8 +43,13 @@ class BranchProInferenceApp(BranchProDashApp):
                                 id='data-fig'))
                     ),
                     html.H4([
-                        'You can upload your own incidence data here. It will'
+                        'You can upload your own incidence data here. It will '
                         'appear as bars.'
+                    ]),
+                    html.H6([
+                        'Data must be in the following column format: `Time`, '
+                        '`Incidence number`, `Imported Cases` (optional), '
+                        '`R_t` (true value of R, optional)'
                     ]),
                     dcc.Upload(
                         id='upload-data',
