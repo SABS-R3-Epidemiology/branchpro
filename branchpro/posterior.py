@@ -136,12 +136,13 @@ class BranchProPosterior(object):
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
             eff_num = (
-                np.sum(cases_data[start_date:t] * self._serial_interval) /
+                np.sum(cases_data[start_date:(
+                    t-1)] * self._serial_interval[:][1:]) /
                 self._normalizing_const)
             return eff_num
 
         eff_num = (
-            np.sum(cases_data[:t] * self._serial_interval[-t:]) /
+            np.sum(cases_data[:(t-1)] * self._serial_interval[-t:][1:]) /
             self._normalizing_const)
         return eff_num
 
@@ -188,7 +189,7 @@ class BranchProPosterior(object):
         rate = []
         mean = []
 
-        for time in range(time_init_inf_r, total_time+1):
+        for time in range(time_init_inf_r+1, total_time+1):
             # get cases in tau window
             start_window = time - tau
             end_window = time + 1
@@ -196,7 +197,7 @@ class BranchProPosterior(object):
             # compute shape parameter of the posterior over time
             shape.append(
                 alpha + np.sum(
-                    self.cases_data[start_window:end_window]))
+                    self.cases_data[(start_window-1):(end_window-1)]))
 
             # compute rate parameter of the posterior over time
 
@@ -209,7 +210,8 @@ class BranchProPosterior(object):
         # compute the Gamma-shaped posterior distribution
         post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
 
-        self.inference_times = list(range(time_init_inf_r, total_time+1))
+        self.inference_times = list(range(
+            self.cases_times.min()+1+tau, self.cases_times.max()+1))
         self.inference_estimates = mean
         self.inference_posterior = post_dist
 
@@ -377,7 +379,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
         rate = []
         mean = []
 
-        for time in range(time_init_inf_r, total_time+1):
+        for time in range(time_init_inf_r+1, total_time+1):
             # get cases in tau window
             start_window = time - tau
             end_window = time + 1
@@ -385,7 +387,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
             # compute shape parameter of the posterior over time
             shape.append(
                 alpha + np.sum(
-                    self.cases_data[start_window:end_window]))
+                    self.cases_data[(start_window-1):(end_window-1)]))
 
             # compute rate parameter of the posterior over time
 
@@ -400,6 +402,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
         # compute the Gamma-shaped posterior distribution
         post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
 
-        self.inference_times = list(range(time_init_inf_r, total_time+1))
+        self.inference_times = list(range(
+            self.cases_times.min()+1+tau, self.cases_times.max()+1))
         self.inference_estimates = mean
         self.inference_posterior = post_dist
