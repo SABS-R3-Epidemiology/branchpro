@@ -188,7 +188,6 @@ class BranchProDashApp:
                 'There was an error processing this file.'
             ]), None
 
-        print(serial_interval.shape)
         if serial_interval.ndim != 1:
             return html.Div(
                 ['Incorrect format; file must be 1-dimensional']), None
