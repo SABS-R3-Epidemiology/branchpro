@@ -24,7 +24,7 @@ from dash.dependencies import Input, Output, State
 import branchpro as bp
 from branchpro.apps import BranchProInferenceApp
 
-
+np.random.seed(100)
 app = BranchProInferenceApp()
 
 # Generate synthetic data

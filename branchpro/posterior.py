@@ -136,13 +136,12 @@ class BranchProPosterior(object):
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval)
             eff_num = (
-                np.sum(cases_data[start_date:(
-                    t-1)] * self._serial_interval[:][1:]) /
+                np.sum(cases_data[start_date:(t-1)] * self._serial_interval) /
                 self._normalizing_const)
             return eff_num
 
         eff_num = (
-            np.sum(cases_data[:(t-1)] * self._serial_interval[-t:][1:]) /
+            np.sum(cases_data[:(t-1)] * self._serial_interval[-(t-1):]) /
             self._normalizing_const)
         return eff_num
 
