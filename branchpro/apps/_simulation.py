@@ -76,6 +76,10 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                     html.Div(id='incidence-data-upload'),
                     html.Div([]),  # Empty div for bottom text
                     html.Div(id='data_storage', style={'display': 'none'}),
+                    dcc.ConfirmDialog(
+                        id='confirm',
+                        message='Simulation failed due to overflow!',
+                    ),
                     ], fluid=True),
                 self.mathjax_script
                 ])
@@ -85,11 +89,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Save the locations of texts from the layout
         self.main_text = self.app.layout.children[0].children[1].children
-        self.collapsed_text = self.app.layout.children[0].children[-2].children
+        self.collapsed_text = self.app.layout.children[0].children[-3].children
 
     def update_sliders(self,
                        init_cond=10.0,
-                       r0=2.0,
+                       r0=1.0,
                        r1=0.5,
                        magnitude_init_cond=None):
         """Generate sliders for the app.
@@ -268,7 +272,10 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         # Generate one simulation trajectory from this model
         simulation_controller = bp.SimulationController(
             br_pro_model, 1, max(times))
-        data = simulation_controller.run(new_init_cond)
+        try:
+            data = simulation_controller.run(new_init_cond)
+        except ValueError:
+            data = -np.ones(max(times))
 
         # Add data to simulations storage
         simulations[inc_label] = data
