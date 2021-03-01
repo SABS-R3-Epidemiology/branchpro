@@ -43,7 +43,7 @@ class Test_SliderComponent(unittest.TestCase):
         self.assertEqual(
             sliders._sliders[1].children[1].marks,
             {
-                # the slider values need be integers
+                # if the slider values need be integers
                 ri: '{:.0f}'.format(ri) for ri in np.round(
                     np.linspace(0, 15, 10), 0)
             }
