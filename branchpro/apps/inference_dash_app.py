@@ -41,7 +41,7 @@ disc_w = w_dist.pdf(np.arange(1, num_timepoints+1))
 
 # Simulate incidence data
 initial_r = 3
-serial_interval = disc_w
+serial_interval = disc_w[:6]
 model = bp.BranchProModel(initial_r, serial_interval)
 new_rs = [3, 0.5]          # sequence of R_0 numbers
 start_times = [0, 15]      # days at which each R_0 period begins
