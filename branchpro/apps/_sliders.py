@@ -62,7 +62,7 @@ class _SliderComponent():
                                         dtype=np.float64
                                         )
 
-        mark_list = np.round(mark_list, decimals=2)
+        mark_list = np.round(mark_list, decimals=0 if as_integer else 2)
 
         keys = [int(r) if r.is_integer() else r for r in mark_list]
         if as_integer:
