@@ -97,7 +97,7 @@ class BranchProInferenceApp(BranchProDashApp):
                         [
                             dbc.Col(
                                 dcc.Loading(
-                                    id="loading",
+                                    id='loading',
                                     children=dcc.Graph(
                                         figure=bp.ReproductionNumberPlot(
                                             ).figure,
