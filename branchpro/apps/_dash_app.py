@@ -144,7 +144,7 @@ class BranchProDashApp:
                             1-dimensional']), None
                     else:
                         data = data.values[:, 0]
-                    if not isinstance(data[0], (int, float)):
+                    if isinstance(data[0], str) and not data[0].isnumeric():
                         return html.Div(['Incorrect format; file must not have a \
                         header']), None
                 else:
