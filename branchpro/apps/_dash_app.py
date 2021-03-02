@@ -160,45 +160,15 @@ class BranchProDashApp:
                 'There was an error processing this file.'
             ]), None
 
-    def parse_contents(self, contents, filename):
+    def parse_contents(self, contents, filename, is_si=False):
         """Load a text (csv) file into a pandas dataframe.
 
-        This method is for loading incidence number data. It expects files to
-        have at least two columns, the first with title ``Time`` and the second
-        with title ``Incidence Number``.
+        This method is for loading:
+        - incidence number data. It expects files to have at least two columns,
+        the first with title ``Time`` and the second with title ``Incidence
+        Number``.
 
-        Parameters
-        ----------
-        contents : str
-            File contents in binary encoding
-        filename : str
-            Name of the file
-
-        Returns
-        -------
-        html.Div
-            A div which contains a message for the user.
-        pandas.DataFrame
-            A dataframe with the loaded file. If the file load was not
-            successful, it will be None.
-        """
-        message, df = self._read_uploaded_file(contents, filename)
-
-        if message is None:
-            if ('Time' not in df.columns) or (
-                    'Incidence Number' not in df.columns):
-                message = html.Div(['Incorrect format; file must contain a `Time` \
-                    and `Incidence Number` column.'])
-                df = None
-            else:
-                message = html.Div(['Loaded data from: {}'.format(filename)])
-
-        return message, df
-
-    def parse_interval_contents(self, contents, filename):
-        """Load a text (csv) file into a list.
-
-        This method is for loading serial interval data. It expects files to
+        - loading serial interval data. It expects files to
         have one column .
 
         Parameters
@@ -207,22 +177,33 @@ class BranchProDashApp:
             File contents in binary encoding
         filename : str
             Name of the file
+        is_si : boolean
+            Function of the file in the context of the app, true if uploaded
+            data is a serial interval.
+
 
         Returns
         -------
         html.Div
             A div which contains a message for the user.
-        numpy.array
-            An array with the loaded file. If the file load was not
+        pandas.DataFrame or numpy.array
+            A dataframe with the loaded data file. If the file load was not
             successful, it will be None.
+            An array with the loaded serial interval file. If the file load was
+            not successful, it will be None.
         """
-        message, serial_interval = self._read_uploaded_file(
-            contents, filename, is_si=True)
+        message, data = self._read_uploaded_file(contents, filename, is_si)
 
         if message is None:
             message = html.Div(['Loaded data from: {}'.format(filename)])
+            if not is_si:
+                if ('Time' not in data.columns) or (
+                        'Incidence Number' not in data.columns):
+                    message = html.Div(['Incorrect format; file must contain a `Time` \
+                        and `Incidence Number` column.'])
+                    data = None
 
-        return message, serial_interval
+        return message, data
 
     def add_text(self, text):
         """Add a block of text at the top of the app.

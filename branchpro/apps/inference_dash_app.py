@@ -123,8 +123,9 @@ def load_interval(*args):
         if list_contents is not None:
             # Run content parser for each file and get message
             # Only use latest file
-            message, data = app.parse_interval_contents(list_contents[-1],
-                                                        list_names[-1])
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1],
+                                               is_si=True)
 
             if data is None:
                 # The file could not be loaded, so keep the current data and
