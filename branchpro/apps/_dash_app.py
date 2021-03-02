@@ -104,6 +104,62 @@ class BranchProDashApp:
             new_session_data[k] = v
         self.session_data = new_session_data
 
+    def _read_uploaded_file(self, contents, filename, is_si=False):
+        """Load a text (csv) file into a pandas dataframe.
+
+        This method is for loading incidence number data. It expects files to
+        have at least two columns, the first with title ``Time`` and the second
+        with title ``Incidence Number``.
+
+        Parameters
+        ----------
+        contents : str
+            File contents in binary encoding
+        filename : str
+            Name of the file
+        is_si : boolean
+            Function of the file in the context of the app
+
+        Returns
+        -------
+        html.Div
+            A div which contains a message for the user.
+        pandas.DataFrame
+            A dataframe with the loaded file. If the file load was not
+            successful, it will be None.
+        """
+        content_type, content_string = contents.split(',')
+        _, extension = os.path.splitext(filename)
+
+        decoded = base64.b64decode(content_string)
+        try:
+            if extension in ['.csv', '.txt']:
+                # Assume that the user uploaded a CSV or TXT file
+                if is_si:
+                    data = pd.read_csv(
+                        io.StringIO(decoded.decode('utf-8')),
+                        header=None)
+                    if len(data.columns) > 1:
+                        return html.Div(['Incorrect format; file must be \
+                            1-dimensional']), None
+                    else:
+                        data = data.values[:, 0]
+                    if not isinstance(data[0], (int, float)):
+                        return html.Div(['Incorrect format; file must not have a \
+                        header']), None
+                else:
+                    data = pd.read_csv(
+                        io.StringIO(decoded.decode('utf-8')))
+
+                return None, data
+            else:
+                return html.Div(['File type must be CSV or TXT.']), None
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ]), None
+
     def parse_contents(self, contents, filename):
         """Load a text (csv) file into a pandas dataframe.
 
@@ -126,29 +182,18 @@ class BranchProDashApp:
             A dataframe with the loaded file. If the file load was not
             successful, it will be None.
         """
-        content_type, content_string = contents.split(',')
-        _, extension = os.path.splitext(filename)
+        message, df = self._read_uploaded_file(contents, filename)
 
-        decoded = base64.b64decode(content_string)
-        try:
-            if extension in ['.csv', '.txt']:
-                # Assume that the user uploaded a CSV or TXT file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')))
+        if message is None:
+            if ('Time' not in df.columns) or (
+                    'Incidence Number' not in df.columns):
+                message = html.Div(['Incorrect format; file must contain a `Time` \
+                    and `Incidence Number` column.'])
+                df = None
             else:
-                return html.Div(['File type must be CSV or TXT.']), None
-        except Exception as e:
-            print(e)
-            return html.Div([
-                'There was an error processing this file.'
-            ]), None
+                message = html.Div(['Loaded data from: {}'.format(filename)])
 
-        if ('Time' not in df.columns) or (
-                'Incidence Number' not in df.columns):
-            return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column.']), None
-        else:
-            return html.Div(['Loaded data from: {}'.format(filename)]), df
+        return message, df
 
     def parse_interval_contents(self, contents, filename):
         """Load a text (csv) file into a list.
@@ -171,29 +216,13 @@ class BranchProDashApp:
             An array with the loaded file. If the file load was not
             successful, it will be None.
         """
-        content_type, content_string = contents.split(',')
-        _, extension = os.path.splitext(filename)
+        message, serial_interval = self._read_uploaded_file(
+            contents, filename, is_si=True)
 
-        decoded = base64.b64decode(content_string)
-        try:
-            if extension in ['.csv', '.txt']:
-                # Assume that the user uploaded a CSV or TXT file
-                serial_interval = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8'))).values[:, 0]
-            else:
-                return html.Div(['File type must be CSV or TXT.']), None
-        except Exception as e:
-            print(e)
-            return html.Div([
-                'There was an error processing this file.'
-            ]), None
+        if message is None:
+            message = html.Div(['Loaded data from: {}'.format(filename)])
 
-        if serial_interval.ndim != 1:
-            return html.Div(
-                ['Incorrect format; file must be 1-dimensional']), None
-        else:
-            return (html.Div(['Loaded data from: {}'.format(filename)]),
-                    serial_interval)
+        return message, serial_interval
 
     def add_text(self, text):
         """Add a block of text at the top of the app.

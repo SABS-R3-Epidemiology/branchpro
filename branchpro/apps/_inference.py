@@ -34,6 +34,17 @@ class BranchProInferenceApp(BranchProDashApp):
             'interval_storage': None,
             'posterior_storage': None}
 
+        button_style = {
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        }
+
         self.app.layout = html.Div([
             dbc.Container(
                 [
@@ -62,16 +73,7 @@ class BranchProInferenceApp(BranchProDashApp):
                                    style={'text-decoration': 'underline'}),
                             ' to upload your Incidence Number data.'
                         ]),
-                        style={
-                            'width': '100%',
-                            'height': '60px',
-                            'lineHeight': '60px',
-                            'borderWidth': '1px',
-                            'borderStyle': 'dashed',
-                            'borderRadius': '5px',
-                            'textAlign': 'center',
-                            'margin': '10px'
-                        },
+                        style=button_style,
                         multiple=True  # Allow multiple files to be uploaded
                     ),
                     html.Div(id='incidence-data-upload'),
@@ -86,16 +88,7 @@ class BranchProInferenceApp(BranchProDashApp):
                                    style={'text-decoration': 'underline'}),
                             ' to upload your Serial Interval.'
                         ]),
-                        style={
-                            'width': '100%',
-                            'height': '60px',
-                            'lineHeight': '60px',
-                            'borderWidth': '1px',
-                            'borderStyle': 'dashed',
-                            'borderRadius': '5px',
-                            'textAlign': 'center',
-                            'margin': '10px'
-                        },
+                        style=button_style,
                         multiple=True  # Allow multiple files to be uploaded
                     ),
                     html.Div(id='ser-interval-upload'),
@@ -224,7 +217,6 @@ class BranchProInferenceApp(BranchProDashApp):
         data = self.session_data.get('data_storage')
         serial_interval = self.session_data.get(
             'interval_storage').iloc[:, 0].values
-        print(serial_interval)
 
         if data is None:
             raise dash.exceptions.PreventUpdate()
