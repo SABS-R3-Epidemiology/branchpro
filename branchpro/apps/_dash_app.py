@@ -188,9 +188,9 @@ class BranchProDashApp:
             A div which contains a message for the user.
         pandas.DataFrame or numpy.array
             A dataframe with the loaded data file. If the file load was not
-            successful, it will be None.
-            An array with the loaded serial interval file. If the file load was
-            not successful, it will be None.
+            successful, it will be None. An array with the loaded serial
+            interval file. If the file load was not successful, it will be
+            None.
         """
         message, data = self._read_uploaded_file(contents, filename, is_si)
 
