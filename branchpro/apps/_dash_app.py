@@ -164,12 +164,12 @@ class BranchProDashApp:
         """Load a text (csv) file into a pandas dataframe.
 
         This method is for loading:
-        - incidence number data. It expects files to have at least two columns,
-        the first with title ``Time`` and the second with title ``Incidence
-        Number``.
 
-        - loading serial interval data. It expects files to
-        have one column .
+        * incidence number data. It expects files to have at least two
+          columns, the first with title ``Time`` and the second with title
+          ``Incidence Number``.
+        * loading serial interval data. It expects files to
+          have one column .
 
         Parameters
         ----------
