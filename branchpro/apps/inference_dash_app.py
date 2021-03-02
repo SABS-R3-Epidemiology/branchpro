@@ -12,6 +12,7 @@ the branching process model with genreated example data. To run the app, use
 """
 
 import os
+import json
 
 import numpy as np
 import pandas as pd
@@ -74,9 +75,6 @@ with open(fname) as f:
 # Get server of the app; necessary for correct deployment of the app.
 server = app.app.server
 
-# Serial interval is currently fixed and constant
-app.serial_interval = serial_interval
-
 
 @app.app.callback(
     Output('incidence-data-upload', 'children'),
@@ -106,6 +104,39 @@ def load_data(*args):
         else:
             message = html.Div(['No data file selected.'])
             data = example_data.to_json()
+
+        return message, data
+
+
+@app.app.callback(
+    Output('ser-interval-upload', 'children'),
+    Output('interval_storage', 'children'),
+    Input('upload-interval', 'contents'),
+    State('upload-interval', 'filename'),
+)
+def load_interval(*args):
+    """Load serial interval from a file and save it in storage.
+    """
+    list_contents, list_names = args
+
+    with app.lock:
+        if list_contents is not None:
+            # Run content parser for each file and get message
+            # Only use latest file
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1],
+                                               is_si=True)
+
+            if data is None:
+                # The file could not be loaded, so keep the current data and
+                # try to prevent updates to any other part of the app
+                return message, dash.no_update
+            else:
+                data = json.dumps(data.tolist())
+
+        else:
+            message = html.Div(['Default serial interval in use.'])
+            data = json.dumps(serial_interval.tolist())
 
         return message, data
 

@@ -104,7 +104,7 @@ class BranchProDashApp:
             new_session_data[k] = v
         self.session_data = new_session_data
 
-    def parse_contents(self, contents, filename):
+    def _read_uploaded_file(self, contents, filename, is_si=False):
         """Load a text (csv) file into a pandas dataframe.
 
         This method is for loading incidence number data. It expects files to
@@ -117,6 +117,8 @@ class BranchProDashApp:
             File contents in binary encoding
         filename : str
             Name of the file
+        is_si : boolean
+            Function of the file in the context of the app
 
         Returns
         -------
@@ -133,8 +135,23 @@ class BranchProDashApp:
         try:
             if extension in ['.csv', '.txt']:
                 # Assume that the user uploaded a CSV or TXT file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')))
+                if is_si:
+                    data = pd.read_csv(
+                        io.StringIO(decoded.decode('utf-8')),
+                        header=None)
+                    if len(data.columns) > 1:
+                        return html.Div(['Incorrect format; file must be \
+                            1-dimensional']), None
+                    else:
+                        data = data.values[:, 0]
+                    if isinstance(data[0], str) and not data[0].isnumeric():
+                        return html.Div(['Incorrect format; file must not have a \
+                        header']), None
+                else:
+                    data = pd.read_csv(
+                        io.StringIO(decoded.decode('utf-8')))
+
+                return None, data
             else:
                 return html.Div(['File type must be CSV or TXT.']), None
         except Exception as e:
@@ -143,12 +160,48 @@ class BranchProDashApp:
                 'There was an error processing this file.'
             ]), None
 
-        if ('Time' not in df.columns) or (
-                'Incidence Number' not in df.columns):
-            return html.Div(['Incorrect format; file must contain a `Time` \
-                and `Incidence Number` column.']), None
-        else:
-            return html.Div(['Loaded data from: {}'.format(filename)]), df
+    def parse_contents(self, contents, filename, is_si=False):
+        """Load a text (csv) file into a pandas dataframe.
+
+        This method is for loading:
+
+        * incidence number data. It expects files to have at least two
+          columns, the first with title ``Time`` and the second with title
+          ``Incidence Number``.
+        * serial interval data. It expects files to have one column .
+
+        Parameters
+        ----------
+        contents : str
+            File contents in binary encoding
+        filename : str
+            Name of the file
+        is_si : boolean
+            Function of the file in the context of the app, true if uploaded
+            data is a serial interval.
+
+
+        Returns
+        -------
+        html.Div
+            A div which contains a message for the user.
+        pandas.DataFrame or numpy.array
+            A dataframe with the loaded data file. An array with the loaded
+            serial interval file. If the file load was not successful, it will
+            be None.
+        """
+        message, data = self._read_uploaded_file(contents, filename, is_si)
+
+        if message is None:
+            message = html.Div(['Loaded data from: {}'.format(filename)])
+            if not is_si:
+                if ('Time' not in data.columns) or (
+                        'Incidence Number' not in data.columns):
+                    message = html.Div(['Incorrect format; file must contain a `Time` \
+                        and `Incidence Number` column.'])
+                    data = None
+
+        return message, data
 
     def add_text(self, text):
         """Add a block of text at the top of the app.
