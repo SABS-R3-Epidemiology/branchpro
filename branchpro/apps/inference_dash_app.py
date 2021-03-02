@@ -167,35 +167,30 @@ def update_slider_ranges(*args):
 
 
 @app.app.callback(
+    Output('posterior_storage', 'children'),
     Output('posterior-fig', 'figure'),
-    Input('posterior_storage', 'children'),
+    [Input(s, 'value') for s in sliders],
+    Input('interval_storage', 'children'),
     State('data_storage', 'children'),
 )
 def update_posterior_figure(*args):
     """Handles all updates to the posterior figure.
-    """
-    with app.lock:
-        app.refresh_user_data_json(
-            data_storage=args[1], posterior_storage=args[0])
-        return app.update_inference_figure()
-
-
-@app.app.callback(
-    Output('posterior_storage', 'children'),
-    [Input(s, 'value') for s in sliders],
-    Input('interval_storage', 'children'),
-    State('data_storage', 'children')
-)
-def calculate_posterior(*args):
-    """Calculate the posterior distribution.
     """
     epsilon, mean, stdev, tau, central_prob, interval_json, data_json = args
 
     with app.lock:
         app.refresh_user_data_json(
             data_storage=data_json, interval_storage=interval_json)
-        return app.update_posterior(
+
+        posterior_data = app.update_posterior(
             mean, stdev, tau, central_prob, epsilon).to_json()
+
+        app.refresh_user_data_json(
+            data_storage=data_json,
+            interval_storage=interval_json,
+            posterior_storage=posterior_data)
+
+        return posterior_data, app.update_inference_figure()
 
 
 @app.app.callback(

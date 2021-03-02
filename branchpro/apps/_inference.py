@@ -95,9 +95,14 @@ class BranchProInferenceApp(BranchProDashApp):
                     html.H2('Plot of R values'),
                     dbc.Row(
                         [
-                            dbc.Col(dcc.Graph(
-                                figure=bp.ReproductionNumberPlot().figure,
-                                id='posterior-fig')),
+                            dbc.Col(
+                                dcc.Loading(
+                                    id='loading',
+                                    children=dcc.Graph(
+                                        figure=bp.ReproductionNumberPlot(
+                                            ).figure,
+                                        id='posterior-fig'),
+                                    type="circle")),
                             dbc.Col(self.update_sliders(), id='all-sliders')
                         ],
                         align='center',
