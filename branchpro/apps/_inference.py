@@ -29,7 +29,21 @@ class BranchProInferenceApp(BranchProDashApp):
         self.app = dash.Dash(__name__, external_stylesheets=self.css)
         self.app.title = 'BranchproInf'
 
-        self.session_data = {'data_storage': None, 'posterior_storage': None}
+        self.session_data = {
+            'data_storage': None,
+            'interval_storage': None,
+            'posterior_storage': None}
+
+        button_style = {
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        }
 
         self.app.layout = html.Div([
             dbc.Container(
@@ -59,19 +73,25 @@ class BranchProInferenceApp(BranchProDashApp):
                                    style={'text-decoration': 'underline'}),
                             ' to upload your Incidence Number data.'
                         ]),
-                        style={
-                            'width': '100%',
-                            'height': '60px',
-                            'lineHeight': '60px',
-                            'borderWidth': '1px',
-                            'borderStyle': 'dashed',
-                            'borderRadius': '5px',
-                            'textAlign': 'center',
-                            'margin': '10px'
-                        },
+                        style=button_style,
                         multiple=True  # Allow multiple files to be uploaded
                     ),
                     html.Div(id='incidence-data-upload'),
+                    html.H4([
+                        'You can upload your own serial interval here.'
+                    ]),
+                    dcc.Upload(
+                        id='upload-interval',
+                        children=html.Div([
+                            'Drag and Drop or ',
+                            html.A('Select Files',
+                                   style={'text-decoration': 'underline'}),
+                            ' to upload your Serial Interval.'
+                        ]),
+                        style=button_style,
+                        multiple=True  # Allow multiple files to be uploaded
+                    ),
+                    html.Div(id='ser-interval-upload'),
                     html.H2('Plot of R values'),
                     dbc.Row(
                         [
@@ -84,6 +104,7 @@ class BranchProInferenceApp(BranchProDashApp):
                     ),
                     html.Div([]),  # Empty div for bottom text
                     html.Div(id='data_storage', style={'display': 'none'}),
+                    html.Div(id='interval_storage', style={'display': 'none'}),
                     html.Div(id='posterior_storage', style={'display': 'none'})
                     ],
                 fluid=True),
@@ -94,7 +115,7 @@ class BranchProInferenceApp(BranchProDashApp):
 
         # Save the locations of texts from the layout
         self.main_text = self.app.layout.children[0].children[1].children
-        self.collapsed_text = self.app.layout.children[0].children[-3].children
+        self.collapsed_text = self.app.layout.children[0].children[-4].children
 
     def update_sliders(self,
                        mean=5.0,
@@ -194,6 +215,8 @@ class BranchProInferenceApp(BranchProDashApp):
         new_beta = mean / (stdev ** 2)
 
         data = self.session_data.get('data_storage')
+        serial_interval = self.session_data.get(
+            'interval_storage').iloc[:, 0].values
 
         if data is None:
             raise dash.exceptions.PreventUpdate()
@@ -212,7 +235,7 @@ class BranchProInferenceApp(BranchProDashApp):
                 data,
                 imported_data,
                 epsilon,
-                self.serial_interval,
+                serial_interval,
                 new_alpha,
                 new_beta,
                 time_key=time_label,
@@ -221,7 +244,7 @@ class BranchProInferenceApp(BranchProDashApp):
             # Posterior follows the simple behaviour
             posterior = bp.BranchProPosterior(
                 data,
-                self.serial_interval,
+                serial_interval,
                 new_alpha,
                 new_beta,
                 time_key=time_label,
