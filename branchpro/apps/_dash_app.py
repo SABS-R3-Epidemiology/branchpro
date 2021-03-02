@@ -168,8 +168,7 @@ class BranchProDashApp:
         * incidence number data. It expects files to have at least two
           columns, the first with title ``Time`` and the second with title
           ``Incidence Number``.
-        * loading serial interval data. It expects files to
-          have one column .
+        * serial interval data. It expects files to have one column .
 
         Parameters
         ----------
@@ -187,10 +186,9 @@ class BranchProDashApp:
         html.Div
             A div which contains a message for the user.
         pandas.DataFrame or numpy.array
-            A dataframe with the loaded data file. If the file load was not
-            successful, it will be None. An array with the loaded serial
-            interval file. If the file load was not successful, it will be
-            None.
+            A dataframe with the loaded data file. An array with the loaded
+            serial interval file. If the file load was not successful, it will
+            be None.
         """
         message, data = self._read_uploaded_file(contents, filename, is_si)
 
