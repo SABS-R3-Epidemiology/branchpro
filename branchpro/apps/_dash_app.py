@@ -139,14 +139,12 @@ class BranchProDashApp:
                     data = pd.read_csv(
                         io.StringIO(decoded.decode('utf-8')),
                         header=None)
-                    if len(data.columns) > 1:
-                        return html.Div(['Incorrect format; file must be \
-                            1-dimensional']), None
-                    else:
-                        data = data.values[:, 0]
-                    if isinstance(data[0], str) and not data[0].isnumeric():
-                        return html.Div(['Incorrect format; file must not have a \
-                        header']), None
+                    data = data.fillna(0).values
+                    for _ in range(data.shape[1]):
+                        if isinstance(data[0, _], str) and \
+                                not data[0, _].isnumeric():
+                            return html.Div(['Incorrect format; file must not have a \
+                            header']), None
                 else:
                     data = pd.read_csv(
                         io.StringIO(decoded.decode('utf-8')))

@@ -206,6 +206,9 @@ class BranchProPosterior(object):
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
 
+        print(self._serial_interval)
+        print(shape, rate)
+
         # compute the Gamma-shaped posterior distribution
         post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
 
@@ -378,8 +381,8 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         """
         # compute mean and bounds of credible interval of level central_prob
         self.inference_estimates = np.mean(self._inference_samples, axis=0)
-        lb = (1-central_prob)/2
-        ub = (1+central_prob)/2
+        lb = 100*(1-central_prob)/2
+        ub = 100*(1+central_prob)/2
         post_dist_interval = np.percentile(
             self._inference_samples, q=np.array([lb, ub]), axis=0)
 
