@@ -7,7 +7,9 @@ Posterior Distribution
 Overview:
 
 - :class:`BranchProPosterior`
+- :class:`BranchProPosteriorMultSI`
 - :class:`LocImpBranchProPosterior`
+- :class:`LocImpBranchProPosteriorMultSI`
 
 Branch Process Posterior Distribution
 *************************************
@@ -15,8 +17,20 @@ Branch Process Posterior Distribution
 .. autoclass:: BranchProPosterior
   :members:
 
+Branch Process Posterior Distribution with Multiple Serial Intervals
+********************************************************************
+
+.. autoclass:: BranchProPosteriorMultSI
+  :members:
+
 Local and Imported Branch Process Posterior Distribution
 ********************************************************
 
 .. autoclass:: LocImpBranchProPosterior
+  :members:
+
+Local and Imported Branch Process Posterior Distribution with Multiple Serial Intervals
+***************************************************************************************
+
+.. autoclass:: LocImpBranchProPosteriorMultSI
   :members:
