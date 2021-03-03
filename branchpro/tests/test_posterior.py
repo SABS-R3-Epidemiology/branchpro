@@ -351,6 +351,17 @@ class TestLocImpBranchProPosteriorMultSIClass(unittest.TestCase):
         bp.LocImpBranchProPosteriorMultSI(
             local_df, imp_df, epsilon, ser_ints, 1, 0.2)
 
+        with self.assertRaises(TypeError) as test_excep:
+            bp.LocImpBranchProPosteriorMultSI(
+                local_df, imp_df, epsilon, [0, 0], 1, 0.2)
+        self.assertTrue('must be iterable' in str(test_excep.exception))
+
+        with self.assertRaises(TypeError) as test_excep:
+            bp.LocImpBranchProPosteriorMultSI(
+                local_df, imp_df, epsilon, [['zero'], [1]], 1, 0.2)
+        self.assertTrue(
+            'distribution must contain' in str(test_excep.exception))
+
     def test_run_inference(self):
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
