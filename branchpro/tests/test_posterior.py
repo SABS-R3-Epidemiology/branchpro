@@ -140,13 +140,13 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
         bp.BranchProPosteriorMultSI(df, ser_ints, 1, 0.2)
 
         with self.assertRaises(TypeError) as test_excep:
-            bp.BranchProPosteriorMultSI(df, [0, 0], 1, 0.2)
+            bp.BranchProPosteriorMultSI(df, [[0], 0], 1, 0.2)
         self.assertTrue('must be iterable' in str(test_excep.exception))
 
         with self.assertRaises(TypeError) as test_excep:
-            bp.BranchProPosteriorMultSI(df, [['zero'], [1]], 1, 0.2)
+            bp.BranchProPosteriorMultSI(df, [[1], ['zero']], 1, 0.2)
         self.assertTrue(
-            'distribution must contain' in str(test_excep.exception))
+            'distributions must contain' in str(test_excep.exception))
 
     def test_get_serial_intervals(self):
         df = pd.DataFrame({
@@ -353,14 +353,14 @@ class TestLocImpBranchProPosteriorMultSIClass(unittest.TestCase):
 
         with self.assertRaises(TypeError) as test_excep:
             bp.LocImpBranchProPosteriorMultSI(
-                local_df, imp_df, epsilon, [0, 0], 1, 0.2)
+                local_df, imp_df, epsilon, [[0], 0], 1, 0.2)
         self.assertTrue('must be iterable' in str(test_excep.exception))
 
         with self.assertRaises(TypeError) as test_excep:
             bp.LocImpBranchProPosteriorMultSI(
-                local_df, imp_df, epsilon, [['zero'], [1]], 1, 0.2)
+                local_df, imp_df, epsilon, [[1], ['zero']], 1, 0.2)
         self.assertTrue(
-            'distribution must contain' in str(test_excep.exception))
+            'distributions must contain' in str(test_excep.exception))
 
     def test_run_inference(self):
         local_df = pd.DataFrame({
