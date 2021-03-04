@@ -191,13 +191,20 @@ class BranchProDashApp:
         message, data = self._read_uploaded_file(contents, filename, is_si)
 
         if message is None:
-            message = html.Div(['Loaded data from: {}'.format(filename)])
             if not is_si:
                 if ('Time' not in data.columns) or (
                         'Incidence Number' not in data.columns):
                     message = html.Div(['Incorrect format; file must contain a `Time` \
                         and `Incidence Number` column.'])
                     data = None
+                else:
+                    message = html.Div(
+                        ['Loaded data from: {}'.format(filename)])
+            else:
+                num_cols = data.shape[1]
+                message = html.Div(
+                    ['Loaded data ({} samples) from: {}'.format(num_cols,
+                                                                filename)])
 
         return message, data
 

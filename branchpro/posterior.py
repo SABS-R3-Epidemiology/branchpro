@@ -60,14 +60,7 @@ class BranchProPosterior(object):
         if not issubclass(type(inc_data), pd.DataFrame):
             raise TypeError('Incidence data has to be a dataframe')
 
-        try:
-            float(next(iter(daily_serial_interval)))
-        except (TypeError, StopIteration):
-            raise TypeError(
-                'Daily Serial Interval distribution must be iterable')
-        except ValueError:
-            raise TypeError('Daily Serial Interval distribution must contain '
-                            'numeric values')
+        self._check_serial(daily_serial_interval)
 
         if time_key not in inc_data.columns:
             raise ValueError('No time column with this name in given data')
@@ -91,6 +84,19 @@ class BranchProPosterior(object):
         self._serial_interval = np.asarray(daily_serial_interval)[::-1]
         self._normalizing_const = np.sum(self._serial_interval)
         self.prior_parameters = (alpha, beta)
+
+    def _check_serial(self, si):
+        """
+        Checks serial interval is iterable and only contains numeric values.
+        """
+        try:
+            float(next(iter(si)))
+        except (TypeError, StopIteration):
+            raise TypeError(
+                'Daily Serial Interval distributions must be iterable')
+        except ValueError:
+            raise TypeError('Daily Serial Interval distribution must contain \
+                            numeric values')
 
     def get_serial_intervals(self):
         """
@@ -206,9 +212,6 @@ class BranchProPosterior(object):
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
 
-        print(self._serial_interval)
-        print(shape, rate)
-
         # compute the Gamma-shaped posterior distribution
         post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
 
@@ -291,14 +294,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             inc_key)
 
         for si in daily_serial_intervals:
-            try:
-                float(next(iter(si)))
-            except (TypeError, StopIteration):
-                raise TypeError(
-                    'Daily Serial Interval distributions must be iterable')
-            except ValueError:
-                raise TypeError('Daily Serial Interval distributions must contain \
-                                numeric values')
+            self._check_serial(si)
 
         self._serial_intervals = np.flip(
             np.asarray(daily_serial_intervals), axis=1)
@@ -581,14 +577,7 @@ class LocImpBranchProPosteriorMultSI(
             daily_serial_intervals[0], alpha, beta, time_key, inc_key)
 
         for si in daily_serial_intervals:
-            try:
-                float(next(iter(si)))
-            except (TypeError, StopIteration):
-                raise TypeError(
-                    'Daily Serial Interval distributions must be iterable')
-            except ValueError:
-                raise TypeError('Daily Serial Interval distributions must contain \
-                                numeric values')
+            self._check_serial(si)
 
         self._serial_intervals = np.flip(
             np.asarray(daily_serial_intervals), axis=1)

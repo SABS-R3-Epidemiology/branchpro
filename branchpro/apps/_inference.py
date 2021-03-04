@@ -225,8 +225,11 @@ class BranchProInferenceApp(BranchProDashApp):
             raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns[:2]
-
         num_cols = len(self.session_data.get('interval_storage').columns)
+
+        prior_params = (new_alpha, new_beta)
+        labels = {'time_key': time_label, 'inc_key': inc_label}
+
         if num_cols == 1:
             serial_interval = self.session_data.get(
                 'interval_storage').iloc[:, 0].values
@@ -244,19 +247,16 @@ class BranchProInferenceApp(BranchProDashApp):
                     imported_data,
                     epsilon,
                     serial_interval,
-                    new_alpha,
-                    new_beta,
-                    time_key=time_label,
-                    inc_key=inc_label)
+                    *prior_params,
+                    **labels)
+
             else:
                 # Posterior follows the simple behaviour
                 posterior = bp.BranchProPosterior(
                     data,
                     serial_interval,
-                    new_alpha,
-                    new_beta,
-                    time_key=time_label,
-                    inc_key=inc_label)
+                    *prior_params,
+                    **labels)
 
         else:
             serial_intervals = self.session_data.get(
@@ -275,19 +275,15 @@ class BranchProInferenceApp(BranchProDashApp):
                     imported_data,
                     epsilon,
                     serial_intervals,
-                    new_alpha,
-                    new_beta,
-                    time_key=time_label,
-                    inc_key=inc_label)
+                    *prior_params,
+                    **labels)
             else:
                 # Posterior follows the simple behaviour
                 posterior = bp.BranchProPosteriorMultSI(
                     data,
                     serial_intervals,
-                    new_alpha,
-                    new_beta,
-                    time_key=time_label,
-                    inc_key=inc_label)
+                    *prior_params,
+                    **labels)
 
         posterior.run_inference(tau)
         return posterior.get_intervals(central_prob)

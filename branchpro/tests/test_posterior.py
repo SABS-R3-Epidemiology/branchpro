@@ -146,7 +146,7 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
         with self.assertRaises(TypeError) as test_excep:
             bp.BranchProPosteriorMultSI(df, [[1], ['zero']], 1, 0.2)
         self.assertTrue(
-            'distributions must contain' in str(test_excep.exception))
+            'distribution must contain' in str(test_excep.exception))
 
     def test_get_serial_intervals(self):
         df = pd.DataFrame({
@@ -360,7 +360,7 @@ class TestLocImpBranchProPosteriorMultSIClass(unittest.TestCase):
             bp.LocImpBranchProPosteriorMultSI(
                 local_df, imp_df, epsilon, [[1], ['zero']], 1, 0.2)
         self.assertTrue(
-            'distributions must contain' in str(test_excep.exception))
+            'distribution must contain' in str(test_excep.exception))
 
     def test_run_inference(self):
         local_df = pd.DataFrame({
