@@ -9,6 +9,7 @@
 
 import copy
 import numpy as np
+import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -26,10 +27,23 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
     def __init__(self):
         super().__init__()
 
-        self.session_data = {'data_storage': None}
+        self.session_data = {
+            'data_storage': None,
+            'interval_storage': None}
 
         self.app = dash.Dash(__name__, external_stylesheets=self.css)
         self.app.title = 'BranchproSim'
+
+        button_style = {
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        }
 
         self.app.layout = \
             html.Div([
@@ -49,31 +63,64 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                         dbc.Col(
                             self.update_sliders(), id='all-sliders')
                     ], align='center'),
-                    html.H4([
-                        'You can upload your own incidence data here. It will'
-                        'appear as bars, while the simulation will be a line.'
-                    ]),
-                    dcc.Upload(
-                        id='upload-data',
-                        children=html.Div([
-                            'Drag and Drop or ',
-                            html.A('Select Files',
-                                   style={'text-decoration': 'underline'}),
-                            ' to upload your Incidence Number data.'
-                        ]),
-                        style={
-                            'width': '100%',
-                            'height': '60px',
-                            'lineHeight': '60px',
-                            'borderWidth': '1px',
-                            'borderStyle': 'dashed',
-                            'borderRadius': '5px',
-                            'textAlign': 'center',
-                            'margin': '10px'
-                        },
-                        multiple=True  # Allow multiple files to be uploaded
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                children=[
+                                    html.H4([
+                                        'You can upload your own '
+                                        'incidence data here. It will'
+                                        'appear as bars, while the simulation '
+                                        'will be a line.'
+                                    ]),
+                                    dcc.Upload(
+                                        id='upload-data',
+                                        children=html.Div([
+                                            'Drag and Drop or ',
+                                            html.A(
+                                                'Select Files',
+                                                style={
+                                                    'text-decoration':
+                                                    'underline'}),
+                                            ' to upload your Incidence Number '
+                                            'data.'
+                                        ]),
+                                        style=button_style,
+                                        # Allow multiple files to be uploaded
+                                        multiple=True
+                                    ),
+                                    html.Div(id='incidence-data-upload')]),
+                            dbc.Col(
+                                children=[
+                                    html.H6([
+                                        'You can upload your own serial \
+                                            interval here.'
+                                    ]),
+                                    html.Div([
+                                        'Data must contain one serial '
+                                        'interval to be used for simulation'
+                                        ' displayed as a column.']),
+                                    dcc.Upload(
+                                        id='upload-interval',
+                                        children=html.Div(
+                                            [
+                                                'Drag and Drop or ',
+                                                html.A(
+                                                    'Select Files',
+                                                    style={
+                                                        'text-decoration': '\
+                                                            underline'}),
+                                                ' to upload your Serial \
+                                                    Interval.'
+                                            ]),
+                                        style=button_style,
+                                        # Allow multiple files to be uploaded
+                                        multiple=True
+                                    ),
+                                    html.Div(id='ser-interval-upload')])
+                        ],
+                        align='center',
                     ),
-                    html.Div(id='incidence-data-upload'),
                     html.Div([]),  # Empty div for bottom text
                     html.Div(id='data_storage', style={'display': 'none'}),
                     dcc.ConfirmDialog(
@@ -141,6 +188,17 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Make new sliders
         sliders = bp._SliderComponent()
+
+        if (data is not None) and ('Imported Cases' in data.columns):
+            # Add slider for epsilon only when imported cases are detected
+            # in the data with default assuming equal R numbers for local
+            # and imported cases
+            sliders.add_slider(
+                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01)
+        else:
+            sliders.add_slider(
+                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01, invisible=True)
+
         sliders.add_slider(
             'Initial Cases', 'init_cond', init_cond, 0.0, magnitude_init_cond,
             1, as_integer=True)
@@ -208,12 +266,35 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         if data is None:
             raise dash.exceptions.PreventUpdate()
 
-        time_label, inc_label = data.columns[:2]
+        time_label, inc_label = ('Time', 'Incidence Number')
         num_simulations = len(simulations.columns) - 1
 
         # Make a new figure
         plot = bp.IncidenceNumberPlot()
-        plot.add_data(data, time_key=time_label, inc_key=inc_label)
+        if 'Imported Cases' in data.columns:
+            # Separate data into local and imported cases
+            imported_data = pd.DataFrame({
+                time_label: data[time_label],
+                inc_label: data['Imported Cases']
+            })
+
+            # Bar plot of local cases
+            plot.add_data(
+                data.loc[:, :2],
+                time_key=time_label,
+                inc_key=inc_label,
+                name='Local Cases')
+
+            # Bar plot of imported cases
+            plot.add_data(
+                imported_data,
+                time_key=time_label,
+                inc_key=inc_label,
+                name='Imported Cases')
+
+        else:
+            # If no imported cases are present
+            plot.add_data(data, time_key=time_label, inc_key=inc_label)
 
         # Keeps traces visibility states fixed when changing sliders
         plot.figure['layout']['legend']['uirevision'] = True
@@ -231,7 +312,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         return plot.figure
 
-    def update_simulation(self, new_init_cond, new_r0, new_r1, new_t1):
+    def update_simulation(
+            self, new_init_cond, new_r0, new_r1, new_t1, new_epsilon):
         """Run a simulation of the branchpro model at the given slider values.
 
         Parameters
@@ -248,6 +330,10 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         new_t1
             (float) updated position on the slider for the time change in
             reproduction numbers for the Branch Pro model in the simulator.
+        new_epsilon
+            (float) updated position on the slider for the constant of
+            proportionality between local and imported cases for the Branch Pro
+            model in the posterior.
 
         Returns
         -------
@@ -255,6 +341,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             Simulations storage dataframe
         """
         data = self.session_data.get('data_storage')
+        serial_interval = self.session_data.get(
+            'interval_storage').iloc[:, 0].values
 
         if data is None:
             raise dash.exceptions.PreventUpdate()
@@ -266,7 +354,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         simulations = data[[time_label]]
 
         # Add the correct R profile to the branchpro model
-        br_pro_model = bp.BranchProModel(new_r0, np.array([1, 2, 3, 2, 1]))
+        if 'Imported Cases' in data.columns:
+            br_pro_model = bp.LocImpBranchProModel(
+                new_r0, serial_interval, new_epsilon)
+        else:
+            br_pro_model = bp.BranchProModel(new_r0, serial_interval)
         br_pro_model.set_r_profile([new_r0, new_r1], [0, new_t1])
 
         # Generate one simulation trajectory from this model
