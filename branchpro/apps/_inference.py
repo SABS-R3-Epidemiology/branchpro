@@ -220,40 +220,70 @@ class BranchProInferenceApp(BranchProDashApp):
         new_beta = mean / (stdev ** 2)
 
         data = self.session_data.get('data_storage')
-        serial_interval = self.session_data.get(
-            'interval_storage').iloc[:, 0].values
 
         if data is None:
             raise dash.exceptions.PreventUpdate()
 
         time_label, inc_label = data.columns[:2]
+        num_cols = len(self.session_data.get('interval_storage').columns)
 
-        if 'Imported Cases' in data.columns:
-            # Separate data into local and imported cases
-            imported_data = pd.DataFrame({
-                time_label: data[time_label],
-                inc_label: data['Imported Cases']
-            })
+        prior_params = (new_alpha, new_beta)
+        labels = {'time_key': time_label, 'inc_key': inc_label}
 
-            # Posterior follows the LocImp behaviour
-            posterior = bp.LocImpBranchProPosterior(
-                data,
-                imported_data,
-                epsilon,
-                serial_interval,
-                new_alpha,
-                new_beta,
-                time_key=time_label,
-                inc_key=inc_label)
+        if num_cols == 1:
+            serial_interval = self.session_data.get(
+                'interval_storage').iloc[:, 0].values
+
+            if 'Imported Cases' in data.columns:
+                # Separate data into local and imported cases
+                imported_data = pd.DataFrame({
+                    time_label: data[time_label],
+                    inc_label: data['Imported Cases']
+                })
+
+                # Posterior follows the LocImp behaviour
+                posterior = bp.LocImpBranchProPosterior(
+                    data,
+                    imported_data,
+                    epsilon,
+                    serial_interval,
+                    *prior_params,
+                    **labels)
+
+            else:
+                # Posterior follows the simple behaviour
+                posterior = bp.BranchProPosterior(
+                    data,
+                    serial_interval,
+                    *prior_params,
+                    **labels)
+
         else:
-            # Posterior follows the simple behaviour
-            posterior = bp.BranchProPosterior(
-                data,
-                serial_interval,
-                new_alpha,
-                new_beta,
-                time_key=time_label,
-                inc_key=inc_label)
+            serial_intervals = self.session_data.get(
+                'interval_storage').values.T
+
+            if 'Imported Cases' in data.columns:
+                # Separate data into local and imported cases
+                imported_data = pd.DataFrame({
+                    time_label: data[time_label],
+                    inc_label: data['Imported Cases']
+                })
+
+                # Posterior follows the LocImp behaviour
+                posterior = bp.LocImpBranchProPosteriorMultSI(
+                    data,
+                    imported_data,
+                    epsilon,
+                    serial_intervals,
+                    *prior_params,
+                    **labels)
+            else:
+                # Posterior follows the simple behaviour
+                posterior = bp.BranchProPosteriorMultSI(
+                    data,
+                    serial_intervals,
+                    *prior_params,
+                    **labels)
 
         posterior.run_inference(tau)
         return posterior.get_intervals(central_prob)

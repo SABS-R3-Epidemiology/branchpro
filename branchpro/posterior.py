@@ -60,14 +60,7 @@ class BranchProPosterior(object):
         if not issubclass(type(inc_data), pd.DataFrame):
             raise TypeError('Incidence data has to be a dataframe')
 
-        try:
-            float(next(iter(daily_serial_interval)))
-        except (TypeError, StopIteration):
-            raise TypeError(
-                'Daily Serial Interval distribution must be iterable')
-        except ValueError:
-            raise TypeError('Daily Serial Interval distribution must contain '
-                            'numeric values')
+        self._check_serial(daily_serial_interval)
 
         if time_key not in inc_data.columns:
             raise ValueError('No time column with this name in given data')
@@ -91,6 +84,19 @@ class BranchProPosterior(object):
         self._serial_interval = np.asarray(daily_serial_interval)[::-1]
         self._normalizing_const = np.sum(self._serial_interval)
         self.prior_parameters = (alpha, beta)
+
+    def _check_serial(self, si):
+        """
+        Checks serial interval is iterable and only contains numeric values.
+        """
+        try:
+            float(next(iter(si)))
+        except (TypeError, StopIteration):
+            raise TypeError(
+                'Daily Serial Interval distributions must be iterable')
+        except ValueError:
+            raise TypeError('Daily Serial Interval distribution must contain \
+                            numeric values')
 
     def get_serial_intervals(self):
         """
@@ -246,6 +252,151 @@ class BranchProPosterior(object):
         )
 
         return intervals_df
+
+
+#
+# BranchProPosteriorMultSI Class
+#
+
+
+class BranchProPosteriorMultSI(BranchProPosterior):
+    r"""BranchProPosteriorMultiSI Class:
+    Class for computing the posterior distribution used for the inference of
+    the reproduction numbers of an epidemic in the case of a branching process
+    using mutiple serial intevals. Based on the :class:`BranchProPosterior`.
+
+    Parameters
+    ----------
+    inc_data
+        (pandas Dataframe) contains numbers of new cases by time unit (usually
+        days).
+        Data stored in columns of with one for time and one for incidence
+        number, respectively.
+    daily_serial_intervals
+        (list of lists) List of unnormalised probability distributions of that
+        the recipient first displays symptoms s days after the infector first
+        displays symptoms.
+    alpha
+        the shape parameter of the Gamma distribution of the prior.
+    beta
+        the rate parameter of the Gamma distribution of the prior.
+    time_key
+        label key given to the temporal data in the inc_data dataframe.
+    inc_key
+        label key given to the incidental data in the inc_data dataframe.
+    """
+    def __init__(
+            self, inc_data, daily_serial_intervals, alpha, beta,
+            time_key='Time', inc_key='Incidence Number'):
+
+        super().__init__(
+            inc_data, daily_serial_intervals[0], alpha, beta, time_key,
+            inc_key)
+
+        for si in daily_serial_intervals:
+            self._check_serial(si)
+
+        self._serial_intervals = np.flip(
+            np.asarray(daily_serial_intervals), axis=1)
+        self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
+
+    def get_serial_intervals(self):
+        """
+        Returns serial intervals for the model.
+
+        """
+        # Reverse inverting of order of serial intervals
+        return np.flip(self._serial_intervals, axis=1)
+
+    def set_serial_intervals(self, serial_intervals):
+        """
+        Updates serial intervals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distributions of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms.
+
+        """
+        for si in serial_intervals:
+            if np.asarray(si).ndim != 1:
+                raise ValueError(
+                    'Chosen times storage format must be 2-dimensional')
+
+        # Invert order of serial intervals for ease in _effective_no_infectives
+        self._serial_intervals = np.flip(np.asarray(serial_intervals), axis=1)
+        self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
+
+    def run_inference(self, tau, num_samples=10000):
+        """
+        Runs the inference of the reproduction numbers based on the entirety
+        of the incidence data available.
+
+        First inferred R value is given at the immediate time point after which
+        the tau-window of the initial incidences ends.
+
+        Parameters
+        ----------
+        tau
+            size sliding time window over which the reproduction number is
+            estimated.
+        num_samples
+            (int) number of draws from the posterior computed for each serial
+            interval stored.
+        """
+        samples = []
+
+        for nc, si in zip(self._normalizing_consts, self._serial_intervals):
+            self._serial_interval = si
+            self._normalizing_const = nc
+            super().run_inference(tau)
+            samples.append(self.inference_posterior.rvs(
+                size=(num_samples, len(self.inference_posterior.args[0]))))
+
+        self._inference_samples = np.vstack(samples)
+
+    def get_intervals(self, central_prob):
+        """
+        Returns a dataframe of the reproduction number posterior mean
+        with percentiles over time.
+
+        The lower and upper percentiles are computed from the posterior
+        distribution, using the specified central probability to form an
+        equal-tailed interval.
+
+        The results are returned in a dataframe with the following columns:
+        'Time Points', 'Mean', 'Lower bound CI' and 'Upper bound CI'
+
+        Parameters
+        ----------
+        central_prob
+            level of the computed credible interval of the estimated
+            R number values. The interval the central probability.
+        """
+        # compute mean and bounds of credible interval of level central_prob
+        self.inference_estimates = np.mean(self._inference_samples, axis=0)
+        lb = 100*(1-central_prob)/2
+        ub = 100*(1+central_prob)/2
+        post_dist_interval = np.percentile(
+            self._inference_samples, q=np.array([lb, ub]), axis=0)
+
+        intervals_df = pd.DataFrame(
+            {
+                'Time Points': self.inference_times,
+                'Mean': self.inference_estimates,
+                'Lower bound CI': post_dist_interval[0],
+                'Upper bound CI': post_dist_interval[1],
+                'Central Probability': central_prob
+            }
+        )
+
+        return intervals_df
+
+#
+# LocImpBranchProPosterior Class
+#
 
 
 class LocImpBranchProPosterior(BranchProPosterior):
@@ -405,3 +556,57 @@ class LocImpBranchProPosterior(BranchProPosterior):
             self.cases_times.min()+1+tau, self.cases_times.max()+1))
         self.inference_estimates = mean
         self.inference_posterior = post_dist
+
+
+#
+# LocImpBranchProPosteriorMultSI
+#
+
+
+class LocImpBranchProPosteriorMultSI(
+        BranchProPosteriorMultSI, LocImpBranchProPosterior):
+    r"""
+    """
+    def __init__(
+            self, inc_data, imported_inc_data, epsilon,
+            daily_serial_intervals, alpha, beta,
+            time_key='Time', inc_key='Incidence Number'):
+
+        LocImpBranchProPosterior.__init__(
+            self, inc_data, imported_inc_data, epsilon,
+            daily_serial_intervals[0], alpha, beta, time_key, inc_key)
+
+        for si in daily_serial_intervals:
+            self._check_serial(si)
+
+        self._serial_intervals = np.flip(
+            np.asarray(daily_serial_intervals), axis=1)
+        self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
+
+    def run_inference(self, tau, num_samples=10000):
+        """
+        Runs the inference of the reproduction numbers based on the entirety
+        of the incidence data available.
+
+        First inferred R value is given at the immediate time point after which
+        the tau-window of the initial incidences ends.
+
+        Parameters
+        ----------
+        tau
+            size sliding time window over which the reproduction number is
+            estimated.
+        num_samples
+            (int) number of draws from the posterior computed for each serial
+            interval stored.
+        """
+        samples = []
+
+        for nc, si in zip(self._normalizing_consts, self._serial_intervals):
+            self._serial_interval = si
+            self._normalizing_const = nc
+            LocImpBranchProPosterior.run_inference(self, tau)
+            samples.append(self.inference_posterior.rvs(
+                size=(num_samples, len(self.inference_posterior.args[0]))))
+
+        self._inference_samples = np.vstack(samples)
