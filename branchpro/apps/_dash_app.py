@@ -144,7 +144,7 @@ class BranchProDashApp:
                         if isinstance(data[0, _], str) and \
                                 not data[0, _].isnumeric():
                             return html.Div(['Incorrect format; file must not have a \
-                            header']), None
+                            header.']), None
                 else:
                     data = pd.read_csv(
                         io.StringIO(decoded.decode('utf-8')))
@@ -199,12 +199,18 @@ class BranchProDashApp:
                     data = None
                 else:
                     message = html.Div(
-                        ['Loaded data from: {}'.format(filename)])
+                        ['Loaded data from: {}.'.format(filename)])
             else:
                 num_cols = data.shape[1]
-                message = html.Div(
-                    ['Loaded data ({} samples) from: {}'.format(num_cols,
-                                                                filename)])
+                if num_cols > 1000:
+                    message = html.Div(['Exceeded maximum number of serial intervals \
+                        allowed (Max = 1000).'])
+                    data = None
+                else:
+                    message = html.Div(
+                        ['Loaded data ({} samples) from: {}.'.format(num_cols,
+                                                                     filename)]
+                        )
 
         return message, data
 
