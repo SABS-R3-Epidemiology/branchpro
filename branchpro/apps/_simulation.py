@@ -126,7 +126,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Calculate slider values that depend on the data
         if data is not None:
-            time_label, inc_label = data.columns
+            time_label, inc_label = data.columns[:2]
             if magnitude_init_cond is None:
                 magnitude_init_cond = max(data[inc_label])
             bounds = (1, max(data[time_label]))
@@ -208,7 +208,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         if data is None:
             raise dash.exceptions.PreventUpdate()
 
-        time_label, inc_label = data.columns
+        time_label, inc_label = data.columns[:2]
         num_simulations = len(simulations.columns) - 1
 
         # Make a new figure
@@ -259,7 +259,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         if data is None:
             raise dash.exceptions.PreventUpdate()
 
-        time_label, inc_label = data.columns
+        time_label, inc_label = data.columns[:2]
         times = data[time_label]
 
         # Make a new dataframe to save the simulation result
