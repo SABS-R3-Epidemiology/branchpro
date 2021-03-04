@@ -216,8 +216,8 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
         self.assertEqual(len(intervals_df['Lower bound CI']), 3)
         self.assertEqual(len(intervals_df['Upper bound CI']), 3)
 
-        npt.assert_almost_equal(
-            intervals_df['Mean'].to_numpy(), np.array([5.0] * 3), decimal=1)
+        npt.assert_allclose(
+            intervals_df['Mean'].to_numpy(), np.array([5.0] * 3), atol=0.5)
         self.assertEqual(
             intervals_df['Central Probability'].to_list(), [.95] * 3)
 
