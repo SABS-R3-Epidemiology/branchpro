@@ -69,9 +69,11 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                                 children=[
                                     html.H4([
                                         'You can upload your own '
-                                        'incidence data here. It will'
-                                        'appear as bars, while the simulation '
-                                        'will be a line.'
+                                        'incidence data here.'
+                                    ]),
+                                    html.Div([
+                                        'It will appear as bars, while'
+                                        ' the simulation will be a line.'
                                     ]),
                                     dcc.Upload(
                                         id='upload-data',
