@@ -56,42 +56,69 @@ class BranchProInferenceApp(BranchProDashApp):
                                 figure=bp.IncidenceNumberPlot().figure,
                                 id='data-fig'))
                     ),
-                    html.H4([
-                        'You can upload your own incidence data here. It will '
-                        'appear as bars.'
-                    ]),
-                    html.H6([
-                        'Data must be in the following column format: `Time`, '
-                        '`Incidence number`, `Imported Cases` (optional), '
-                        '`R_t` (true value of R, optional)'
-                    ]),
-                    dcc.Upload(
-                        id='upload-data',
-                        children=html.Div([
-                            'Drag and Drop or ',
-                            html.A('Select Files',
-                                   style={'text-decoration': 'underline'}),
-                            ' to upload your Incidence Number data.'
-                        ]),
-                        style=button_style,
-                        multiple=True  # Allow multiple files to be uploaded
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                children=[
+                                    html.H6([
+                                        'You can upload your own incidence \
+                                            data here. It will appear as bars \
+                                                .']),
+                                    html.Div([
+                                        'Data must be in the following column '
+                                        'format: `Time`, `Incidence number`, '
+                                        '`Imported Cases` (optional), '
+                                        '`R_t` (true value of R, optional).']),
+                                    dcc.Upload(
+                                        id='upload-data',
+                                        children=html.Div(
+                                            [
+                                                'Drag and Drop or ',
+                                                html.A(
+                                                    'Select Files',
+                                                    style={
+                                                        'text-decoration':
+                                                            'underline'}),
+                                                ' to upload your Incidence \
+                                                    Number data.'
+                                            ]),
+                                        style=button_style,
+                                        # Allow multiple files to be uploaded
+                                        multiple=True
+                                    ),
+                                    html.Div(id='incidence-data-upload')]),
+                            dbc.Col(
+                                children=[
+                                    html.H6([
+                                        'You can upload your own serial \
+                                            interval here.'
+                                    ]),
+                                    html.Div([
+                                        'Data must contain one or more serial '
+                                        'intervals to be used for constructing'
+                                        ' the posterior distributions each '
+                                        'included as a column.']),
+                                    dcc.Upload(
+                                        id='upload-interval',
+                                        children=html.Div(
+                                            [
+                                                'Drag and Drop or ',
+                                                html.A(
+                                                    'Select Files',
+                                                    style={
+                                                        'text-decoration': '\
+                                                            underline'}),
+                                                ' to upload your Serial \
+                                                    Interval.'
+                                            ]),
+                                        style=button_style,
+                                        # Allow multiple files to be uploaded
+                                        multiple=True
+                                    ),
+                                    html.Div(id='ser-interval-upload')])
+                        ],
+                        align='center',
                     ),
-                    html.Div(id='incidence-data-upload'),
-                    html.H4([
-                        'You can upload your own serial interval here.'
-                    ]),
-                    dcc.Upload(
-                        id='upload-interval',
-                        children=html.Div([
-                            'Drag and Drop or ',
-                            html.A('Select Files',
-                                   style={'text-decoration': 'underline'}),
-                            ' to upload your Serial Interval.'
-                        ]),
-                        style=button_style,
-                        multiple=True  # Allow multiple files to be uploaded
-                    ),
-                    html.Div(id='ser-interval-upload'),
                     html.H2('Plot of R values'),
                     dbc.Row(
                         [
