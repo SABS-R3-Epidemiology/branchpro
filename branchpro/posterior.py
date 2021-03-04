@@ -352,8 +352,9 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             self._serial_interval = si
             self._normalizing_const = nc
             super().run_inference(tau)
-            samples.append(self.inference_posterior.rvs(
-                size=(num_samples, len(self.inference_posterior.args[0]))))
+            samples.append(np.asarray(self.inference_posterior.rvs(
+                size=(num_samples, len(
+                    self.inference_posterior.args[0]))), dtype=np.float32))
 
         self._inference_samples = np.vstack(samples)
 
@@ -606,7 +607,8 @@ class LocImpBranchProPosteriorMultSI(
             self._serial_interval = si
             self._normalizing_const = nc
             LocImpBranchProPosterior.run_inference(self, tau)
-            samples.append(self.inference_posterior.rvs(
-                size=(num_samples, len(self.inference_posterior.args[0]))))
+            samples.append(np.asarray(self.inference_posterior.rvs(
+                size=(num_samples, len(
+                    self.inference_posterior.args[0]))), dtype=np.float32))
 
         self._inference_samples = np.vstack(samples)
