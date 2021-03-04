@@ -329,7 +329,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._serial_intervals = np.flip(np.asarray(serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau, num_samples=10000):
+    def run_inference(self, tau, num_samples=1000):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
@@ -583,7 +583,7 @@ class LocImpBranchProPosteriorMultSI(
             np.asarray(daily_serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau, num_samples=10000):
+    def run_inference(self, tau, num_samples=1000):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
