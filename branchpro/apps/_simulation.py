@@ -278,6 +278,6 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
             data = -np.ones(max(times))
 
         # Add data to simulations storage
-        simulations[inc_label] = data
+        simulations.loc[:, inc_label] = data
 
         return simulations
