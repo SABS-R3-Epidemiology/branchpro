@@ -77,8 +77,8 @@ class BranchProInferenceApp(BranchProDashApp):
                                                 html.A(
                                                     'Select Files',
                                                     style={
-                                                        'text-decoration': 'under\
-                                                            line'}),
+                                                        'text-decoration':
+                                                            'underline'}),
                                                 ' to upload your Incidence \
                                                     Number data.'
                                             ]),
