@@ -32,7 +32,7 @@ french_flu_data = pd.DataFrame({
             'Incidence Number': small_ffd['inc']
         })
 
-serial_interval = np.array()
+serial_interval = np.array([1, 2, 3, 2, 1])
 
 sliders = ['epsilon', 'init_cond', 'r0', 'r1', 't1']
 
@@ -135,24 +135,28 @@ def update_slider_ranges(*args):
     Input('all-sliders', 'children'),
     [Input(s, 'value') for s in sliders],
     Input('sim-button', 'n_clicks'),
+    Input('interval_storage', 'children'),
     State('myfig', 'figure'),
     State('data_storage', 'children'),
 )
 def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
-    _, init_cond, r0, r1, t1, _, fig, data_json = args
+    _, epsilon, init_cond, r0, r1, t1, _, interval_json, fig, data_json = args
 
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
 
     with app.lock:
-        app.refresh_user_data_json(data_storage=data_json)
-        new_sim = app.update_simulation(init_cond, r0, r1, t1)
+        app.refresh_user_data_json(
+            data_storage=data_json, interval_storage=interval_json)
+
+        new_sim = app.update_simulation(init_cond, r0, r1, t1, epsilon)
         if np.all(new_sim.iloc[:, -1] == -1):
             overflow = True
         else:
             overflow = False
+
         return (app.update_figure(fig=fig, simulations=new_sim, source=source),
                 overflow)
 
