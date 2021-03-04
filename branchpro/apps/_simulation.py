@@ -125,6 +125,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                     ),
                     html.Div([]),  # Empty div for bottom text
                     html.Div(id='data_storage', style={'display': 'none'}),
+                    html.Div(id='interval_storage', style={'display': 'none'}),
                     dcc.ConfirmDialog(
                         id='confirm',
                         message='Simulation failed due to overflow!',
@@ -138,7 +139,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
         # Save the locations of texts from the layout
         self.main_text = self.app.layout.children[0].children[1].children
-        self.collapsed_text = self.app.layout.children[0].children[-3].children
+        self.collapsed_text = self.app.layout.children[0].children[-4].children
 
     def update_sliders(self,
                        init_cond=10.0,
@@ -237,12 +238,22 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         plotly.Figure
             Figure with updated data and simulations
         """
+        data = self.session_data.get('data_storage')
+
+        if data is None:
+            raise dash.exceptions.PreventUpdate()
+
         if fig is not None and simulations is not None:
             # Check if there is a faster way to update the figure
-            if len(fig['data']) > 0 and source in ['init_cond', 'r0', 'r1',
-                                                   't1']:
+            if len(fig['data']) > 0 and source in ['epsilon', 'init_cond',
+                                                   'r0', 'r1', 't1']:
                 # Clear all traces except one simulation and the data
-                fig['data'] = [fig['data'][0], fig['data'][-1]]
+                if ('Imported Cases' in data.columns) and (
+                        'Incidence Number' in data.columns):
+                    fig['data'] = [fig['data'][0],
+                                   fig['data'][1], fig['data'][-1]]
+                else:
+                    fig['data'] = [fig['data'][0], fig['data'][-1]]
 
                 # Set the y values of that trace equal to an updated simulation
                 fig['data'][-1]['y'] = simulations.iloc[:, -1]
@@ -254,7 +265,13 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 fig['data'].append(copy.deepcopy(fig['data'][-1]))
                 fig['data'][-1]['y'] = simulations.iloc[:, -1]
 
-                for i in range(len(fig['data'])-2):
+                if ('Imported Cases' in data.columns) and (
+                        'Incidence Number' in data.columns):
+                    sim_tuple = range(1, len(fig['data'])-2)
+                else:
+                    sim_tuple = range(len(fig['data'])-2)
+
+                for i in sim_tuple:
                     # Change opacity of all traces in the figure but for the
                     # first - the barplot of incidences
                     # last - the latest simulation
@@ -263,12 +280,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
 
                 return fig
 
-        data = self.session_data.get('data_storage')
-
-        if data is None:
-            raise dash.exceptions.PreventUpdate()
-
-        time_label, inc_label = ('Time', 'Incidence Number')
+        time_label, inc_label = (data.columns[0], 'Incidence Number')
         num_simulations = len(simulations.columns) - 1
 
         # Make a new figure
@@ -280,12 +292,13 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                 inc_label: data['Imported Cases']
             })
 
-            # Bar plot of local cases
-            plot.add_data(
-                data.loc[:, :2],
-                time_key=time_label,
-                inc_key=inc_label,
-                name='Local Cases')
+            if 'Incidence Number' in data.columns:
+                # Bar plot of local cases
+                plot.add_data(
+                    data.iloc[:, :2],
+                    time_key=time_label,
+                    inc_key=inc_label,
+                    name='Local Cases')
 
             # Bar plot of imported cases
             plot.add_data(
@@ -349,7 +362,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         if data is None:
             raise dash.exceptions.PreventUpdate()
 
-        time_label, inc_label = data.columns[:2]
+        time_label, inc_label = (data.columns[0], 'Incidence Number')
         times = data[time_label]
 
         # Make a new dataframe to save the simulation result
@@ -359,19 +372,22 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         if 'Imported Cases' in data.columns:
             br_pro_model = bp.LocImpBranchProModel(
                 new_r0, serial_interval, new_epsilon)
+            br_pro_model.set_imported_cases(
+                times, data.loc[:, ['Imported Cases']].squeeze().tolist())
         else:
             br_pro_model = bp.BranchProModel(new_r0, serial_interval)
         br_pro_model.set_r_profile([new_r0, new_r1], [0, new_t1])
 
         # Generate one simulation trajectory from this model
         simulation_controller = bp.SimulationController(
-            br_pro_model, 1, max(times))
+            br_pro_model, min(times), max(times))
         try:
             data = simulation_controller.run(new_init_cond)
         except ValueError:
             data = -np.ones(max(times))
 
         # Add data to simulations storage
+        print(times, len(times), len(data))
         simulations.loc[:, inc_label] = data
 
         return simulations

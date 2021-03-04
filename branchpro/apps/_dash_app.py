@@ -193,9 +193,11 @@ class BranchProDashApp:
         if message is None:
             if not is_si:
                 if ('Time' not in data.columns) or (
-                        'Incidence Number' not in data.columns):
+                        ('Imported Cases' not in data.columns) and (
+                        'Incidence Number' not in data.columns)):
                     message = html.Div(['Incorrect format; file must contain a `Time` \
-                        and `Incidence Number` column.'])
+                        and `Incidence Number` and / or `Imported Cases` \
+                            column.'])
                     data = None
                 else:
                     message = html.Div(
