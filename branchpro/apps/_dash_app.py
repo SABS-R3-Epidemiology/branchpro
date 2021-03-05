@@ -150,10 +150,14 @@ class BranchProDashApp:
                         io.StringIO(decoded.decode('utf-8')))
                     time_key = data.columns[0]
                     data_times = data[time_key]
+                    values = {
+                        'Incidence Number': 0,
+                        'Imported Cases': 0
+                    }
                     data = data.set_index(time_key).reindex(
                         range(
                             min(data_times), max(data_times)+1)
-                            ).fillna(0).reset_index()
+                            ).fillna(value=values).reset_index()
 
                 return None, data
             else:
