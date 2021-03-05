@@ -11,6 +11,7 @@ import threading
 import base64
 import io
 import os
+import csv
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
@@ -146,18 +147,23 @@ class BranchProDashApp:
                             return html.Div(['Incorrect format; file must not have a \
                             header.']), None
                 else:
-                    data = pd.read_csv(
-                        io.StringIO(decoded.decode('utf-8')))
-                    time_key = data.columns[0]
-                    data_times = data[time_key]
-                    values = {
-                        'Incidence Number': 0,
-                        'Imported Cases': 0
-                    }
-                    data = data.set_index(time_key).reindex(
-                        range(
-                            min(data_times), max(data_times)+1)
-                            ).fillna(value=values).reset_index()
+                    if not csv.Sniffer().has_header(
+                            io.StringIO(decoded.decode('utf-8')).getvalue()):
+                        return html.Div(['Incorrect format; file must have a \
+                            header.']), None
+                    else:
+                        data = pd.read_csv(
+                            io.StringIO(decoded.decode('utf-8')))
+                        time_key = data.columns[0]
+                        data_times = data[time_key]
+                        values = {
+                            'Incidence Number': 0,
+                            'Imported Cases': 0
+                        }
+                        data = data.set_index(time_key).reindex(
+                            range(
+                                min(data_times), max(data_times)+1)
+                                ).fillna(value=values).reset_index()
 
                 return None, data
             else:
@@ -201,6 +207,9 @@ class BranchProDashApp:
             be None.
         """
         message, data = self._read_uploaded_file(contents, filename, is_si)
+
+        if data is None:
+            return message, data
 
         if not is_si:
             if sim_app:
