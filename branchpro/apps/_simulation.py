@@ -74,6 +74,8 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                                     html.Div([
                                         'It will appear as bars, while'
                                         ' the simulation will be a line.'
+                                        ' You can upload both local and '
+                                        '/ or imported incidence data.'
                                     ]),
                                     dcc.Upload(
                                         id='upload-data',
@@ -101,7 +103,9 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                                     html.Div([
                                         'Data must contain one serial '
                                         'interval to be used for simulation'
-                                        ' displayed as a column.']),
+                                        ' displayed as a column. If multiple '
+                                        'serial intervals are uploaded, the '
+                                        'first one will be used.']),
                                     dcc.Upload(
                                         id='upload-interval',
                                         children=html.Div(
