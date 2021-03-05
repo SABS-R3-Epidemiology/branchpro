@@ -94,7 +94,7 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                                     html.Div(id='incidence-data-upload')]),
                             dbc.Col(
                                 children=[
-                                    html.H6([
+                                    html.H4([
                                         'You can upload your own serial \
                                             interval here.'
                                     ]),
@@ -382,12 +382,14 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
         simulation_controller = bp.SimulationController(
             br_pro_model, min(times), max(times))
         try:
-            data = simulation_controller.run(new_init_cond)
+            sim_data = simulation_controller.run(new_init_cond)
         except ValueError:
-            data = -np.ones(max(times))
+            sim_data = -np.ones(max(times))
 
         # Add data to simulations storage
-        print(times, len(times), len(data))
-        simulations.loc[:, inc_label] = data
+        sim_times = simulation_controller.get_regime()
+        simulations = pd.DataFrame({
+            time_label: sim_times,
+            inc_label: sim_data})
 
         return simulations

@@ -148,6 +148,12 @@ class BranchProDashApp:
                 else:
                     data = pd.read_csv(
                         io.StringIO(decoded.decode('utf-8')))
+                    time_key = data.columns[0]
+                    data_times = data[time_key]
+                    data = data.set_index(time_key).reindex(
+                        range(
+                            min(data_times), max(data_times)+1)
+                            ).fillna(0).reset_index()
 
                 return None, data
             else:
@@ -158,7 +164,7 @@ class BranchProDashApp:
                 'There was an error processing this file.'
             ]), None
 
-    def parse_contents(self, contents, filename, is_si=False):
+    def parse_contents(self, contents, filename, is_si=False, sim_app=False):
         """Load a text (csv) file into a pandas dataframe.
 
         This method is for loading:
@@ -177,6 +183,8 @@ class BranchProDashApp:
         is_si : boolean
             Function of the file in the context of the app, true if uploaded
             data is a serial interval.
+        sim_app : boolean
+            Data to be read will be used for the simulation app.
 
 
         Returns
@@ -190,14 +198,22 @@ class BranchProDashApp:
         """
         message, data = self._read_uploaded_file(contents, filename, is_si)
 
+        if not is_si:
+            if sim_app:
+                inc_col_cond = (
+                    ('Imported Cases' not in data.columns) and (
+                        'Incidence Number' not in data.columns))
+                str_message = '`Incidence Number` and / or `Imported Cases`\
+                    column'
+            else:
+                inc_col_cond = ('Incidence Number' not in data.columns)
+                str_message = '`Incidence Number` column'
+
         if message is None:
             if not is_si:
-                if ('Time' not in data.columns) or (
-                        ('Imported Cases' not in data.columns) and (
-                        'Incidence Number' not in data.columns)):
+                if ('Time' not in data.columns) or inc_col_cond:
                     message = html.Div(['Incorrect format; file must contain a `Time` \
-                        and `Incidence Number` and / or `Imported Cases` \
-                            column.'])
+                        and {}.'.format(str_message)])
                     data = None
                 else:
                     message = html.Div(

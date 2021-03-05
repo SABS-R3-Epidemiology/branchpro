@@ -67,7 +67,8 @@ def load_data(*args):
             # Run content parser for each file and get message
             # Only use latest file
             message, data = app.parse_contents(list_contents[-1],
-                                               list_names[-1])
+                                               list_names[-1],
+                                               sim_app=True)
 
             if data is None:
                 # The file could not be loaded, so keep the current data and
