@@ -292,6 +292,10 @@ class LocImpBranchProModel(BranchProModel):
             R_{t}^{\text(local)}\sum_{s=1}^{t}I_{t-s}^{\text(local)}w_{s} +
             R_{t}^{\text(imported)}\sum_{s=1}^{t}I_{t-s}^{\text(imported)}w_{s}
 
+    Always apply methods :meth:`set_r_profile` and :meth:`set_imported_cases`
+    before calling :meth:`LocImpBranchProModel.simulate` for a change of R_t
+    profile and for loading the imported cases data!
+
     Parameters
     ----------
     initial_r

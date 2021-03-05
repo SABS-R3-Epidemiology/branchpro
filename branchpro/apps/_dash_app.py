@@ -11,6 +11,7 @@ import threading
 import base64
 import io
 import os
+import csv
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
@@ -146,8 +147,23 @@ class BranchProDashApp:
                             return html.Div(['Incorrect format; file must not have a \
                             header.']), None
                 else:
-                    data = pd.read_csv(
-                        io.StringIO(decoded.decode('utf-8')))
+                    if not csv.Sniffer().has_header(
+                            io.StringIO(decoded.decode('utf-8')).getvalue()):
+                        return html.Div(['Incorrect format; file must have a \
+                            header.']), None
+                    else:
+                        data = pd.read_csv(
+                            io.StringIO(decoded.decode('utf-8')))
+                        time_key = data.columns[0]
+                        data_times = data[time_key]
+                        values = {
+                            'Incidence Number': 0,
+                            'Imported Cases': 0
+                        }
+                        data = data.set_index(time_key).reindex(
+                            range(
+                                min(data_times), max(data_times)+1)
+                                ).fillna(value=values).reset_index()
 
                 return None, data
             else:
@@ -158,7 +174,7 @@ class BranchProDashApp:
                 'There was an error processing this file.'
             ]), None
 
-    def parse_contents(self, contents, filename, is_si=False):
+    def parse_contents(self, contents, filename, is_si=False, sim_app=False):
         """Load a text (csv) file into a pandas dataframe.
 
         This method is for loading:
@@ -177,6 +193,8 @@ class BranchProDashApp:
         is_si : boolean
             Function of the file in the context of the app, true if uploaded
             data is a serial interval.
+        sim_app : boolean
+            Data to be read will be used for the simulation app.
 
 
         Returns
@@ -190,12 +208,25 @@ class BranchProDashApp:
         """
         message, data = self._read_uploaded_file(contents, filename, is_si)
 
+        if data is None:
+            return message, data
+
+        if not is_si:
+            if sim_app:
+                inc_col_cond = (
+                    ('Imported Cases' not in data.columns) and (
+                        'Incidence Number' not in data.columns))
+                str_message = '`Incidence Number` and / or `Imported Cases`\
+                    column'
+            else:
+                inc_col_cond = ('Incidence Number' not in data.columns)
+                str_message = '`Incidence Number` column'
+
         if message is None:
             if not is_si:
-                if ('Time' not in data.columns) or (
-                        'Incidence Number' not in data.columns):
+                if ('Time' not in data.columns) or inc_col_cond:
                     message = html.Div(['Incorrect format; file must contain a `Time` \
-                        and `Incidence Number` column.'])
+                        and {}.'.format(str_message)])
                     data = None
                 else:
                     message = html.Div(

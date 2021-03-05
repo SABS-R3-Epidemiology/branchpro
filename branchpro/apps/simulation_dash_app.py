@@ -11,6 +11,7 @@ with fixed example data. To run the app, use ``python dash_app.py``.
 """
 
 import os
+import json
 
 import numpy as np
 import pandas as pd
@@ -31,7 +32,9 @@ french_flu_data = pd.DataFrame({
             'Incidence Number': small_ffd['inc']
         })
 
-sliders = ['init_cond', 'r0', 'r1', 't1']
+serial_interval = np.array([1, 2, 3, 2, 1])
+
+sliders = ['epsilon', 'init_cond', 'r0', 'r1', 't1']
 
 # Add the explanation texts
 fname = os.path.join(os.path.dirname(__file__), 'data', 'dash_app_text.md')
@@ -64,7 +67,8 @@ def load_data(*args):
             # Run content parser for each file and get message
             # Only use latest file
             message, data = app.parse_contents(list_contents[-1],
-                                               list_names[-1])
+                                               list_names[-1],
+                                               sim_app=True)
 
             if data is None:
                 # The file could not be loaded, so keep the current data and
@@ -76,6 +80,39 @@ def load_data(*args):
         else:
             message = html.Div(['No data file selected.'])
             data = french_flu_data.to_json()
+
+        return message, data
+
+
+@app.app.callback(
+    Output('ser-interval-upload', 'children'),
+    Output('interval_storage', 'children'),
+    Input('upload-interval', 'contents'),
+    State('upload-interval', 'filename'),
+)
+def load_interval(*args):
+    """Load serial interval from a file and save it in storage.
+    """
+    list_contents, list_names = args
+
+    with app.lock:
+        if list_contents is not None:
+            # Run content parser for each file and get message
+            # Only use latest file
+            message, data = app.parse_contents(list_contents[-1],
+                                               list_names[-1],
+                                               is_si=True)
+
+            if data is None:
+                # The file could not be loaded, so keep the current data and
+                # try to prevent updates to any other part of the app
+                return message, dash.no_update
+            else:
+                data = json.dumps(data.tolist())
+
+        else:
+            message = html.Div(['Default serial interval in use.'])
+            data = json.dumps(serial_interval.tolist())
 
         return message, data
 
@@ -99,24 +136,28 @@ def update_slider_ranges(*args):
     Input('all-sliders', 'children'),
     [Input(s, 'value') for s in sliders],
     Input('sim-button', 'n_clicks'),
+    Input('interval_storage', 'children'),
     State('myfig', 'figure'),
     State('data_storage', 'children'),
 )
 def update_figure(*args):
     """Handles all updates to the incidence number figure.
     """
-    _, init_cond, r0, r1, t1, _, fig, data_json = args
+    _, epsilon, init_cond, r0, r1, t1, _, interval_json, fig, data_json = args
 
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
 
     with app.lock:
-        app.refresh_user_data_json(data_storage=data_json)
-        new_sim = app.update_simulation(init_cond, r0, r1, t1)
+        app.refresh_user_data_json(
+            data_storage=data_json, interval_storage=interval_json)
+
+        new_sim = app.update_simulation(init_cond, r0, r1, t1, epsilon)
         if np.all(new_sim.iloc[:, -1] == -1):
             overflow = True
         else:
             overflow = False
+
         return (app.update_figure(fig=fig, simulations=new_sim, source=source),
                 overflow)
 
