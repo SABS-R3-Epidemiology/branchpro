@@ -5,10 +5,10 @@
 # notice and full license details.
 #
 
-"""Processing script for Australian serial intervaldata from [1]_.
+"""Processing script for Australian serial interval data from [1]_.
 
-It generating multiple serial intervals from a lognormal distribution
-with parameetrs as shown in the EpiNow repository:
+It generates multiple serial intervals from a lognormal distribution
+with parameters as shown in the EpiNow repository:
 https://github.com/epiforecasts/EpiNow/tree/master/data-raw.
 
 References
@@ -42,8 +42,8 @@ def write_ser_int_data(name):
 
     # Split it into param1 and param2 of the lognormal distribution
     # Keep only 1000 of the pairs
-    s_data = data['param1'].to_numpy()[:1000]
-    scale_data = data['param2'].to_numpy()[:1000]
+    s_data = data['param2'].to_numpy()[:1000]
+    scale_data = data['param1'].to_numpy()[:1000]
 
     si_data = np.zeros((60, 1000))
 
