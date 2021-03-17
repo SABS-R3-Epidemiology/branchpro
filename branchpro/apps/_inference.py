@@ -61,9 +61,21 @@ class BranchProInferenceApp(BranchProDashApp):
                             dbc.Col(
                                 children=[
                                     html.H6([
-                                        'You can upload your own incidence \
-                                            data here. It will appear as bars \
-                                                .']),
+                                        'You can upload your own ',
+                                        html.Span(
+                                            'incidence data',
+                                            id='id-tooltip',
+                                            style={
+                                                'textDecoration':
+                                                    'underline',
+                                                'cursor':
+                                                    'pointer'},
+                                        ),
+                                        ' here. It will appear as bars.']),
+                                    dbc.Tooltip(
+                                        'here it is',
+                                        target='id-tooltip',
+                                    ),
                                     html.Div([
                                         'Data must be in the following column '
                                         'format: `Time`, `Incidence number`, '
@@ -90,9 +102,22 @@ class BranchProInferenceApp(BranchProDashApp):
                             dbc.Col(
                                 children=[
                                     html.H6([
-                                        'You can upload your own serial \
-                                            interval here.'
+                                        'You can upload your own ',
+                                        html.Span(
+                                            'serial interval',
+                                            id='si-tooltip',
+                                            style={
+                                                'textDecoration':
+                                                    'underline',
+                                                'cursor':
+                                                    'pointer'}
+                                        ),
+                                        ' here.'
                                     ]),
+                                    dbc.Tooltip(
+                                        'here is the other one',
+                                        target='si-tooltip',
+                                    ),
                                     html.Div([
                                         'Data must contain one or more serial '
                                         'intervals to be used for constructing'

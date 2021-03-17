@@ -68,9 +68,22 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                             dbc.Col(
                                 children=[
                                     html.H4([
-                                        'You can upload your own '
-                                        'incidence data here.'
+                                        'You can upload your own ',
+                                        html.Span(
+                                            'incidence data',
+                                            id='id-tooltip',
+                                            style={
+                                                'textDecoration':
+                                                    'underline',
+                                                'cursor':
+                                                    'pointer'},
+                                        ),
+                                        ' here.'
                                     ]),
+                                    dbc.Tooltip(
+                                        'here it is',
+                                        target='id-tooltip'
+                                    ),
                                     html.Div([
                                         'It will appear as bars, while'
                                         ' the simulation will be a line.'
@@ -97,9 +110,22 @@ class IncidenceNumberSimulationApp(BranchProDashApp):
                             dbc.Col(
                                 children=[
                                     html.H4([
-                                        'You can upload your own serial \
-                                            interval here.'
+                                        'You can upload your own ',
+                                        html.Span(
+                                            'serial interval',
+                                            id='si-tooltip',
+                                            style={
+                                                'textDecoration':
+                                                    'underline',
+                                                'cursor':
+                                                    'pointer'}
+                                        ),
+                                        ' here.'
                                     ]),
+                                    dbc.Tooltip(
+                                        'here is the other one',
+                                        target='si-tooltip',
+                                    ),
                                     html.Div([
                                         'Data must contain one serial '
                                         'interval to be used for simulation'
