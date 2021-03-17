@@ -18,6 +18,7 @@ References
 """
 
 import datetime
+import os
 import pandas
 
 
@@ -36,7 +37,8 @@ def write_state_data(state, start_date='2020-03-01', end_date='2020-05-01'):
         Last day (year-month-day)
     """
     # Select data from the given state
-    data = pandas.read_csv('cases.csv')
+    data = pandas.read_csv(
+        os.path.join(os.path.dirname(__file__), 'cases.csv'))
     data = data[data['region'] == state]
 
     # Split it into local, imported, and unknown cases
@@ -71,7 +73,9 @@ def write_state_data(state, start_date='2020-03-01', end_date='2020-05-01'):
     # Keep only those columns we are using
     data = data[['Time', 'Incidence Number', 'Imported Cases', 'date']]
 
-    data.to_csv('{}.csv'.format(state), index=False)
+    data.to_csv(
+        os.path.join(os.path.dirname(__file__), '{}.csv'.format(state)),
+        index=False)
 
 
 def main():
