@@ -118,7 +118,9 @@ inc_modal = [
                                 'bold'})
                 ]),
             html.P(['e.g.']),
-            dbc.Table.from_dataframe(df, bordered=True, hover=True)]),
+            dbc.Table.from_dataframe(df, bordered=True, hover=True),
+            'Missing days are filled in automatically. Missing data will \
+                be replaced with 0.']),
     dbc.ModalFooter(
                     dbc.Button(
                         'Close', id='inc_modal_close', className='ml-auto')
@@ -162,9 +164,42 @@ si_modal = [
             ' (comma separated values) format and will be displayed as a table with no \
                     columns names. ',
             html.P([
-                'Each serial interval is displayed',
-                ' as a column (as opposed to a row). ',
-                'Alternatively, each column could represent MCMC samples ',
+                'Each ',
+                html.Span(
+                    'serial interval',
+                    id='si',
+                    style={
+                        'font-weight':
+                            'bold'}
+                ),
+                ' is displayed',
+                ' as a ',
+                html.Span(
+                    'column',
+                    id='column',
+                    style={
+                        'font-weight':
+                            'bold'}
+                ),
+                ' (as opposed to a row). ',
+                'For each serial interval, each ',
+                html.Span(
+                    'row',
+                    id='row',
+                    style={
+                        'font-weight':
+                            'bold'}
+                ),
+                ' represents the ',
+                html.Span(
+                    'value by day ',
+                    id='daily',
+                    style={
+                        'font-weight':
+                            'bold'}
+                ),
+                ' (i.e. daily serial interval).',
+                ' Alternatively, each column could represent MCMC samples ',
                 'from a posterior distribution of the serial interval instead.'
             ]),
             html.P(['e.g.']),
