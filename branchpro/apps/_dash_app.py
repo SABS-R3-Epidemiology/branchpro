@@ -53,6 +53,134 @@ index_str_math = """<!DOCTYPE html>
 </html>
 """
 
+df = pd.DataFrame({
+    'Time': [1, 3, 4, 5],
+    'Incidence Number': [10, 50, 7, 50],
+    'Imported Cases': [1, None, 1, 1],
+    'R_t': [0.5, 2, 1, 2.5]
+})
+
+inc_modal = [
+    dbc.ModalHeader(html.H6(['Incidence Data'])),
+    dbc.ModalBody(
+        [
+            'The data for the incidences comes in either ',
+            html.Span(
+                '.csv',
+                id='csv_inc',
+                style={
+                    'font-weight':
+                        'bold',
+                    'cursor':
+                        'pointer'}
+            ),
+            ' or ',
+            html.Span(
+                '.txt',
+                id='txt_inc',
+                style={
+                    'font-weight':
+                        'bold',
+                    'cursor':
+                        'pointer'}
+            ),
+            ' format and will be displayed as a table with the \
+                following column names:',
+            dbc.ListGroup(
+                [
+                    dbc.ListGroupItem(
+                        'Time (compulsory)',
+                        style={
+                            'font-weight':
+                                'bold',
+                            'cursor':
+                                'pointer'}
+                        ),
+                    dbc.ListGroupItem([
+                        'Incidence Number (compulsory if no ',
+                        html.Span(
+                            'Imported Cases',
+                            id='Imported Cases',
+                            style={
+                                'font-weight':
+                                    'lighter',
+                                'cursor':
+                                    'pointer'}
+                        ),
+                        ' column is present)'],
+                        style={
+                            'font-weight':
+                                'bold',
+                            'cursor':
+                                'pointer'}),
+                    dbc.ListGroupItem(
+                        'Imported Cases (optional)',
+                        style={
+                            'font-weight':
+                                'bold',
+                            'cursor':
+                                'pointer'}),
+                    dbc.ListGroupItem(
+                        'R_t (optional).',
+                        style={
+                            'font-weight':
+                                'bold',
+                            'cursor':
+                                'pointer'})
+                ]),
+            html.P(['e.g.']),
+            dbc.Table.from_dataframe(df, bordered=True, hover=True)]),
+    dbc.ModalFooter(
+                    dbc.Button(
+                        'Close', id='inc_modal_close', className='ml-auto')
+                ),
+]
+
+row1 = html.Tr(
+    [html.Td('0'), html.Td('0'), html.Td('1'), html.Td('0.001')])
+row2 = html.Tr(
+    [html.Td('0.233'), html.Td('2'), html.Td('0'), html.Td('0.003')])
+row3 = html.Tr(
+    [html.Td('0.359'), html.Td('4'), html.Td('0'), html.Td('0.027')])
+row4 = html.Tr([
+    html.Td('0.198'), html.Td('2'), html.Td('0'), html.Td('0.057')])
+
+table_body = [html.Tbody([row1, row2, row3, row4])]
+
+si_modal = [
+    dbc.ModalHeader(html.H6(['Serial Interval'])),
+    dbc.ModalBody(
+        [
+            'The data for the incidences comes in either ',
+            html.Span(
+                '.csv',
+                id='csv_si',
+                style={
+                    'font-weight':
+                        'bold',
+                    'cursor':
+                        'pointer'}
+            ),
+            ' or ',
+            html.Span(
+                '.txt',
+                id='txt_si',
+                style={
+                    'font-weight':
+                        'bold',
+                    'cursor':
+                        'pointer'}
+            ),
+            ' format and will be displayed as a table with no \
+                    columns names.',
+            html.P(['e.g.']),
+            dbc.Table(table_body, bordered=True, hover=True)]),
+    dbc.ModalFooter(
+                    dbc.Button(
+                        'Close', id='si_modal_close', className='ml-auto')
+                ),
+]
+
 
 class BranchProDashApp:
     """Base class for dash apps for branching processes.
@@ -78,6 +206,8 @@ class BranchProDashApp:
         self.session_data = {}
         self.mathjax_html = index_str_math
         self.mathjax_script = mathjax_script
+        self._inc_modal = inc_modal
+        self._si_modal = si_modal
 
         self.lock = threading.Lock()
 

@@ -64,7 +64,7 @@ class BranchProInferenceApp(BranchProDashApp):
                                         'You can upload your own ',
                                         html.Span(
                                             'incidence data',
-                                            id='id-tooltip',
+                                            id='inc-tooltip',
                                             style={
                                                 'textDecoration':
                                                     'underline',
@@ -72,9 +72,10 @@ class BranchProInferenceApp(BranchProDashApp):
                                                     'pointer'},
                                         ),
                                         ' here. It will appear as bars.']),
-                                    dbc.Tooltip(
-                                        'here it is',
-                                        target='id-tooltip',
+                                    dbc.Modal(
+                                        self._inc_modal,
+                                        id='inc_modal',
+                                        size='xl',
                                     ),
                                     html.Div([
                                         'Data must be in the following column '
@@ -114,9 +115,10 @@ class BranchProInferenceApp(BranchProDashApp):
                                         ),
                                         ' here.'
                                     ]),
-                                    dbc.Tooltip(
-                                        'here is the other one',
-                                        target='si-tooltip',
+                                    dbc.Modal(
+                                        self._si_modal,
+                                        id='si_modal',
+                                        size='lg',
                                     ),
                                     html.Div([
                                         'Data must contain one or more serial '
