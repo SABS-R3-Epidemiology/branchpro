@@ -83,7 +83,7 @@ inc_modal = [
                     'font-weight':
                         'bold'}
             ),
-            ' format and will be displayed as a table with the \
+            ' (comma separated values) format and will be displayed as a table with the \
                 following column names:',
             dbc.ListGroup(
                 [
@@ -159,7 +159,7 @@ si_modal = [
                     'font-weight':
                         'bold'}
             ),
-            ' format and will be displayed as a table with no \
+            ' (comma separated values) format and will be displayed as a table with no \
                     columns names. ',
             html.P([
                 'Each serial interval is displayed',
