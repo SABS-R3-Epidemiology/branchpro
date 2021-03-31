@@ -53,6 +53,7 @@ index_str_math = """<!DOCTYPE html>
 </html>
 """
 
+# Head of the Incidence Data dataframe example
 df = pd.DataFrame({
     'Time': [1, 3, 4, 5],
     'Incidence Number': [10, 50, 7, 50],
@@ -60,6 +61,8 @@ df = pd.DataFrame({
     'R_t': [0.5, 2, 1, 2.5]
 })
 
+# Text for the modal explaining how uploaded Incidence Data
+# files should look like
 inc_modal = [
     dbc.ModalHeader(html.H6(['Incidence Data'])),
     dbc.ModalBody(
@@ -70,9 +73,7 @@ inc_modal = [
                 id='csv_inc',
                 style={
                     'font-weight':
-                        'bold',
-                    'cursor':
-                        'pointer'}
+                        'bold'}
             ),
             ' or ',
             html.Span(
@@ -80,9 +81,7 @@ inc_modal = [
                 id='txt_inc',
                 style={
                     'font-weight':
-                        'bold',
-                    'cursor':
-                        'pointer'}
+                        'bold'}
             ),
             ' format and will be displayed as a table with the \
                 following column names:',
@@ -92,9 +91,7 @@ inc_modal = [
                         'Time (compulsory)',
                         style={
                             'font-weight':
-                                'bold',
-                            'cursor':
-                                'pointer'}
+                                'bold'}
                         ),
                     dbc.ListGroupItem([
                         'Incidence Number (compulsory if no ',
@@ -103,30 +100,22 @@ inc_modal = [
                             id='Imported Cases',
                             style={
                                 'font-weight':
-                                    'lighter',
-                                'cursor':
-                                    'pointer'}
+                                    'lighter'}
                         ),
                         ' column is present)'],
                         style={
                             'font-weight':
-                                'bold',
-                            'cursor':
-                                'pointer'}),
+                                'bold'}),
                     dbc.ListGroupItem(
                         'Imported Cases (optional)',
                         style={
                             'font-weight':
-                                'bold',
-                            'cursor':
-                                'pointer'}),
+                                'bold'}),
                     dbc.ListGroupItem(
                         'R_t (optional).',
                         style={
                             'font-weight':
-                                'bold',
-                            'cursor':
-                                'pointer'})
+                                'bold'})
                 ]),
             html.P(['e.g.']),
             dbc.Table.from_dataframe(df, bordered=True, hover=True)]),
@@ -136,6 +125,7 @@ inc_modal = [
                 ),
 ]
 
+# Head of the Serial Interval table example
 row1 = html.Tr(
     [html.Td('0'), html.Td('0'), html.Td('1'), html.Td('0.001')])
 row2 = html.Tr(
@@ -147,19 +137,19 @@ row4 = html.Tr([
 
 table_body = [html.Tbody([row1, row2, row3, row4])]
 
+# Text for the modal explaining how uploaded Serial Interval
+# files should look like
 si_modal = [
     dbc.ModalHeader(html.H6(['Serial Interval'])),
     dbc.ModalBody(
         [
-            'The data for the incidences comes in either ',
+            'The data for the serial intervals comes in either ',
             html.Span(
                 '.csv',
                 id='csv_si',
                 style={
                     'font-weight':
-                        'bold',
-                    'cursor':
-                        'pointer'}
+                        'bold'}
             ),
             ' or ',
             html.Span(
@@ -167,12 +157,16 @@ si_modal = [
                 id='txt_si',
                 style={
                     'font-weight':
-                        'bold',
-                    'cursor':
-                        'pointer'}
+                        'bold'}
             ),
             ' format and will be displayed as a table with no \
-                    columns names.',
+                    columns names. ',
+            html.P([
+                'Each serial interval is displayed',
+                ' as a column (as opposed to a row). ',
+                'Alternatively, each column could represent MCMC samples ',
+                'from a posterior distribution of the serial interval instead.'
+            ]),
             html.P(['e.g.']),
             dbc.Table(table_body, bordered=True, hover=True)]),
     dbc.ModalFooter(
