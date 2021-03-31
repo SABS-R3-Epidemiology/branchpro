@@ -38,11 +38,16 @@ def write_state_data(start_date='Sun Mar 01 2020', end_date='Wed Mar 17 2021'):
     data = pandas.read_csv(
         os.path.join(os.path.dirname(__file__), 'cases.csv'))
 
+    # Rename date column.
+    data = data.rename(columns={'category': 'date'})
+
     # Split it into local, imported, and unknown cases
     imported_data = \
-        data[data['import_status'] == 'Overseas acquired']
-    local_data = data[data['import_status'] == 'Locally acquired']
-    unknown_data = data['Other']
+        data[['Travel', 'date']]
+    local_data = data[
+        ['Close contact', 'Community spread', 'Outbreak setting',
+         'Other', 'date']]
+    unknown_data = data[['Other', 'date']]
 
     # Rename columns to the names we are using in the app
     imported_data = imported_data.rename(columns={'cases': 'Imported Cases'})
