@@ -67,7 +67,7 @@ setup(
         # Dependencies go here!
         'numpy>=1.8',
         'dash>=1.18',
-        'dash_bootstrap_components',
+        'dash_bootstrap_components>=0.12',
         'dash_daq',
         'dash_defer_js_import',
         'pandas',
