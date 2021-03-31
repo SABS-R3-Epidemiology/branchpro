@@ -82,7 +82,9 @@ def write_state_data(start_date='Sun Mar 01 2020', end_date='Wed Mar 17 2021'):
                     for x in data['processed-date']]
 
     # Keep only those columns we are using
-    data = data[['Time', 'Incidence Number', 'Imported Cases', 'date']]
+    data = data[
+        ['Time', 'Incidence Number', 'Imported Cases', 'processed-date']]
+    data = data.rename(columns={'processed-date': 'date'})
 
     data.to_csv(
         os.path.join(os.path.dirname(__file__), 'ON.csv'),
