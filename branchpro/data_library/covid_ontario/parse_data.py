@@ -12,9 +12,9 @@ into the format expected by our app.
 
 References
 ----------
-.. [1] Price, David J., et al. "Early analysis of the Australian COVID-19
-       epidemic." Elife 9 (2020): e58785.
-       https://elifesciences.org/articles/58785/figures#content
+.. [1] Government of Ontario, Public Health Case and Contact Management
+       Solution (CCM), (last viewed March 31 2021).
+       https://covid-19.ontario.ca/data/likely-source-infection
 """
 
 import time
@@ -25,16 +25,14 @@ import pandas
 
 
 def write_state_data(start_date='Sun Mar 01 2020', end_date='Wed Mar 17 2021'):
-    """Write a new csv file for the selected state.
-
-    The new filename is given by the argument state.
+    """Write a new csv file for the data.
 
     Parameters
     ----------
     start_date : str
-        First day (year-month-day)
+        First day (Week_day Month Day Year)
     end_date : str
-        Last day (year-month-day)
+        Last day (Week_day Month Day Year)
     """
     # Select data from the given state
     data = pandas.read_csv(
