@@ -24,3 +24,48 @@ Thompson RN, Stockwin JE, van Gaalen RD, Polonsky JA, Kamvar ZN, Demarsh PA,
 Dahlqwist E, Li S, Miguel E, Jombart T, Lessler J. (2019). Improved inference of
 time-varying reproduction numbers during infectious disease outbreaks.
 Epidemics 29: 100356.
+
+## Installation procedure
+***
+One way to install the module is to download the repositiory to your machine of choice and type the following commands in the terminal. 
+```bash
+git clone https://github.com/SABS-R3-Epidemiology/branchpro.git
+cd ../path/to/the/file
+```
+
+A different method to install this is using `pip`:
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+```python
+import branchpro
+import numpy as np
+
+# create a simple branching process model with prescribed initial R and serial interval
+branchpro.BranchProModel(initial_r=0.5, serial_interval=[0, 0.15, 0.52, 0.3, 0.01])
+
+# create branching process model with local and imported cases with prescribed initial R 
+# and serial interval
+# set imported cases data
+libr_model_1 = branchpro.LocImpBranchProModel(
+  initial_r=2, serial_interval=np.array([1, 2, 3, 2, 1]), epsilon=0)
+libr_model_1.set_imported_cases(times=[1, 2.0, 4, 8], cases=[5, 10, 9, 2])
+
+# create the posterior of a branching process model for multiple daily serial intervals
+# and incidence data contained in the dataframe df; prior distribution is Gamma with
+# parameters alpha and beta (shape, rate)
+branchpro.BranchProPosteriorMultSI(
+  inc_data=df, daily_serial_intervals=[[1, 2], [0, 1]], alpha=1, beta=0.2)
+```
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+[BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
