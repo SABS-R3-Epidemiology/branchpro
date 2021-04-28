@@ -9,8 +9,8 @@
 It rewrites the data file into the format expected by our app.
 References
 ----------
-.. [1] Institute of Environmental Science and Research (ESR), (updated April 14 2021).
-       https://nzcoviddashboard.esr.cri.nz/#!/source
+.. [1] Institute of Environmental Science and Research (ESR), (updated April 14
+       2021). https://nzcoviddashboard.esr.cri.nz/#!/source
 """
 
 import datetime
