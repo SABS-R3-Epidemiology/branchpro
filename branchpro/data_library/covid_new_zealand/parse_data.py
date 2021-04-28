@@ -35,7 +35,7 @@ def main():
     for i, row in data.iterrows():
         date = row['Date']
         day, month, year = date.split('/')
-        date = '{}-{:02d}-{:02d}'.format(year, int(month),int(day))
+        date = '{}-{:02d}-{:02d}'.format(year, int(month), int(day))
 
         # Add up the import-related case and imported case
         new_data[date][1] += row['Daily import-related case']
