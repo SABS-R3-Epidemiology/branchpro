@@ -43,7 +43,8 @@ def main():
 
         # add the daily under investigation to the daily locally acquired cases
         new_data[date][0] += row['Daily locally acquired case  unknown source']
-        new_data[date][0] += row['Daily locally acquired  epidemiologically linked']
+        new_data[date][0] += \
+            row['Daily locally acquired  epidemiologically linked']
         new_data[date][0] += row['Daily under investigation']
 
     all_dates = sorted(list(new_data.keys()))
