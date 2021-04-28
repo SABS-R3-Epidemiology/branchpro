@@ -30,7 +30,7 @@ def main():
     data = pandas.read_csv(
         os.path.join(os.path.dirname(__file__), 'cases.csv'))
     # Initialize a dictionary for the new data
-    new_data = defaultdict(lambda : [0, 0])
+    new_data = defaultdict(lambda: [0, 0])
 
     for i, row in data.iterrows():
         date = row['Date']
