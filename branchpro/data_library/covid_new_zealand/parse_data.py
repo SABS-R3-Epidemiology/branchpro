@@ -22,9 +22,9 @@ from collections import defaultdict
 def main():
     """
     Rewrite a new csv file for the data in the desired format.
-    We combine the daily import-related and imported cases as the imported case,
-    and we add the daily under investigation to the daily locally acquired cases
-    (with unknown source and epidemiologically linked)
+    We combine the daily import-related and imported cases as the imported
+    case, and we add the daily under investigation to the daily locally
+    acquired cases (with unknown source and epidemiologically linked)
     """
     # Read the original data
     data = pandas.read_csv(
