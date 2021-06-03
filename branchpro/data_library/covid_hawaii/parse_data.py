@@ -7,12 +7,13 @@
 
 """Processing script for Hawaiian data from [1]_.
 
-It splits the cases by county, selects certain dates, and rewrites the data file
-into the format expected by our app.
+It splits the cases by county, selects certain dates, and rewrites the data
+file into the format expected by our app.
 
 References
 ----------
-.. [1] State of Hawaii Department of Health, Disease Outbreak Control Division (DOCD), (last viewed April 14 2021).
+.. [1] State of Hawaii Department of Health, Disease Outbreak Control Division
+       (DOCD), (last viewed April 14 2021).
        https://health.hawaii.gov/coronavirusdisease2019/what-you-should-know/current-situation-in-hawaii/
 """
 
@@ -47,20 +48,24 @@ def write_state_data(state, start_date='3/5/2020'):
     # Unknown cases is treated as 'No Travel History' in the data
     imported_data = \
         data[data['Traveler'] == 'Travel History']
-    imported_data = imported_data.groupby('processed-date',as_index=False).sum()
+    imported_data = imported_data.groupby(
+        'processed-date', as_index=False).sum()
     local_data = data[data['Traveler'] == 'No Travel History']
-    local_data = local_data.groupby('processed-date',as_index=False).sum()
-    
+    local_data = local_data.groupby(
+        'processed-date', as_index=False).sum()
+
     # Rename columns to the names we are using in the app
-    imported_data = imported_data.rename(columns={'Total Number of Cases': 'Imported Cases'})
-    local_data = local_data.rename(columns={'Total Number of Cases': 'Incidence Number'})
+    imported_data = imported_data.rename(
+        columns={'Total Number of Cases': 'Imported Cases'})
+    local_data = local_data.rename(
+        columns={'Total Number of Cases': 'Incidence Number'})
 
     # Join all sets of cases on date
-    data = pandas.merge(local_data, imported_data, on=['processed-date'], how='outer')
+    data = pandas.merge(local_data, imported_data,
+                        on=['processed-date'], how='outer')
     data = data.fillna(value=0)
 
-    # # Process dates
-    # data['processed-date'] = [process_dates(x) for x in data['date']]
+    # Process dates
     data = data.sort_values('processed-date')
 
     # Add a column 'Time', which is the number of days from start_date
@@ -69,16 +74,19 @@ def write_state_data(state, start_date='3/5/2020'):
                     for x in data['processed-date']]
 
     # Keep only those columns we are using
-    data = data[['Time', 'Incidence Number', 'Imported Cases', 'processed-date']]
+    data = data[['Time', 'Incidence Number',
+                'Imported Cases', 'processed-date']]
     data = data.rename(columns={'processed-date': 'date'})
 
     data.to_csv(
         os.path.join(os.path.dirname(__file__), '{}.csv'.format(state)),
-        index=False)    
+        index=False)
+
 
 def process_dates(date):
     return datetime.date(
         *map(int, [date.split('/')[2]] + date.split('/')[:2]))
+
 
 def write_all_data(all_states):
     # Read data
@@ -93,8 +101,8 @@ def write_all_data(all_states):
     all_data = all_data.reset_index()
     for i in range(len(all_data.index)):
         all_data.loc[i, 'Time'] = (datetime.date(
-            *map(int, all_data.loc[i, 'date'].split('-'))) 
-            - datetime.date(2020,3,5)).days + 1
+            *map(int, all_data.loc[i, 'date'].split('-')))
+            - datetime.date(2020, 3, 5)).days + 1
     all_data = all_data[['Time', 'Incidence Number', 'Imported Cases', 'date']]
 
     all_data.to_csv(
@@ -109,6 +117,7 @@ def main():
         write_state_data(state)
 
     write_all_data(all_states)
+
 
 if __name__ == '__main__':
     main()
