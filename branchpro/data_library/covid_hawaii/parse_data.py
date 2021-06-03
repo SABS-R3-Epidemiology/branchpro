@@ -80,11 +80,35 @@ def process_dates(date):
     return datetime.date(
         *map(int, [date.split('/')[2]] + date.split('/')[:2]))
 
+def write_all_data(all_states):
+    # Read data
+    all_data = pandas.DataFrame()
+    for states in all_states:
+        data = pandas.read_csv(
+            os.path.join(os.path.dirname(__file__), states + '.csv'))
+        all_data = all_data.append(data)
+    all_data = all_data.set_index('date')
+    all_data = all_data.sum(level='date')
+    all_data = all_data.sort_values('date')
+    all_data = all_data.reset_index()
+    for i in range(len(all_data.index)):
+        all_data.loc[i, 'Time'] = (datetime.date(
+            *map(int, all_data.loc[i, 'date'].split('-'))) 
+            - datetime.date(2020,3,5)).days + 1
+    all_data = all_data[['Time', 'Incidence Number', 'Imported Cases', 'date']]
+
+    all_data.to_csv(
+        os.path.join(os.path.dirname(__file__), 'HI.csv'),
+        index=False)
+
+
 def main():
     all_states = ['Hawaii', 'Honolulu', 'Kauai', 'Maui']
 
     for state in all_states:
         write_state_data(state)
+
+    write_all_data(all_states)
 
 if __name__ == '__main__':
     main()
