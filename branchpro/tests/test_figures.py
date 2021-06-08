@@ -111,7 +111,7 @@ class TestPlotForwardSimulations(unittest.TestCase):
 
     def test_plot(self):
         # Test plotting the figure
-        with patch('matplotlib.pyplot.show') as p:
+        with patch('matplotlib.pyplot.show') as _:
             fig = branchpro.figures.plot_forward_simulations(
                 self.imported_cases.values,
                 self.start_times[self.R_t_start:],
@@ -146,13 +146,10 @@ class TestPlotRInference(unittest.TestCase):
 
         # Get time points from the data
         num_timepoints = max(data['Time'])
-        data_times = data['Time']
         start_times = np.arange(1, num_timepoints+1, dtype=int)
-        times = np.arange(num_timepoints+1)
 
         # Same inference, but using the LocImpBranchProPosterior
         tau = 6
-        R_t_start = tau+1
         a = 1
         b = 0.2
 
@@ -203,17 +200,16 @@ class TestPlotRInference(unittest.TestCase):
         cls.prior_median = median
         cls.all_intervals = all_intervals
 
-
     def test_plot(self):
         # Test plotting the figure
-        with patch('matplotlib.pyplot.show') as p:
+        with patch('matplotlib.pyplot.show') as _:
             fig = branchpro.figures.plot_r_inference(
                 datetime.datetime(2020, 3, 1),
                 self.locally_infected_cases,
                 self.imported_cases,
                 datetime.datetime(2020, 3, 7),
                 self.epsilon_range,
-                [self.all_intervals.loc[self.all_intervals['Epsilon']==e]
+                [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                 self.prior_median,
                 show=True)
