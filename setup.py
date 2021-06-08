@@ -65,6 +65,7 @@ setup(
     # List of dependencies
     install_requires=[
         # Dependencies go here!
+        'matplotlib',
         'numpy>=1.8',
         'dash>=1.18',
         'dash_bootstrap_components>=0.12',
