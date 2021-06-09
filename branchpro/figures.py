@@ -6,7 +6,18 @@
 #
 """Figure functions for the imported cases paper.
 
-These are fixed, static figures, not part of the web app.
+These functions are intended for producing highly customized static figures for
+a report concerning imported cases in branching process models. For more
+generally applicable visualizations, please see:
+
+ - :class:`branchpro.IncidenceNumberPlot`
+ - :class:`branchpro.ReproductionNumberPlot`
+
+as well as the Dash apps:
+
+ - :class:`branchpro.IncidenceNumberSimulationApp`
+ - :class:`branchpro.BranchProInferenceApp`
+
 """
 
 import datetime
