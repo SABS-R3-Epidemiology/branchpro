@@ -154,7 +154,7 @@ def plot_r_inference(first_day_data,
                      epsilons,
                      R_t_results,
                      prior_mid,
-                     default_epsilon=0,
+                     default_epsilon=1,
                      show=True):
     """Make a figure showing R_t inference for different choices of epsilon.
 
