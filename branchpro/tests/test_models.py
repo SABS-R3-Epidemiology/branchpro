@@ -115,8 +115,8 @@ class TestLocImpBranchProModelClass(unittest.TestCase):
 
     def test_set_epsilon(self):
         libr_model1 = bp.LocImpBranchProModel(0, [1, 2], 0)
-        libr_model1.set_epsilon(1)
-        self.assertEqual(libr_model1.epsilon, 1)
+        libr_model1.set_epsilon(1.5)
+        self.assertEqual(libr_model1.epsilon, 1.5)
 
     def test_set_imported_cases(self):
         libr_model = bp.LocImpBranchProModel(0, [1, 2], 0)
