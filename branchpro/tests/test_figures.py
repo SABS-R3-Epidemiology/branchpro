@@ -72,7 +72,7 @@ class TestPlotForwardSimulations(unittest.TestCase):
         new_rs = intervals['Mean'].values.tolist()
 
         # Run simulation of local cases for various values of epsilon
-        epsilon_values = [-0.75, 0, 1.5]
+        epsilon_values = [0.25, 1.0, 1.5]
         initial_r = new_rs[0]
         si = np.median(serial_intervals, axis=0)
         parameters = 0  # initial number of cases
@@ -160,7 +160,7 @@ class TestPlotRInference(unittest.TestCase):
                         'Upper bound CI',
                         'Central Probability',
                         'Epsilon']
-        epsilon_range = [-0.8, -0.5, 0, 0.5, 1.5]
+        epsilon_range = [0.2, 0.5, 1.0, 1.5, 2.0]
         all_intervals = pd.DataFrame(columns=column_names)
 
         # Transform our incidence data into pandas dataframes
@@ -212,7 +212,7 @@ class TestPlotRInference(unittest.TestCase):
                 [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                 self.prior_median,
-                default_epsilon=0,
+                default_epsilon=1,
                 show=True)
 
         # Check that all plots are present

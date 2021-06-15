@@ -261,7 +261,7 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
 
         with self.assertRaises(ValueError) as test_excep:
             bp.LocImpBranchProPosterior(local_df, imp_df, -3, ser_int, 1, 0.2)
-        self.assertTrue('greater or equal to -1' in str(test_excep.exception))
+        self.assertTrue('greater or equal to 0' in str(test_excep.exception))
 
         with self.assertRaises(TypeError) as test_excep:
             bp.LocImpBranchProPosterior(local_df, '0', 0, ser_int, 1, 0.2)
