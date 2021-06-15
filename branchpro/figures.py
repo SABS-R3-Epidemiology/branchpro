@@ -255,14 +255,14 @@ def plot_r_inference(first_day_data,
             # Plot shaded region for R_t
             line, = ax.plot(date_times,
                             results['Mean'],
-                            color='royalblue',
+                            color='red',
                             lw=1.0,
                             zorder=7)
             shade = ax.fill_between(date_times,
                                     results['Lower bound CI'],
                                     results['Upper bound CI'],
                                     alpha=0.3,
-                                    color='royalblue',
+                                    color='red',
                                     zorder=6,
                                     linewidth=0.0)
 
