@@ -420,7 +420,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
     proportional to the R number of the local incidences:
 
     .. math::
-        R_{t}^{\text(imported)} = (1 + \epsilon)R_{t}^{\text(local)}
+        R_{t}^{\text(imported)} = \epsilon R_{t}^{\text(local)}
 
     Parameters
     ----------
@@ -503,8 +503,8 @@ class LocImpBranchProPosterior(BranchProPosterior):
         """
         if not isinstance(new_epsilon, (int, float)):
             raise TypeError('Value of epsilon must be integer or float.')
-        if new_epsilon < -1:
-            raise ValueError('Epsilon needs to be greater or equal to -1.')
+        if new_epsilon < 0:
+            raise ValueError('Epsilon needs to be greater or equal to 0.')
 
         self.epsilon = new_epsilon
 
@@ -544,7 +544,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
 
             rate.append(beta + self._infectives_in_tau(
                 self.cases_data, start_window, end_window) +
-                (1 + self.epsilon) * self._infectives_in_tau(
+                self.epsilon * self._infectives_in_tau(
                 self.imp_cases_data, start_window, end_window))
 
         # compute the mean of the Gamma-shaped posterior over time
