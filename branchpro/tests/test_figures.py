@@ -59,11 +59,11 @@ class TestPlotForwardSimulations(unittest.TestCase):
             }
         )
 
-        # Run inference with epsilon = 0 to get R trajectory
+        # Run inference with epsilon = 1 to get R trajectory
         inference = branchpro.LocImpBranchProPosteriorMultSI(
             inc_data=inc_data,
             imported_inc_data=imported_inc_data,
-            epsilon=0,
+            epsilon=1,
             daily_serial_intervals=serial_intervals,
             alpha=a,
             beta=1/b)
