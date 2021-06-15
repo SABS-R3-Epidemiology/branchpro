@@ -186,7 +186,7 @@ def plot_r_inference(first_day_data,
         'Upper bound CI'.
     prior_mid : float
         The prior median of R_t
-    default_epsilon : float, optional (0)
+    default_epsilon : float, optional (1)
         The value of epsilon whose inference results will be compared to the
         results from all other values of epsilon.
     show : bool, optional (True)

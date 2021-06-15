@@ -212,6 +212,7 @@ class TestPlotRInference(unittest.TestCase):
                 [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                 self.prior_median,
+                default_epsilon=0,
                 show=True)
 
         # Check that all plots are present
