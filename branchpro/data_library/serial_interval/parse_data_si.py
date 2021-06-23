@@ -5,17 +5,17 @@
 # notice and full license details.
 #
 
-"""Processing script for Australian serial interval data from [1]_.
+"""Processing script for COVID serial interval data from [1]_.
 
 It generates multiple serial intervals from a lognormal distribution
-with parameters as shown in the EpiNow repository:
-https://github.com/epiforecasts/EpiNow/tree/master/data-raw.
+with parameters as given in the reference.
+https://github.com/aakhmetz/COVID19SerialInterval
 
 References
 ----------
-.. [1] Price, David J., et al. "Early analysis of the Australian COVID-19
-       epidemic." Elife 9 (2020): e58785.
-       https://elifesciences.org/articles/58785/figures#content
+.. [1] Nishiura, Hiroshi, Natalie M. Linton, and Andrei R. Akhmetzhanov.
+       "Serial interval of novel coronavirus (COVID-19) infections."
+       International journal of infectious diseases 93 (2020): 284-286.
 """
 
 import os
@@ -52,7 +52,8 @@ def write_ser_int_data(name):
     for i, _ in enumerate(s_data):
         w_dist = sc.stats.lognorm(
             s=s_data[i], scale=np.exp(scale_data[i]))
-        disc_w = w_dist.pdf(np.arange(1, 61))
+        disc_w = [w_dist.cdf(s+0.5) - w_dist.cdf(s-0.5)
+                  for s in np.arange(1, 61)]
         si_data[:, i] = disc_w
 
     # Transform recorded matrix of serial intervals to csv file
