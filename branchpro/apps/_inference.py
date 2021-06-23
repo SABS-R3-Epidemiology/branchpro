@@ -222,10 +222,10 @@ class BranchProInferenceApp(BranchProDashApp):
             # in the data with default assuming equal R numbers for local
             # and imported cases
             sliders.add_slider(
-                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01)
+                'Epsilon', 'epsilon', 1.0, 0.0, 3.0, 0.01)
         else:
             sliders.add_slider(
-                'Epsilon', 'epsilon', 0, -0.99, 2.0, 0.01, invisible=True)
+                'Epsilon', 'epsilon', 1.0, 0.0, 3.0, 0.01, invisible=True)
 
         sliders.add_slider(
             'Prior Mean', 'mean', mean, 0.1, 10.0, 0.01)

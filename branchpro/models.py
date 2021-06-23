@@ -280,7 +280,7 @@ class LocImpBranchProModel(BranchProModel):
     the imported cases is proportional to the R number of the local incidences:
 
     .. math::
-        R_{t}^{\text(imported)} = (1 + \epsilon)R_{t}^{\text(local)}
+        R_{t}^{\text(imported)} = \epsilon R_{t}^{\text(local)}
 
     The local incidence at time t is modelled by a random variable distributed
     according to a Poisson distribution with a mean that depends on previous
@@ -328,8 +328,8 @@ class LocImpBranchProModel(BranchProModel):
         """
         if not isinstance(new_epsilon, (int, float)):
             raise TypeError('Value of epsilon must be integer or float.')
-        if new_epsilon < -1:
-            raise ValueError('Epsilon needs to be greater or equal to -1.')
+        if new_epsilon < 0:
+            raise ValueError('Epsilon needs to be greater or equal to 0.')
 
         self.epsilon = new_epsilon
 
@@ -414,7 +414,7 @@ class LocImpBranchProModel(BranchProModel):
         for t in simulation_times:
             norm_daily_mean = self._r_profile[t-1] * (
                 self._effective_no_infectives(
-                    t, incidences) + (self.epsilon + 1) * (
+                    t, incidences) + self.epsilon * (
                         self._effective_no_infectives(
                             t, imported_incidences)))
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)

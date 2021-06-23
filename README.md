@@ -27,7 +27,7 @@ Epidemics 29: 100356.
 
 ## Installation procedure
 ***
-One way to install the module is to download the repositiory to your machine of choice and type the following commands in the terminal. 
+One way to install the module is to download the repositiory to your machine of choice and type the following commands in the terminal.
 ```bash
 git clone https://github.com/SABS-R3-Epidemiology/branchpro.git
 cd ../path/to/the/file
@@ -48,11 +48,11 @@ import numpy as np
 # create a simple branching process model with prescribed initial R and serial interval
 branchpro.BranchProModel(initial_r=0.5, serial_interval=[0, 0.15, 0.52, 0.3, 0.01])
 
-# create branching process model with local and imported cases with prescribed initial R 
+# create branching process model with local and imported cases with prescribed initial R
 # and serial interval
 # set imported cases data
 libr_model_1 = branchpro.LocImpBranchProModel(
-  initial_r=2, serial_interval=np.array([1, 2, 3, 2, 1]), epsilon=0)
+  initial_r=2, serial_interval=np.array([1, 2, 3, 2, 1]), epsilon=1)
 libr_model_1.set_imported_cases(times=[1, 2.0, 4, 8], cases=[5, 10, 9, 2])
 
 # create the posterior of a branching process model for multiple daily serial intervals
