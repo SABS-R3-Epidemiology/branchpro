@@ -11,11 +11,17 @@ It generates multiple serial intervals from a lognormal distribution
 with parameters as given in the reference.
 https://github.com/aakhmetz/COVID19SerialInterval
 
+To covert the continuous serial interval estimates into discrete daily terms,
+we use the method of [2]_ (appendix 11).
+
 References
 ----------
 .. [1] Nishiura, Hiroshi, Natalie M. Linton, and Andrei R. Akhmetzhanov.
        "Serial interval of novel coronavirus (COVID-19) infections."
        International journal of infectious diseases 93 (2020): 284-286.
+.. [2] Cori, Anne, et al. "A new framework and software to estimate
+       time-varying reproduction numbers during epidemics." American Journal of
+       Epidemiology 178.9 (2013): 1505-1512.
 """
 
 import os
