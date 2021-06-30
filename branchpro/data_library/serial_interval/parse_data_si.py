@@ -52,8 +52,21 @@ def write_ser_int_data(name):
     for i, _ in enumerate(s_data):
         w_dist = sc.stats.lognorm(
             s=s_data[i], scale=np.exp(scale_data[i]))
-        disc_w = [w_dist.cdf(s+0.5) - w_dist.cdf(s-0.5)
-                  for s in np.arange(1, 61)]
+
+        # Get the density weighted by the delay
+        def weighted_density(u):
+            return u * w_dist.pdf(u)
+
+        # Calculate discrete serial interval terms, for k = 1,2,3,...
+        disc_w = [
+            (1 + k) * w_dist.cdf(k + 1)
+            - 2 * k * w_dist.cdf(k)
+            + (k - 1) * w_dist.cdf(k - 1)
+            + scipy.integrate.quad(weighted_density, k - 1, k)[0]
+            - scipy.integrate.quad(weighted_density, k, k + 1)[0]
+            for k in np.arange(1, 61)
+            ]
+
         si_data[:, i] = disc_w
 
     # Transform recorded matrix of serial intervals to csv file
