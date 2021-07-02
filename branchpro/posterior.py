@@ -11,6 +11,7 @@ import copy
 import numpy as np
 import pandas as pd
 import scipy.stats
+import scipy.integrate
 
 
 class BranchProPosterior(object):
