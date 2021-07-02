@@ -404,11 +404,14 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         cdf = np.vstack((np.zeros(cdf.shape[1]), cdf))
 
         # Do an interpolation to get the inverse CDF
+        # Interpolation is performed separately for each time point
         inv_cdf = [scipy.interpolate.interp1d(cdf[:, t], integration_grid)
                    for t in range(cdf.shape[1])]
 
-        # Define a function to get the percentiles over time
+        # Define a function to get the values of R_t over time in an array
         def posterior_ppf(p):
+            # p = probability
+            # returns = posterior R_t trajectory
             return np.array([ppf(p)[()] for ppf in inv_cdf])
 
         self.posterior_ppf = posterior_ppf
