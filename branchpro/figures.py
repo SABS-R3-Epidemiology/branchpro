@@ -342,3 +342,244 @@ def plot_r_inference(first_day_data,
         plt.show()
 
     return fig
+
+
+def plot_regions_inference(first_day_data,
+                           region_names,
+                           local_cases,
+                           import_cases,
+                           first_day_inference,
+                           epsilons,
+                           R_t_results,
+                           default_epsilon=1,
+                           show=True):
+    """Make a figure showing R_t inference for different choices of epsilon and
+    regions.
+
+    It has two panels:
+        a. Local and imported cases which were used for inference
+        b. Subplots each comparing R_t for one choice of epsilon with the
+           default choice.
+
+    Notes
+    -----
+    As written this function expects a total of three epsilon values (including
+    the default value) and three regions. Some details of this function is
+    specific to certain regions, such as the inset of the graph.
+
+    Parameters
+    ----------
+    first_day_data : datetime.datetime
+        First day of incidence data
+    region_names: list of str
+        Name of regions
+    local_cases : list of int
+        Daily incident local cases
+    import_cases : list of int
+        Daily incident imported cases
+    first_day_inference : datetime.datetime
+        First day of inference results
+    epsilons : list of float
+        Values of epsilon for which inference was performed
+    R_t_results : list of pandas.DataFrame
+        For each epsilon, a dataframe giving the inference results for R_t. It
+        must have the three columns 'Mean', 'Lower bound CI', and
+        'Upper bound CI'.
+    default_epsilon : float, optional (1)
+        The value of epsilon whose inference results will be compared to the
+        results from all other values of epsilon.
+    show : bool, optional (True)
+        Whether or not to plt.show() the figure after it has been generated
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    # Build grid of subplots
+    # Use 0.01 height ratio subplot rows to space out the panels
+    region_num = len(region_names)
+    fig = plt.figure()
+    gs = fig.add_gridspec(3, region_num, height_ratios=[1, 0.01, 1])
+
+    # Ax for case data
+    top_axs = [fig.add_subplot(gs[0, i]) for i in range(region_num)]
+
+    # Axes for R_t inference
+    axs = [fig.add_subplot(gs[2, j]) for j in range(region_num)]
+
+    # Make inference panel share x axis of its incidence data
+    for i in range(len(region_names)):
+        axs[i].sharex(top_axs[i])
+
+    # Plot local and imported cases
+    width = datetime.timedelta(hours=10)
+
+    for region in range(len(region_names)):
+        data_times = [first_day_data + datetime.timedelta(days=int(i))
+                      for i in range(len(local_cases[region]))]
+        top_axs[region].bar([x - width/2 for x in data_times],
+                            local_cases[region],
+                            width,
+                            label='Local cases',
+                            color='k',
+                            alpha=0.8)
+        top_axs[region].bar([x + width/2 for x in data_times],
+                            import_cases[region],
+                            width,
+                            hatch='/////',
+                            edgecolor='w',
+                            lw=0.1,
+                            label='Imported cases',
+                            color='deeppink')
+
+        # Plot a zoomed in part of the graph as an inset
+        if region == 0:
+            top_axs[region].legend()
+            axins = top_axs[0].inset_axes([0.08, 0.27, 0.4, 0.3])
+            axins.bar([x - width/2 for x in data_times],
+                      local_cases[region],
+                      width,
+                      label='Local cases',
+                      color='k',
+                      alpha=0.8)
+            axins.bar([x + width/2 for x in data_times],
+                      import_cases[region],
+                      width,
+                      hatch='/////',
+                      edgecolor='w',
+                      lw=0.1,
+                      label='Imported cases',
+                      color='deeppink')
+
+        # Get R_t for the default epsilon
+        default_results = R_t_results[region][epsilons.index(default_epsilon)]
+
+        # Build time vector for all R_t
+        times = len(default_results['Mean'])
+        date_times = [first_day_inference + datetime.timedelta(days=int(i))
+                      for i in range(times)]
+
+        ind = 0
+        color_list = ['blue', 'red']
+        lines = []
+        shades = []
+        for epsilon, results in zip(epsilons, R_t_results[region]):
+            if epsilon != default_epsilon:
+                ax = axs[region]
+
+                # Plot shaded region for R_t
+                line, = ax.plot(date_times,
+                                results['Mean'],
+                                color=color_list[ind],
+                                lw=1.0,
+                                zorder=8)
+                shade = ax.fill_between(date_times,
+                                        results['Lower bound CI'],
+                                        results['Upper bound CI'],
+                                        alpha=0.35,
+                                        color=color_list[ind],
+                                        zorder=6,
+                                        linewidth=0.0)
+
+                # Plot another region for the default epsilon inference results
+                zeroline, = ax.plot(date_times,
+                                    default_results['Mean'],
+                                    color='k',
+                                    lw=1.0,
+                                    ls='--',
+                                    zorder=7)
+                zerorange = ax.fill_between(date_times,
+                                            default_results['Lower bound CI'],
+                                            default_results['Upper bound CI'],
+                                            alpha=0.35,
+                                            color='k',
+                                            zorder=-10,
+                                            linewidth=0.0)
+                # Add a texture to the region for default epsilon R_t
+                zerorangelines = ax.fill_between(
+                    date_times,
+                    default_results['Lower bound CI'],
+                    default_results['Upper bound CI'],
+                    alpha=1.0,
+                    color=None,
+                    facecolor='none',
+                    zorder=5,
+                    hatch='||||',
+                    edgecolor='w',
+                    linewidth=0)
+
+                # Add labels if the subplot is on the left side of the figure
+                ax.set_ylabel(r'$R_t^\mathrm{local}$')
+
+                # Add dotted line for R_t = 1
+                ax.axhline(1,
+                           color='darkgray',
+                           zorder=-20,
+                           ls='-',
+                           lw=2)
+
+                # Collect lines and shades of inference for legend
+                lines.append(line)
+                shades.append(shade)
+
+                ind += 1
+
+        # define sub region of the original image for zoom in plot
+        if region == 0:
+            x1, x2 = first_day_data, datetime.datetime(2020, 3, 10)
+            y1, y2 = 0, 10
+            axins.set_xlim(x1, x2)
+            axins.set_ylim(y1, y2)
+            axins.set_xticklabels('')
+            axins.set_yticks([0, 7])
+            axins.set_yticklabels(['0', '7'], fontdict={'fontsize': 9})
+
+            top_axs[0].indicate_inset_zoom(axins, edgecolor="black")
+
+    # Add the legend for epsilons
+    axs[0].legend([(lines[0], shades[0]),
+                   (zerorange, zerorangelines, zeroline),
+                   (lines[1], shades[1]), ],
+                  [r'$ϵ={}$'.format(epsilons[0]),
+                   r'$ϵ={}$'.format(default_epsilon),
+                   r'$ϵ={}$'.format(epsilons[2]), ])
+
+    # Use "Jan 01", etc as the date format
+    for i in range(len(region_names)):
+        top_axs[i].xaxis.set_major_formatter(
+            matplotlib.dates.DateFormatter('%b %d'))
+        axs[i].xaxis.set_major_formatter(
+            matplotlib.dates.DateFormatter('%b %d'))
+
+    # Set ticks once per week
+    axs[0].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+                      for i in range(len(local_cases[0]))][::7])
+
+    top_axs[0].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+                           for i in range(len(local_cases[0]))][::7])
+    for i in range(1, region_num):
+        axs[i].set_xticks(data_times[::7])
+        top_axs[i].set_xticks(data_times[::7])
+
+    # Rotate labels
+    plt.xticks(rotation=45, ha='center')
+    for i in range(len(region_names)):
+        plt.sca(top_axs[i])
+        plt.xticks(rotation=45, ha='center')
+        plt.sca(axs[i])
+        plt.xticks(rotation=45, ha='center')
+
+    for i in range(len(region_names)):
+        top_axs[i].set_title(region_names[i], fontsize=14)
+
+    # Add panel labels
+    fig.text(0.025, 0.975, '(a)', fontsize=14)
+    fig.text(0.025, 0.45, '(b)', fontsize=14)
+
+    fig.set_size_inches(12, 6)
+    fig.set_tight_layout(True)
+
+    if show:
+        plt.show()
+
+    return fig
