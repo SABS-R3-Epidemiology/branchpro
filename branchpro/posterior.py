@@ -358,6 +358,15 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._calculate_posterior_mean()
         self._calculate_posterior_percentiles()
 
+    def _calculate_posterior_mean(self):
+        """Calculate posterior mean.
+
+        To be called after self._inference_samples has been populated.
+        """
+        self.inference_estimates = \
+            np.mean(np.array(
+                [dist.mean() for dist in self._inference_samples]), axis=0)
+
     def get_intervals(self, central_prob):
         """
         Returns a dataframe of the reproduction number posterior mean
