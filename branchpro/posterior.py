@@ -268,6 +268,20 @@ class BranchProPosteriorMultSI(BranchProPosterior):
     the reproduction numbers of an epidemic in the case of a branching process
     using mutiple serial intevals. Based on the :class:`BranchProPosterior`.
 
+    In order to incorporate the uncertainty in the serial interval into the
+    posterior of :math:`R_t`, this class employs the approximation
+
+    .. math::
+        p(R_t|I) = \int p(R_t|I, w) p(w) dw
+        = \frac{1}{N} \sum_{i=1}^N p(R_t|I,w^{(i)}); w^{(i)} \sim p(w)
+
+    where :math:`I` indicates the incidence data. At instantiation, the user
+    supplies the samples :math:`w^{(i)}` which are assumed to be drawn IID from
+    the distribution of serial intervals.
+
+    Requested posterior percentiles are computed from the above density using
+    numerical integration.
+
     Parameters
     ----------
     inc_data
