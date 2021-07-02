@@ -358,6 +358,46 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._calculate_posterior_mean()
         self._calculate_posterior_percentiles()
 
+    def _calculate_posterior_percentiles(self):
+        """Calculate the posterior inverse CDF.
+
+        To be called after self._inference_samples has been populated.
+        """
+        samples = self._inference_samples
+        N = len(samples)
+
+        # Get the 99.9th percentile of R for each posterior
+        max_Rs = [dist.ppf(0.999) for dist in samples]
+
+        # Define a grid of R values from 0 to above the highest of the 99.9
+        # percentiles of R
+        dR = 0.001
+        integration_grid = np.arange(0, 1.1 * np.max(max_Rs), dR)
+
+        # Evaluate the posterior pdf on the grid
+        pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
+        for dist in samples:
+            pdf_values += dist.pdf(integration_grid[:, np.newaxis])
+        pdf_values *= 1 / N
+
+        # Perform a cumulative integration of the posterior density using the
+        # trapezoidal rule to get the cumulative distribution
+        cdf = scipy.integrate.cumulative_trapezoid(
+            pdf_values, x=integration_grid, axis=0)
+
+        # Add zero for the first element of the CDF values
+        cdf = np.vstack((np.zeros(cdf.shape[1]), cdf))
+
+        # Do an interpolation to get the inverse CDF
+        inv_cdf = [scipy.interpolate.interp1d(cdf[:, t], integration_grid)
+                   for t in range(cdf.shape[1])]
+
+        # Define a function to get the percentiles over time
+        def posterior_ppf(p):
+            return np.array([ppf(p)[()] for ppf in inv_cdf])
+
+        self.posterior_ppf = posterior_ppf
+
     def _calculate_posterior_mean(self):
         """Calculate posterior mean.
 
