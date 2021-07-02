@@ -414,7 +414,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             # returns = posterior R_t trajectory
             return np.array([ppf(p)[()] for ppf in inv_cdf])
 
-        self.posterior_ppf = posterior_ppf
+        self._posterior_ppf = posterior_ppf
 
     def _calculate_posterior_mean(self):
         """Calculate posterior mean.
@@ -450,9 +450,9 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             {
                 'Time Points': self.inference_times,
                 'Mean': self.inference_estimates,
-                'Median': self.posterior_ppf(0.5),
-                'Lower bound CI': self.posterior_ppf(lb),
-                'Upper bound CI': self.posterior_ppf(ub),
+                'Median': self._posterior_ppf(0.5),
+                'Lower bound CI': self._posterior_ppf(lb),
+                'Upper bound CI': self._posterior_ppf(ub),
                 'Central Probability': central_prob
             }
         )
