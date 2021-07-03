@@ -352,14 +352,15 @@ def plot_regions_inference(first_day_data,
                            epsilons,
                            R_t_results,
                            default_epsilon=1,
+                           inset_region=[],
                            show=True):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
     It has two panels:
         a. Local and imported cases which were used for inference
-        b. Subplots each comparing R_t for one choice of epsilon with the
-           default choice.
+        b. Subplots each comparing R_t for two other choices of epsilon with
+           the default choice.
 
     Notes
     -----
@@ -373,21 +374,23 @@ def plot_regions_inference(first_day_data,
         First day of incidence data
     region_names: list of str
         Name of regions
-    local_cases : list of int
+    local_cases : list of lists of int
         Daily incident local cases
-    import_cases : list of int
+    import_cases : list of lists of int
         Daily incident imported cases
     first_day_inference : datetime.datetime
         First day of inference results
     epsilons : list of float
         Values of epsilon for which inference was performed
-    R_t_results : list of pandas.DataFrame
+    R_t_results : list of lists of pandas.DataFrame
         For each epsilon, a dataframe giving the inference results for R_t. It
         must have the three columns 'Mean', 'Lower bound CI', and
         'Upper bound CI'.
     default_epsilon : float, optional (1)
         The value of epsilon whose inference results will be compared to the
         results from all other values of epsilon.
+    inset_region : list of str, optional ([])
+        List of regions name where insets are to be included.
     show : bool, optional (True)
         Whether or not to plt.show() the figure after it has been generated
 
@@ -433,9 +436,8 @@ def plot_regions_inference(first_day_data,
                             color='deeppink')
 
         # Plot a zoomed in part of the graph as an inset
-        if region == 0:
-            top_axs[region].legend()
-            axins = top_axs[0].inset_axes([0.08, 0.27, 0.4, 0.3])
+        if region_names[region] in inset_region:
+            axins = top_axs[region].inset_axes([0.08, 0.27, 0.4, 0.3])
             axins.bar([x - width/2 for x in data_times],
                       local_cases[region],
                       width,
@@ -525,7 +527,7 @@ def plot_regions_inference(first_day_data,
                 ind += 1
 
         # define sub region of the original image for zoom in plot
-        if region == 0:
+        if region_names[region] in inset_region:
             x1, x2 = first_day_data, datetime.datetime(2020, 3, 10)
             y1, y2 = 0, 10
             axins.set_xlim(x1, x2)
@@ -534,9 +536,10 @@ def plot_regions_inference(first_day_data,
             axins.set_yticks([0, 7])
             axins.set_yticklabels(['0', '7'], fontdict={'fontsize': 9})
 
-            top_axs[0].indicate_inset_zoom(axins, edgecolor="black")
+            top_axs[region].indicate_inset_zoom(axins, edgecolor="black")
 
     # Add the legend for epsilons
+    top_axs[0].legend()
     axs[0].legend([(lines[0], shades[0]),
                    (zerorange, zerorangelines, zeroline),
                    (lines[1], shades[1]), ],
@@ -552,14 +555,12 @@ def plot_regions_inference(first_day_data,
             matplotlib.dates.DateFormatter('%b %d'))
 
     # Set ticks once per week
-    axs[0].set_xticks([first_day_data + datetime.timedelta(days=int(i))
-                      for i in range(len(local_cases[0]))][::7])
+    for j in range(region_num):
+        axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+                          for i in range(len(local_cases[j]))][::7])
 
-    top_axs[0].set_xticks([first_day_data + datetime.timedelta(days=int(i))
-                           for i in range(len(local_cases[0]))][::7])
-    for i in range(1, region_num):
-        axs[i].set_xticks(data_times[::7])
-        top_axs[i].set_xticks(data_times[::7])
+        top_axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+                              for i in range(len(local_cases[j]))][::7])
 
     # Rotate labels
     plt.xticks(rotation=45, ha='center')
@@ -576,7 +577,7 @@ def plot_regions_inference(first_day_data,
     fig.text(0.025, 0.975, '(a)', fontsize=14)
     fig.text(0.025, 0.45, '(b)', fontsize=14)
 
-    fig.set_size_inches(12, 6)
+    fig.set_size_inches(4 * region_num, 6)
     fig.set_tight_layout(True)
 
     if show:

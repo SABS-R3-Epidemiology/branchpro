@@ -305,6 +305,7 @@ class TestPlotRegionsInference(unittest.TestCase):
                  [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range]],
                 default_epsilon=1,
+                inset_region=['Ontario'],
                 show=True)
 
         # Check that all plots are present
