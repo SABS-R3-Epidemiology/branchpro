@@ -22,6 +22,7 @@ as well as the Dash apps:
 
 import datetime
 import matplotlib.dates
+import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -578,6 +579,90 @@ def plot_regions_inference(first_day_data,
     fig.text(0.025, 0.45, '(b)', fontsize=14)
 
     fig.set_size_inches(4 * region_num, 6)
+    fig.set_tight_layout(True)
+
+    if show:
+        plt.show()
+
+    return fig
+
+
+def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
+    """Plot a heatmap of R_t for different epsilons.
+
+    It assumes that about 20 values of epsilon are provided.
+
+    Parameters
+    ----------
+    region_names : list of str
+        Names of each region (for titles)
+    epsilons : list of float
+        Value of epsilon
+    R_t_results : list of pandas.DataFrame
+        For each region, a dataframe containing the inference results for R_t.
+        It must contain the columns 'Epsilon', 'Time Points', and 'Mean'.
+    first_day : datetime.datetime
+        First day of inference results
+    show : bool, optional (True)
+        Whether or not to plt.show() the figure after it has been generated
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    num_regions = len(region_names)
+    fig = plt.figure(figsize=(3.33 * num_regions, 4))
+
+    R_t_arrays = []
+    num_time_points = []
+    for df in R_t_results:
+        n = len(df.loc[df['Epsilon'] == 1]['Time Points'])
+
+        # Build an array to hold R values
+        X = np.zeros((len(epsilons), n))
+
+        for i, eps in enumerate(epsilons[::-1]):
+            X[i, :] = df.loc[df['Epsilon'] == eps]['Mean']
+
+        R_t_arrays.append(X)
+        num_time_points.append(n)
+
+    max_R = max([np.max(X) for X in R_t_arrays])
+    max_n = max(num_time_points)
+
+    for k, (name, nt, X) in enumerate(zip(region_names,
+                                          num_time_points,
+                                          R_t_arrays)):
+        ax = fig.add_subplot(1, num_regions, k+1)
+
+        im = ax.imshow(
+            X,
+            cmap='seismic',
+            norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
+            aspect=nt/max_n)
+
+        # Add horizontal lines to divide the epsilons
+        for i, eps in enumerate(epsilons):
+            ax.axhline(i+0.5, color='k', lw=1)
+
+        e_ticks = [0, 4, 8, 12, 15, 18]
+        ax.set_yticks(e_ticks)
+        ax.set_yticklabels([epsilons[i] for i in e_ticks[::-1]])
+        ax.set_ylabel(r'$ϵ$')
+
+        x_ticks = list(range(0, nt, 10))
+        ax.set_xticks(x_ticks)
+        ax.set_xticklabels(
+            [(first_day + datetime.timedelta(days=i)).strftime('%b %d')
+             for i in x_ticks])
+        ax.set_xlabel('Date')
+
+        ax.set_title(region_names[k])
+
+    # Add key for R values
+    cax = plt.axes([0.47, 0.15, 0.1, 0.04])
+    fig.colorbar(im, cax=cax, orientation='horizontal')
+    cax.set_xlabel(r'$R_t^{\mathrm{local}}$')
     fig.set_tight_layout(True)
 
     if show:
