@@ -273,11 +273,11 @@ class BranchProPosteriorMultSI(BranchProPosterior):
 
     .. math::
         p(R_t|I) = \int p(R_t|I, w) p(w) dw
-        = \frac{1}{N} \sum_{i=1}^N p(R_t|I,w^{(i)}); w^{(i)} \sim p(w)
+        \approx \frac{1}{N} \sum_{i=1}^N p(R_t|I,w^{(i)}); w^{(i)} \sim p(w)
 
     where :math:`I` indicates the incidence data. At instantiation, the user
-    supplies the samples :math:`w^{(i)}` which are assumed to be drawn IID from
-    the distribution of serial intervals.
+    supplies the samples :math:`w^{(i)}` which are assumed to have been drawn
+    IID from the distribution of serial intervals.
 
     Requested posterior percentiles are computed from the above density using
     numerical integration.
