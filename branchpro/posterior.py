@@ -390,6 +390,10 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         integration_grid = np.arange(0, 1.1 * np.max(max_Rs), dR)
 
         # Evaluate the posterior pdf on the grid
+        # We assume that the serial interval samples were drawn IID. Thus, the
+        # marginal posterior pdf can be approximated by an average of the
+        # conditional posteriors (those saved in self._inference_samples.) See
+        # the class docstring for further details.
         pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
         for dist in samples:
             pdf_values += dist.pdf(integration_grid[:, np.newaxis])
