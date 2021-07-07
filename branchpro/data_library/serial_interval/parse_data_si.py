@@ -42,8 +42,9 @@ def write_ser_int_data(name):
 
     # Split it into param1 and param2 of the lognormal distribution
     # Keep only 1000 of the pairs
-    s_data = data['param2'].to_numpy()[:1000]
-    scale_data = data['param1'].to_numpy()[:1000]
+    data = data.sample(1000)
+    s_data = data['param2'].to_numpy()
+    scale_data = data['param1'].to_numpy()
 
     si_data = np.zeros((60, 1000))
 
