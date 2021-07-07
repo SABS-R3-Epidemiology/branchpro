@@ -73,7 +73,7 @@ setup(
         'dash_defer_js_import',
         'pandas',
         'plotly',
-        'scipy'
+        'scipy>=1.6'
     ],
     extras_require={
         'docs': [

@@ -112,6 +112,7 @@ class TestBranchProPosteriorClass(unittest.TestCase):
 
         self.assertEqual(len(intervals_df['Time Points']), 3)
         self.assertEqual(len(intervals_df['Mean']), 3)
+        self.assertEqual(len(intervals_df['Median']), 3)
         self.assertEqual(len(intervals_df['Lower bound CI']), 3)
         self.assertEqual(len(intervals_df['Upper bound CI']), 3)
 
@@ -213,6 +214,7 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
 
         self.assertEqual(len(intervals_df['Time Points']), 3)
         self.assertEqual(len(intervals_df['Mean']), 3)
+        self.assertEqual(len(intervals_df['Median']), 3)
         self.assertEqual(len(intervals_df['Lower bound CI']), 3)
         self.assertEqual(len(intervals_df['Upper bound CI']), 3)
 
