@@ -7,9 +7,11 @@
 # notice and full license details.
 #
 
+import copy
 import numpy as np
 import pandas as pd
 import scipy.stats
+import scipy.integrate
 
 
 class BranchProPosterior(object):
@@ -245,6 +247,7 @@ class BranchProPosterior(object):
             {
                 'Time Points': self.inference_times,
                 'Mean': self.inference_estimates,
+                'Median': self.inference_posterior.median(),
                 'Lower bound CI': post_dist_interval[0],
                 'Upper bound CI': post_dist_interval[1],
                 'Central Probability': central_prob
@@ -264,6 +267,20 @@ class BranchProPosteriorMultSI(BranchProPosterior):
     Class for computing the posterior distribution used for the inference of
     the reproduction numbers of an epidemic in the case of a branching process
     using mutiple serial intevals. Based on the :class:`BranchProPosterior`.
+
+    In order to incorporate the uncertainty in the serial interval into the
+    posterior of :math:`R_t`, this class employs the approximation
+
+    .. math::
+        p(R_t|I) = \int p(R_t|I, w) p(w) dw
+        \approx \frac{1}{N} \sum_{i=1}^N p(R_t|I,w^{(i)}); w^{(i)} \sim p(w)
+
+    where :math:`I` indicates the incidence data. At instantiation, the user
+    supplies the samples :math:`w^{(i)}` which are assumed to have been drawn
+    IID from the distribution of serial intervals.
+
+    Requested posterior percentiles are computed from the above density using
+    numerical integration.
 
     Parameters
     ----------
@@ -329,7 +346,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._serial_intervals = np.flip(np.asarray(serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau, num_samples=1000):
+    def run_inference(self, tau):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
@@ -342,21 +359,75 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         tau
             size sliding time window over which the reproduction number is
             estimated.
-        num_samples
-            (int) number of draws from the posterior computed for each serial
-            interval stored.
         """
-        samples = []
+        samples = []  # For saving each gamma posterior (scipy.stats object)
 
         for nc, si in zip(self._normalizing_consts, self._serial_intervals):
             self._serial_interval = si
             self._normalizing_const = nc
             super().run_inference(tau)
-            samples.append(np.asarray(self.inference_posterior.rvs(
-                size=(num_samples, len(
-                    self.inference_posterior.args[0]))), dtype=np.float32))
+            samples.append(copy.deepcopy(self.inference_posterior))
 
-        self._inference_samples = np.vstack(samples)
+        self._inference_samples = samples
+
+        self._calculate_posterior_mean()
+        self._calculate_posterior_percentiles()
+
+    def _calculate_posterior_percentiles(self):
+        """Calculate the posterior inverse CDF.
+
+        To be called after self._inference_samples has been populated.
+        """
+        samples = self._inference_samples
+        N = len(samples)
+
+        # Get the 99.9th percentile of R for each posterior
+        max_Rs = [dist.ppf(0.999) for dist in samples]
+
+        # Define a grid of R values from 0 to above the highest of the 99.9
+        # percentiles of R
+        dR = 0.001
+        integration_grid = np.arange(0, 1.1 * np.max(max_Rs), dR)
+
+        # Evaluate the posterior pdf on the grid
+        # We assume that the serial interval samples were drawn IID. Thus, the
+        # marginal posterior pdf can be approximated by an average of the
+        # conditional posteriors (those saved in self._inference_samples.) See
+        # the class docstring for further details.
+        pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
+        for dist in samples:
+            pdf_values += dist.pdf(integration_grid[:, np.newaxis])
+        pdf_values *= 1 / N
+
+        # Perform a cumulative integration of the posterior density using the
+        # trapezoidal rule to get the cumulative distribution
+        cdf = scipy.integrate.cumulative_trapezoid(
+            pdf_values, x=integration_grid, axis=0)
+
+        # Add zero for the first element of the CDF values
+        cdf = np.vstack((np.zeros(cdf.shape[1]), cdf))
+
+        # Do an interpolation to get the inverse CDF
+        # Interpolation is performed separately for each time point
+        inv_cdf = [scipy.interpolate.interp1d(cdf[:, t], integration_grid)
+                   for t in range(cdf.shape[1])]
+
+        # Define a function to get the values of R_t over time in an array
+        def posterior_ppf(p):
+            # p = probability
+            # returns = posterior R_t trajectory
+            return np.array([ppf(p)[()] for ppf in inv_cdf])
+
+        self._posterior_ppf = posterior_ppf
+
+    def _calculate_posterior_mean(self):
+        """Calculate posterior mean.
+
+        To be called after self._inference_samples has been populated.
+        """
+        self.inference_estimates = \
+            np.mean(np.array(
+                [dist.mean() for dist in self._inference_samples]), axis=0)
 
     def get_intervals(self, central_prob):
         """
@@ -376,19 +447,16 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             level of the computed credible interval of the estimated
             R number values. The interval the central probability.
         """
-        # compute mean and bounds of credible interval of level central_prob
-        self.inference_estimates = np.mean(self._inference_samples, axis=0)
-        lb = 100*(1-central_prob)/2
-        ub = 100*(1+central_prob)/2
-        post_dist_interval = np.percentile(
-            self._inference_samples, q=np.array([lb, ub]), axis=0)
+        lb = (1-central_prob)/2
+        ub = (1+central_prob)/2
 
         intervals_df = pd.DataFrame(
             {
                 'Time Points': self.inference_times,
                 'Mean': self.inference_estimates,
-                'Lower bound CI': post_dist_interval[0],
-                'Upper bound CI': post_dist_interval[1],
+                'Median': self._posterior_ppf(0.5),
+                'Lower bound CI': self._posterior_ppf(lb),
+                'Upper bound CI': self._posterior_ppf(ub),
                 'Central Probability': central_prob
             }
         )
@@ -584,7 +652,7 @@ class LocImpBranchProPosteriorMultSI(
             np.asarray(daily_serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau, num_samples=1000):
+    def run_inference(self, tau):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
@@ -597,18 +665,16 @@ class LocImpBranchProPosteriorMultSI(
         tau
             size sliding time window over which the reproduction number is
             estimated.
-        num_samples
-            (int) number of draws from the posterior computed for each serial
-            interval stored.
         """
-        samples = []
+        samples = []  # For saving each gamma posterior (scipy.stats object)
 
         for nc, si in zip(self._normalizing_consts, self._serial_intervals):
             self._serial_interval = si
             self._normalizing_const = nc
             LocImpBranchProPosterior.run_inference(self, tau)
-            samples.append(np.asarray(self.inference_posterior.rvs(
-                size=(num_samples, len(
-                    self.inference_posterior.args[0]))), dtype=np.float32))
+            samples.append(copy.deepcopy(self.inference_posterior))
 
-        self._inference_samples = np.vstack(samples)
+        self._inference_samples = samples
+
+        self._calculate_posterior_mean()
+        self._calculate_posterior_percentiles()
