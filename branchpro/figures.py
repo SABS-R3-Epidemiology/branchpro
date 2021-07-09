@@ -98,7 +98,7 @@ def plot_forward_simulations(import_cases,
     # Plot line for R_t
     ax2.plot(R_t_times, R_t, color='k')
     ax2.axhline(1, ls='-', color='gray', lw=1.5, alpha=0.4, zorder=-10)
-    ax2.set_ylabel(r'$R_t^\mathrm{local}$')
+    ax2.set_ylabel(r'$R_t$')
     ax2.set_ylim(0, 1.1*max(R_t))
     ax2.tick_params(labelbottom=False)
 
@@ -512,7 +512,7 @@ def plot_regions_inference(first_day_data,
                     linewidth=0)
 
                 # Add labels if the subplot is on the left side of the figure
-                ax.set_ylabel(r'$R_t^\mathrm{local}$')
+                ax.set_ylabel(r'$R_t$')
 
                 # Add dotted line for R_t = 1
                 ax.axhline(1,
