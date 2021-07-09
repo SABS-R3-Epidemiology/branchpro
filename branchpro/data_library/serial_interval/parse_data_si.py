@@ -11,11 +11,17 @@ It generates multiple serial intervals from a lognormal distribution
 with parameters as given in the reference.
 https://github.com/aakhmetz/COVID19SerialInterval
 
+To covert the continuous serial interval estimates into discrete daily terms,
+we use the method of [2]_ (appendix 11).
+
 References
 ----------
 .. [1] Nishiura, Hiroshi, Natalie M. Linton, and Andrei R. Akhmetzhanov.
        "Serial interval of novel coronavirus (COVID-19) infections."
        International journal of infectious diseases 93 (2020): 284-286.
+.. [2] Cori, Anne, et al. "A new framework and software to estimate
+       time-varying reproduction numbers during epidemics." American Journal of
+       Epidemiology 178.9 (2013): 1505-1512.
 """
 
 import os
@@ -42,8 +48,9 @@ def write_ser_int_data(name):
 
     # Split it into param1 and param2 of the lognormal distribution
     # Keep only 1000 of the pairs
-    s_data = data['param2'].to_numpy()[:1000]
-    scale_data = data['param1'].to_numpy()[:1000]
+    data = data.sample(1000)
+    s_data = data['param2'].to_numpy()
+    scale_data = data['param1'].to_numpy()
 
     si_data = np.zeros((60, 1000))
 
@@ -52,8 +59,21 @@ def write_ser_int_data(name):
     for i, _ in enumerate(s_data):
         w_dist = sc.stats.lognorm(
             s=s_data[i], scale=np.exp(scale_data[i]))
-        disc_w = [w_dist.cdf(s+0.5) - w_dist.cdf(s-0.5)
-                  for s in np.arange(1, 61)]
+
+        # Get the density weighted by the delay
+        def weighted_density(u):
+            return u * w_dist.pdf(u)
+
+        # Calculate discrete serial interval terms, for k = 1,2,3,...
+        disc_w = [
+            (1 + k) * w_dist.cdf(k + 1)
+            - 2 * k * w_dist.cdf(k)
+            + (k - 1) * w_dist.cdf(k - 1)
+            + scipy.integrate.quad(weighted_density, k - 1, k)[0]
+            - scipy.integrate.quad(weighted_density, k, k + 1)[0]
+            for k in np.arange(1, 61)
+            ]
+
         si_data[:, i] = disc_w
 
     # Transform recorded matrix of serial intervals to csv file

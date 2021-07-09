@@ -310,3 +310,89 @@ class TestPlotRegionsInference(unittest.TestCase):
 
         # Check that all plots are present
         assert len(fig.axes) == 4
+
+
+class TestPlotHeatmap(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        """Set up the class using real data and inference.
+
+        The purpose is to test the figure function under realistic conditions.
+        """
+        # Make a fake set of serial intervals
+        serial_intervals = np.array([[0.1, 0.5, 0.2, 0.2],
+                                     [0.2, 0.4, 0.2, 0.2],
+                                     [0.1, 0.5, 0.4, 0.0]])
+
+        # Read Ontario data
+        data = pd.read_csv(
+            '../branchpro/branchpro/data_library/covid_ontario/ON.csv')[:51]
+
+        locally_infected_cases = data['Incidence Number']
+        imported_cases = data['Imported Cases']
+
+        # Get time points from the data
+        num_timepoints = max(data['Time'])
+        start_times = np.arange(1, num_timepoints+1, dtype=int)
+
+        # Same inference, but using the LocImpBranchProPosterior
+        tau = 6
+        a = 1
+        b = 0.2
+
+        # Run inferences for different values of epsilon
+        column_names = ['Time Points',
+                        'Mean',
+                        'Lower bound CI',
+                        'Upper bound CI',
+                        'Central Probability',
+                        'Epsilon']
+        epsilon_range = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2,
+                         1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+        all_intervals = pd.DataFrame(columns=column_names)
+
+        # Transform our incidence data into pandas dataframes
+        inc_data = pd.DataFrame(
+            {
+                'Time': start_times,
+                'Incidence Number': locally_infected_cases
+            }
+        )
+        imported_inc_data = pd.DataFrame(
+            {
+                'Time': start_times,
+                'Incidence Number': imported_cases
+            }
+        )
+
+        for epsilon in epsilon_range:
+            inference = branchpro.LocImpBranchProPosteriorMultSI(
+                inc_data=inc_data,
+                imported_inc_data=imported_inc_data,
+                epsilon=epsilon,
+                daily_serial_intervals=serial_intervals,
+                alpha=a,
+                beta=b)
+
+            inference.run_inference(tau=tau)
+            intervals = inference.get_intervals(central_prob=.95)
+            intervals['Epsilon'] = [epsilon] * len(intervals.index)
+            all_intervals = all_intervals.append(intervals)
+
+        cls.epsilon_range = epsilon_range
+        cls.all_intervals = all_intervals
+
+    def test_plot(self):
+        # Test plotting the figure
+        with patch('matplotlib.pyplot.show') as _:
+            fig = branchpro.figures.plot_r_heatmap(
+                ['Ontario', 'Ontario'],
+                self.epsilon_range,
+                [self.all_intervals, self.all_intervals],
+                datetime.datetime(2020, 3, 8),
+                show=True
+                )
+
+        # Check that all plots are present
+        # There should be 2 (one for each region) plus 1 for the R colorbar
+        assert len(fig.axes) == 3
