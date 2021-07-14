@@ -354,7 +354,8 @@ def plot_regions_inference(first_day_data,
                            R_t_results,
                            default_epsilon=1,
                            inset_region=[],
-                           show=True):
+                           show=True,
+                           mers=False):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
@@ -417,6 +418,8 @@ def plot_regions_inference(first_day_data,
 
     # Plot local and imported cases
     width = datetime.timedelta(hours=10)
+    if mers:
+        width = datetime.timedelta(hours=14)
 
     for region in range(len(region_names)):
         data_times = [first_day_data + datetime.timedelta(days=int(i))
@@ -434,7 +437,8 @@ def plot_regions_inference(first_day_data,
                             edgecolor='w',
                             lw=0.1,
                             label='Imported cases',
-                            color='deeppink')
+                            color='deeppink',
+                            zorder=10)
 
         # Plot a zoomed in part of the graph as an inset
         if region_names[region] in inset_region:
@@ -512,7 +516,7 @@ def plot_regions_inference(first_day_data,
                     linewidth=0)
 
                 # Add labels if the subplot is on the left side of the figure
-                ax.set_ylabel(r'$R_t^\mathrm{local}$')
+                ax.set_ylabel(r'$R_t$')
 
                 # Add dotted line for R_t = 1
                 ax.axhline(1,
@@ -641,6 +645,8 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
             norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
             aspect=nt/max_n)
 
+        ax.contour(X, [1], colors='k', linestyles='--', linewidths=1)
+
         # Add horizontal lines to divide the epsilons
         for i, eps in enumerate(epsilons):
             ax.axhline(i+0.5, color='k', lw=1)
@@ -648,7 +654,8 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         e_ticks = [0, 4, 8, 12, 15, 18]
         ax.set_yticks(e_ticks)
         ax.set_yticklabels([epsilons[i] for i in e_ticks[::-1]])
-        ax.set_ylabel(r'$ϵ$')
+        ax.set_ylabel('Relative transmissibility\n of imported cases '
+                      + r'($ϵ$)')
 
         x_ticks = list(range(0, nt, 10))
         ax.set_xticks(x_ticks)
@@ -662,7 +669,10 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
     # Add key for R values
     cax = plt.axes([0.47, 0.15, 0.1, 0.04])
     fig.colorbar(im, cax=cax, orientation='horizontal')
-    cax.set_xlabel(r'$R_t^{\mathrm{local}}$')
+    cax.set_xlabel(r'$R_t$')
+
+    cax.axvline(1, color='k', ls='--', lw=1)
+
     fig.set_tight_layout(True)
 
     if show:
