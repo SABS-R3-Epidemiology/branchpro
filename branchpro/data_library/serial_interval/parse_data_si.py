@@ -47,7 +47,7 @@ def write_ser_int_data(name):
     data = pd.read_csv(path, dtype=np.float64)
 
     # Seed the generator
-    np.random.seed()
+    np.random.seed(0)
 
     # Split it into param1 and param2 of the lognormal distribution
     # Keep only 1000 of the pairs
