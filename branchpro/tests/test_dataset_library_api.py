@@ -16,4 +16,3 @@ class TestDatasetLibraryAPIClass(unittest.TestCase):
     """
     def test__init__(self):
         bp.DatasetLibrary()
-
