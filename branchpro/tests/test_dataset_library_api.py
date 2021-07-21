@@ -17,7 +17,7 @@ class TestDatasetLibraryAPIClass(unittest.TestCase):
     def test__init__(self):
         bp.DatasetLibrary()
 
-def test_french_flu(self):
+    def test_french_flu(self):
         dataframe = bp.DatasetLibrary().french_flu()
         column_names = dataframe.head()
         some_names = [
