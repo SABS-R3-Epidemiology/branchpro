@@ -5,7 +5,7 @@
 # notice and full license details.
 #
 
-"""Processing script for COVID serial interval data from [1]_.
+r"""Processing script for COVID serial interval data from [1]_.
 
 It generates multiple serial intervals from a lognormal distribution
 with parameters as given in the reference.
@@ -14,16 +14,16 @@ https://github.com/aakhmetz/COVID19SerialInterval
 To covert the continuous serial interval estimates into discrete daily terms,
 we use the method of [2]_ (appendix 11).
 
-With the assumption that the exact time of infection from day :math:'t' is 
+With the assumption that the exact time of infection from day :math:'t' is
 uniformly distributed, :math:'f_U(u) = \mathbbm{1}_{k-1<u<k+1}(1-|u-k|)'
-describes the distribution of the delay :math:'u' between true times of 2 
-infections on days :math:'t' and :math:'t+k'. The probability density 
-function is weighted with the probability function of each delay to 
-discretise the serial interval distribution. 
+describes the distribution of the delay :math:'u' between true times of 2
+infections on days :math:'t' and :math:'t+k'. The probability density
+function is weighted with the probability function of each delay to
+discretise the serial interval distribution.
 
 .. math::
     \begin{align} w_k &= \int_{k-1}^{k+1}f_{SI}(u)f_U(u)du \\
-    &= (1+k)F_{SI}(k+1) - 2kF_{SI}(k) + (K-1)F_{SI}(k-1) + 
+    &= (1+k)F_{SI}(k+1) - 2kF_{SI}(k) + (K-1)F_{SI}(k-1) +
     \int_{k-1}^{k}uf_{SI}(u)du - \int_{k}^{k+1}uf_{SI}(u)du \end{align}
 
 References
