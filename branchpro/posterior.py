@@ -256,6 +256,105 @@ class BranchProPosterior(object):
 
         return intervals_df
 
+    def proportion_time_r_more_than_1(self, central_prob=.95):
+        """
+        Return the proportion of time the reproduction number posterior
+        mean, lower bound and upper bound for a specified central probability
+        respectively are bigger than 1.
+
+        Parameters
+        ----------
+        central_prob
+            level of the computed credible interval of the estimated
+            R number values. The interval the central probability.
+        """
+        intervals = self.get_intervals(central_prob)
+
+        total_length = len(intervals['Time Points'].tolist())
+
+        # Number of rows of `intervals` meeting condition
+        subset_with_mean = len(intervals.loc[
+            intervals['Mean'] > 1]['Time Points'].tolist())
+
+        subset_with_lower = len(intervals.loc[
+            intervals['Lower bound CI'] > 1]['Time Points'].tolist())
+
+        subset_with_upper = len(intervals.loc[
+            intervals['Upper bound CI'] > 1]['Time Points'].tolist())
+
+        proportion_time_r_more_than_1 = subset_with_mean/total_length
+        proportion_time_r_more_than_1_LowerCI = \
+            subset_with_lower/total_length
+        proportion_time_r_more_than_1_UpperCI = \
+            subset_with_upper/total_length
+
+        return(
+            proportion_time_r_more_than_1,
+            proportion_time_r_more_than_1_LowerCI,
+            proportion_time_r_more_than_1_UpperCI)
+
+    def last_time_r_threshold(self, type_threshold, central_prob=.95):
+        """
+        Return the value of the first of time point after the reproduction
+        number posterior mean, lower bound and upper bound for a specified
+        central probability respectively crosses the imposed threshold for
+        the last time during the inference.
+
+        Parameters
+        ----------
+        type_threshold
+            (str) type of threshold imposed; 'more' = last time R > 1 and
+            'less' = last time R < 1.
+        central_prob
+            level of the computed credible interval of the estimated
+            R number values. The interval the central probability.
+        """
+        intervals = self.get_intervals(central_prob)
+
+        if type_threshold not in ['more', 'less']:
+            raise ValueError('Threshold value must be `more` or `less` than \
+                1.')
+
+        # Subset only rows of `intervals` meeting condition
+        if type_threshold == 'more':
+            subset_with_mean = intervals.loc[
+                intervals['Mean'] > 1]['Time Points'].tolist()
+
+            subset_with_lower = intervals.loc[
+                intervals['Lower bound CI'] > 1]['Time Points'].tolist()
+
+            subset_with_upper = intervals.loc[
+                intervals['Upper bound CI'] > 1]['Time Points'].tolist()
+
+        elif type_threshold == 'less':
+            subset_with_mean = intervals.loc[
+                intervals['Mean'] < 1]['Time Points'].tolist()
+
+            subset_with_lower = intervals.loc[
+                intervals['Lower bound CI'] < 1]['Time Points'].tolist()
+
+            subset_with_upper = intervals.loc[
+                intervals['Upper bound CI'] < 1]['Time Points'].tolist()
+
+        if len(subset_with_mean) == 0:
+            last_time_r_threshold = None
+        else:
+            last_time_r_threshold = subset_with_mean[-1] + 1
+
+        if len(subset_with_lower) == 0:
+            last_time_r_threshold_LowerCI = None
+        else:
+            last_time_r_threshold_LowerCI = subset_with_lower[-1] + 1
+
+        if len(subset_with_upper) == 0:
+            plast_time_r_threshold_UpperCI = None
+        else:
+            plast_time_r_threshold_UpperCI = subset_with_upper[-1] + 1
+
+        return(
+            last_time_r_threshold,
+            last_time_r_threshold_LowerCI,
+            plast_time_r_threshold_UpperCI)
 
 #
 # BranchProPosteriorMultSI Class
