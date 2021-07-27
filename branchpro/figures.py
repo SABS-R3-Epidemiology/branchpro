@@ -641,7 +641,6 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
             norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
             aspect=nt/max_n)
 
-
         ax.contour(X, [1], colors='k')
 
         # Add horizontal lines to divide the epsilons
