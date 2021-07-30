@@ -14,10 +14,10 @@ https://github.com/aakhmetz/COVID19SerialInterval
 To covert the continuous serial interval estimates into discrete daily terms,
 we use the method of [2]_ (appendix 11).
 
-With the assumption that the exact time of infection from day :math:'t' is
-uniformly distributed, :math:'f_U(u) = \mathbbm{1}_{k-1<u<k+1}(1-|u-k|)'
-describes the distribution of the delay :math:'u' between true times of 2
-infections on days :math:'t' and :math:'t+k'. The probability density
+With the assumption that the exact time of infection from day :math:`t` is
+uniformly distributed, :math:`f_U(u) = \mathbbm{1}_{k-1<u<k+1}(1-|u-k|)`
+describes the distribution of the delay :math:`u` between true times of 2
+infections on days :math:`t` and :math:`t+k`. The probability density
 function is weighted with the probability function of each delay to
 discretise the serial interval distribution.
 
