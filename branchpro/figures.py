@@ -591,7 +591,15 @@ def plot_regions_inference(first_day_data,
     return fig
 
 
-def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
+def plot_r_heatmap(region_names,
+                   epsilons,
+                   R_t_results,
+                   first_day,
+                   show=True,
+                   figsize=None,
+                   max_R=None,
+                   aspect=1.0,
+                   date_interval=10):
     """Plot a heatmap of R_t for different epsilons.
 
     It assumes that about 20 values of epsilon are provided.
@@ -609,13 +617,25 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         First day of inference results
     show : bool, optional (True)
         Whether or not to plt.show() the figure after it has been generated
+    figsize : tuple of float, optional (None)
+        Size of matplotlib figure. If None, it will default to
+        (3.33 * num_regions, 4)
+    max_R : float, optional (None)
+        Maximum value of R_t on the legend. If None, it will be the maximum
+        value in the results.
+    aspect : float, optional (1.0)
+        Aspect ratio for each tile in the heatmap.
+    date_interval : int, optional (10)
+        How many days in between x-axis date labels
 
     Returns
     -------
     matplotlib.figure.Figure
     """
     num_regions = len(region_names)
-    fig = plt.figure(figsize=(3.33 * num_regions, 4))
+    if figsize is None:
+        figsize=(3.33 * num_regions, 4)
+    fig = plt.figure(figsize=figsize)
 
     R_t_arrays = []
     num_time_points = []
@@ -631,7 +651,8 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         R_t_arrays.append(X)
         num_time_points.append(n)
 
-    max_R = max([np.max(X) for X in R_t_arrays])
+    if max_R is None:
+        max_R = max([np.max(X) for X in R_t_arrays])
     max_n = max(num_time_points)
 
     for k, (name, nt, X) in enumerate(zip(region_names,
@@ -643,7 +664,7 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
             X,
             cmap='seismic',
             norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
-            aspect=nt/max_n)
+            aspect=nt/max_n*aspect)
 
         ax.contour(X, [1], colors='k', linestyles='--', linewidths=1)
 
@@ -657,7 +678,7 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         ax.set_ylabel('Relative transmissibility\n of imported cases '
                       + r'($ϵ$)')
 
-        x_ticks = list(range(0, nt, 10))
+        x_ticks = list(range(0, nt, date_interval))
         ax.set_xticks(x_ticks)
         ax.set_xticklabels(
             [(first_day + datetime.timedelta(days=i)).strftime('%b %d')
