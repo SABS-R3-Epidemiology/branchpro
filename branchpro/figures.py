@@ -641,7 +641,7 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
             norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
             aspect=nt/max_n)
 
-        ax.contour(X, [1], colors='k')
+        ax.contour(X, [1], colors='k', linestyles='--', linewidths=1)
 
         # Add horizontal lines to divide the epsilons
         for i, eps in enumerate(epsilons):
@@ -650,7 +650,7 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         e_ticks = [0, 4, 8, 12, 15, 18]
         ax.set_yticks(e_ticks)
         ax.set_yticklabels([epsilons[i] for i in e_ticks[::-1]])
-        ax.set_ylabel(r'$ϵ$')
+        ax.set_ylabel('Relative transmissibility\n of imported cases ' + r'($ϵ$)')
 
         x_ticks = list(range(0, nt, 10))
         ax.set_xticks(x_ticks)
@@ -664,7 +664,10 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
     # Add key for R values
     cax = plt.axes([0.47, 0.15, 0.1, 0.04])
     fig.colorbar(im, cax=cax, orientation='horizontal')
-    cax.set_xlabel(r'$R_t^{\mathrm{local}}$')
+    cax.set_xlabel(r'$R_t$')
+
+    cax.axvline(1, color='k', ls='--', lw=1)
+
     fig.set_tight_layout(True)
 
     if show:
