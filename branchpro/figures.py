@@ -650,7 +650,8 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         e_ticks = [0, 4, 8, 12, 15, 18]
         ax.set_yticks(e_ticks)
         ax.set_yticklabels([epsilons[i] for i in e_ticks[::-1]])
-        ax.set_ylabel('Relative transmissibility\n of imported cases ' + r'($ϵ$)')
+        ax.set_ylabel('Relative transmissibility\n of imported cases '
+                      + r'($ϵ$)')
 
         x_ticks = list(range(0, nt, 10))
         ax.set_xticks(x_ticks)
