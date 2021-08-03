@@ -634,7 +634,7 @@ def plot_r_heatmap(region_names,
     """
     num_regions = len(region_names)
     if figsize is None:
-        figsize=(3.33 * num_regions, 4)
+        figsize = (3.33 * num_regions, 4)
     fig = plt.figure(figsize=figsize)
 
     R_t_arrays = []
