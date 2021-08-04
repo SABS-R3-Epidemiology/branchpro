@@ -121,6 +121,57 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         self.assertEqual(
             intervals_df['Central Probability'].to_list(), [.95] * 3)
 
+    def test_proportion_time_r_more_than_1(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [0, 0, 0, 0, 0]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
+        inference.run_inference(tau=2)
+        proportions = inference.proportion_time_r_more_than_1(.95)
+
+        self.assertEqual(len(proportions), 3)
+
+        self.assertEqual(proportions[0], 1)
+        self.assertEqual(proportions[1], 0)
+        self.assertEqual(proportions[2], 1)
+
+        with self.assertRaises(ValueError):
+            inference.proportion_time_r_more_than_1(.95, 'mean')
+
+    def test_last_time_r_threshold(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [0, 0, 0, 0, 0]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
+        inference.run_inference(tau=2)
+        last_time_r_more_than_1 = inference.last_time_r_threshold('more')
+        last_time_r_less_than_1 = inference.last_time_r_threshold(
+            'less', method='Median')
+
+        self.assertEqual(len(last_time_r_more_than_1), 3)
+        self.assertEqual(len(last_time_r_less_than_1), 3)
+
+        self.assertEqual(last_time_r_more_than_1[0], 7)
+        self.assertEqual(last_time_r_more_than_1[1], None)
+        self.assertEqual(last_time_r_more_than_1[2], 7)
+
+        self.assertEqual(last_time_r_less_than_1[0], None)
+        self.assertEqual(last_time_r_less_than_1[1], 7)
+        self.assertEqual(last_time_r_less_than_1[2], None)
+
+        with self.assertRaises(ValueError):
+            inference.last_time_r_threshold('=')
+            inference.last_time_r_threshold('<')
+            inference.last_time_r_threshold('>')
+            inference.last_time_r_threshold(2)
+            inference.last_time_r_threshold('more', method='mean')
+
 
 #
 # TestBranchProPosteriorMultSI Class
