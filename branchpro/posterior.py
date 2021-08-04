@@ -256,7 +256,7 @@ class BranchProPosterior(object):
 
         return intervals_df
 
-    def proportion_time_r_more_than_1(self, central_prob=.95):
+    def proportion_time_r_more_than_1(self, central_prob=.95, method='Mean'):
         """
         Return the proportion of time the reproduction number posterior
         mean, lower bound and upper bound for a specified central probability
@@ -267,14 +267,19 @@ class BranchProPosterior(object):
         central_prob
             level of the computed credible interval of the estimated
             R number values. The interval the central probability.
+        method
+            choice for the average trajcetory of reproduction number
+            considered; can be either `Mean` or `Median`.
         """
+        self._check_method(method)
+
         intervals = self.get_intervals(central_prob)
 
         total_length = len(intervals['Time Points'].tolist())
 
         # Number of rows of `intervals` meeting condition
-        subset_with_mean = len(intervals.loc[
-            intervals['Mean'] > 1]['Time Points'].tolist())
+        subset_with_method = len(intervals.loc[
+            intervals[method] > 1]['Time Points'].tolist())
 
         subset_with_lower = len(intervals.loc[
             intervals['Lower bound CI'] > 1]['Time Points'].tolist())
@@ -282,7 +287,7 @@ class BranchProPosterior(object):
         subset_with_upper = len(intervals.loc[
             intervals['Upper bound CI'] > 1]['Time Points'].tolist())
 
-        proportion_time_r_more_than_1 = subset_with_mean/total_length
+        proportion_time_r_more_than_1 = subset_with_method/total_length
         proportion_time_r_more_than_1_LowerCI = \
             subset_with_lower/total_length
         proportion_time_r_more_than_1_UpperCI = \
@@ -293,9 +298,10 @@ class BranchProPosterior(object):
             proportion_time_r_more_than_1_LowerCI,
             proportion_time_r_more_than_1_UpperCI)
 
-    def last_time_r_threshold(self, type_threshold, central_prob=.95):
+    def last_time_r_threshold(
+            self, type_threshold, central_prob=.95, method='Mean'):
         """
-        Return the value of the first of time point after the reproduction
+        Return the value of the first time point after the reproduction
         number posterior mean, lower bound and upper bound for a specified
         central probability respectively crosses the imposed threshold for
         the last time during the inference.
@@ -308,17 +314,22 @@ class BranchProPosterior(object):
         central_prob
             level of the computed credible interval of the estimated
             R number values. The interval the central probability.
+        method
+            choice for the average trajcetory of reproduction number
+            considered; can be either `Mean` or `Median`.
         """
         intervals = self.get_intervals(central_prob)
 
         if type_threshold not in ['more', 'less']:
-            raise ValueError('Threshold value must be `more` or `less` than \
-                1.')
+            raise ValueError('Threshold value must be `more` or `less` than'
+                             ' 1.')
+
+        self._check_method(method)
 
         # Subset only rows of `intervals` meeting condition
         if type_threshold == 'more':
-            subset_with_mean = intervals.loc[
-                intervals['Mean'] > 1]['Time Points'].tolist()
+            subset_with_method = intervals.loc[
+                intervals[method] > 1]['Time Points'].tolist()
 
             subset_with_lower = intervals.loc[
                 intervals['Lower bound CI'] > 1]['Time Points'].tolist()
@@ -327,8 +338,8 @@ class BranchProPosterior(object):
                 intervals['Upper bound CI'] > 1]['Time Points'].tolist()
 
         elif type_threshold == 'less':
-            subset_with_mean = intervals.loc[
-                intervals['Mean'] < 1]['Time Points'].tolist()
+            subset_with_method = intervals.loc[
+                intervals[method] < 1]['Time Points'].tolist()
 
             subset_with_lower = intervals.loc[
                 intervals['Lower bound CI'] < 1]['Time Points'].tolist()
@@ -336,10 +347,10 @@ class BranchProPosterior(object):
             subset_with_upper = intervals.loc[
                 intervals['Upper bound CI'] < 1]['Time Points'].tolist()
 
-        if len(subset_with_mean) == 0:
+        if len(subset_with_method) == 0:
             last_time_r_threshold = None
         else:
-            last_time_r_threshold = subset_with_mean[-1] + 1
+            last_time_r_threshold = subset_with_method[-1] + 1
 
         if len(subset_with_lower) == 0:
             last_time_r_threshold_LowerCI = None
@@ -347,14 +358,28 @@ class BranchProPosterior(object):
             last_time_r_threshold_LowerCI = subset_with_lower[-1] + 1
 
         if len(subset_with_upper) == 0:
-            plast_time_r_threshold_UpperCI = None
+            last_time_r_threshold_UpperCI = None
         else:
-            plast_time_r_threshold_UpperCI = subset_with_upper[-1] + 1
+            last_time_r_threshold_UpperCI = subset_with_upper[-1] + 1
 
         return(
             last_time_r_threshold,
             last_time_r_threshold_LowerCI,
-            plast_time_r_threshold_UpperCI)
+            last_time_r_threshold_UpperCI)
+
+    def _check_method(self, method):
+        """
+        Checks validity of method option.
+
+        Paramaters
+        ----------
+        method
+            choice for the average trajcetory of reproduction number
+            considered; can be either `Mean` or `Median`.
+        """
+        if method not in ['Mean', 'Median']:
+            raise ValueError('Method of selecting the R numbers can only be '
+                             '`Mean` or `Median`.')
 
 #
 # BranchProPosteriorMultSI Class

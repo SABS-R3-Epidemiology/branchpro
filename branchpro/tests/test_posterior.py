@@ -138,6 +138,9 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         self.assertEqual(proportions[1], 0)
         self.assertEqual(proportions[2], 1)
 
+        with self.assertRaises(ValueError):
+            inference.proportion_time_r_more_than_1(.95, 'mean')
+
     def test_last_time_r_threshold(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -148,7 +151,8 @@ class TestBranchProPosteriorClass(unittest.TestCase):
         inference = bp.BranchProPosterior(df, ser_int, 1, 0.2)
         inference.run_inference(tau=2)
         last_time_r_more_than_1 = inference.last_time_r_threshold('more')
-        last_time_r_less_than_1 = inference.last_time_r_threshold('less')
+        last_time_r_less_than_1 = inference.last_time_r_threshold(
+            'less', method='Median')
 
         self.assertEqual(len(last_time_r_more_than_1), 3)
         self.assertEqual(len(last_time_r_less_than_1), 3)
@@ -166,6 +170,7 @@ class TestBranchProPosteriorClass(unittest.TestCase):
             inference.last_time_r_threshold('<')
             inference.last_time_r_threshold('>')
             inference.last_time_r_threshold(2)
+            inference.last_time_r_threshold('more', method='mean')
 
 
 #
