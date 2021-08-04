@@ -62,6 +62,8 @@ branchpro.BranchProPosteriorMultSI(
   inc_data=df, daily_serial_intervals=[[1, 2], [0, 1]], alpha=1, beta=0.2)
 ```
 
+More examples on how to use the classes and features included in this repository can be found [here](https://github.com/SABS-R3-Epidemiology/branchpro/tree/main/examples).
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
