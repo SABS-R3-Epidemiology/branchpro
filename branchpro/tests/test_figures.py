@@ -347,8 +347,7 @@ class TestPlotHeatmap(unittest.TestCase):
                         'Upper bound CI',
                         'Central Probability',
                         'Epsilon']
-        epsilon_range = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2,
-                         1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+        epsilon_range = [0.1 + 0.1 * i for i in range(30)]
         all_intervals = pd.DataFrame(columns=column_names)
 
         # Transform our incidence data into pandas dataframes
