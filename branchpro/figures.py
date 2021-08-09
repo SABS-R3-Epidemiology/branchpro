@@ -421,7 +421,7 @@ def plot_regions_inference(first_day_data,
     # Plot local and imported cases
     width = datetime.timedelta(hours=10)
     if mers:
-        width = datetime.timdedelta(hours=14)
+        width = datetime.timedelta(hours=14)
 
     for region in range(len(region_names)):
         data_times = [first_day_data + datetime.timedelta(days=int(i))
