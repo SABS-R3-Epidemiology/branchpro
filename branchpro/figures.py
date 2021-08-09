@@ -568,6 +568,11 @@ def plot_regions_inference(first_day_data,
         top_axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
                               for i in range(len(local_cases[j]))][::7])
 
+    # Remove full box
+    for ax in fig.axes:
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+
     # Rotate labels
     plt.xticks(rotation=45, ha='center')
     for i in range(len(region_names)):
