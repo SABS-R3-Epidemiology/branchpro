@@ -12,6 +12,7 @@ import numpy as np
 import numexpr as ne
 import pandas as pd
 import scipy.stats
+import scipy.special
 import scipy.integrate
 
 
