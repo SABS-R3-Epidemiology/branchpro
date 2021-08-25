@@ -209,7 +209,7 @@ class BranchProPosterior(object):
 
     def _infectives_in_tau(self, cases_data, start, end):
         """
-        Sum total number of infectives in tau window.
+        Get number of infectives in tau window.
 
         Parameters
         ----------
@@ -226,7 +226,7 @@ class BranchProPosterior(object):
         num = []
         for time in range(start, end):
             num += [self._infectious_individuals(cases_data, time)]
-        return np.sum(num)
+        return num
 
     def run_inference(self, tau):
         """
@@ -260,10 +260,19 @@ class BranchProPosterior(object):
                 alpha + np.sum(
                     self.cases_data[(start_window-1):(end_window-1)]))
 
-            # compute rate parameter of the posterior over time
+            try:
+                # try to shift the window by 1 time point
+                tau_window = \
+                    tau_window[1:] \
+                        + [self._infectious_individuals(self.cases_data,
+                                                        end_window-1)]
+            except UnboundLocalError:
+                # First iteration, so set up the sliding window
+                tau_window = self._infectives_in_tau(
+                    self.cases_data, start_window, end_window)
 
-            rate.append(beta + self._infectives_in_tau(
-                self.cases_data, start_window, end_window))
+            # compute rate parameter of the posterior over time
+            rate.append(beta + sum(tau_window))
 
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
@@ -786,12 +795,26 @@ class LocImpBranchProPosterior(BranchProPosterior):
                 alpha + np.sum(
                     self.cases_data[(start_window-1):(end_window-1)]))
 
-            # compute rate parameter of the posterior over time
+            try:
+                # try to shift the windows by 1 time point
+                tau_window = \
+                    tau_window[1:] \
+                        + [self._infectious_individuals(self.cases_data,
+                                                        end_window-1)]
+                tau_window_imp = \
+                    tau_window_imp[1:] \
+                        + [self._infectious_individuals(self.imp_cases_data,
+                                                        end_window-1)]
+            except UnboundLocalError:
+                # First iteration, so set up the sliding windows
+                tau_window = self._infectives_in_tau(
+                    self.cases_data, start_window, end_window)
+                tau_window_imp = self._infectives_in_tau(
+                    self.imp_cases_data, start_window, end_window)
 
-            rate.append(beta + self._infectives_in_tau(
-                self.cases_data, start_window, end_window) +
-                self.epsilon * self._infectives_in_tau(
-                self.imp_cases_data, start_window, end_window))
+            # compute rate parameter of the posterior over time
+            rate.append(beta + sum(tau_window)
+                        + self.epsilon * sum(tau_window_imp))
 
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
