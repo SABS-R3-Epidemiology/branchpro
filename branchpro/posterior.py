@@ -9,9 +9,61 @@
 
 import copy
 import numpy as np
+import numexpr as ne
 import pandas as pd
 import scipy.stats
 import scipy.integrate
+
+
+class GammaDist:
+    r"""Gamma distribution.
+
+    Smaller version of the scipy.stats class. It uses the scipy methods, but
+    only saves the shape and rate parameters in the object. Instantiation
+    is much faster than scipy; method calls are similar in speed. It also uses
+    less memory than scipy.
+
+    It also has a new density function, :meth:`big_pdf`, which is faster on
+    large array inputs.
+
+    We use the shape/rate parametrization, under which the gamma pdf is:
+
+    .. math::
+        f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}
+
+    for shape :math:`alpha` and rate :`beta`.
+    """
+    def __init__(self, shape, rate):
+        self.shape = np.asarray(shape)
+        self.rate = np.asarray(rate)
+        self.scipy_args = {'a': self.shape, 'scale': 1/self.rate}
+
+    def ppf(self, q):
+        return scipy.stats.gamma.ppf(q, **self.scipy_args)
+
+    def big_pdf(self, x):
+        """Probability density function optimized for large inputs.
+
+        For small arrays x, it will be slower than the regular pdf. However it
+        can be much faster if x is a large array.
+        """
+        r = self.rate  # noqa
+        a = self.shape
+        logpdf = -scipy.special.gammaln(a)  # noqa
+        pdf = ne.evaluate('exp(logpdf + (a-1.0) * log(r * x) - r * x) * r')
+        return pdf
+
+    def pdf(self, x):
+        return scipy.stats.gamma.pdf(x, **self.scipy_args)
+
+    def mean(self):
+        return self.shape / self.rate
+
+    def interval(self, central_prob):
+        return scipy.stats.gamma.interval(central_prob, **self.scipy_args)
+
+    def median(self):
+        return scipy.stats.gamma.median(**self.scipy_args)
 
 
 class BranchProPosterior(object):
@@ -215,7 +267,7 @@ class BranchProPosterior(object):
         mean = np.divide(shape, rate)
 
         # compute the Gamma-shaped posterior distribution
-        post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
+        post_dist = GammaDist(shape, rate)
 
         self.inference_times = list(range(
             self.cases_times.min()+1+tau, self.cases_times.max()+1))
@@ -520,7 +572,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         # the class docstring for further details.
         pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
         for dist in samples:
-            pdf_values += dist.pdf(integration_grid[:, np.newaxis])
+            pdf_values += dist.big_pdf(integration_grid[:, np.newaxis])
         pdf_values *= 1 / N
 
         # Perform a cumulative integration of the posterior density using the
@@ -743,7 +795,7 @@ class LocImpBranchProPosterior(BranchProPosterior):
         mean = np.divide(shape, rate)
 
         # compute the Gamma-shaped posterior distribution
-        post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
+        post_dist = GammaDist(shape, rate)
 
         self.inference_times = list(range(
             self.cases_times.min()+1+tau, self.cases_times.max()+1))

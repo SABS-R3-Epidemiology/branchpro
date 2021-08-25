@@ -20,5 +20,5 @@ from .models import ForwardModel, BranchProModel, LocImpBranchProModel    # noqa
 from .simulation import SimulationController  # noqa
 from .apps import IncidenceNumberPlot, _SliderComponent, BranchProDashApp, IncidenceNumberSimulationApp, ReproductionNumberPlot, BranchProInferenceApp # noqa
 from ._dataset_library_api import DatasetLibrary # noqa
-from .posterior import BranchProPosterior, BranchProPosteriorMultSI, LocImpBranchProPosterior, LocImpBranchProPosteriorMultSI # noqa
+from .posterior import GammaDist, BranchProPosterior, BranchProPosteriorMultSI, LocImpBranchProPosterior, LocImpBranchProPosteriorMultSI # noqa
 from . import figures  # noqa
