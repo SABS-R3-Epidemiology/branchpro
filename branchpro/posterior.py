@@ -197,13 +197,14 @@ class BranchProPosterior(object):
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval) - 1
             eff_num = (
-                np.sum(cases_data[start_date:(t-1)] * self._serial_interval) /
+                (cases_data[start_date:(t-1)] * self._serial_interval).sum() /
                 self._normalizing_const)
             return eff_num
 
         eff_num = (
-            np.sum(cases_data[:(t-1)] * self._serial_interval[-(t-1):]) /
+            (cases_data[:(t-1)] * self._serial_interval[-(t-1):]).sum() /
             self._normalizing_const)
+
         return eff_num
 
     def _infectives_in_tau(self, cases_data, start, end):
