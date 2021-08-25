@@ -264,8 +264,8 @@ class BranchProPosterior(object):
                 # try to shift the window by 1 time point
                 tau_window = \
                     tau_window[1:] \
-                        + [self._infectious_individuals(self.cases_data,
-                                                        end_window-1)]
+                    + [self._infectious_individuals(self.cases_data,
+                                                    end_window-1)]
             except UnboundLocalError:
                 # First iteration, so set up the sliding window
                 tau_window = self._infectives_in_tau(
@@ -797,14 +797,14 @@ class LocImpBranchProPosterior(BranchProPosterior):
 
             try:
                 # try to shift the windows by 1 time point
-                tau_window = \
-                    tau_window[1:] \
-                        + [self._infectious_individuals(self.cases_data,
-                                                        end_window-1)]
+                tau_window = \  # noqa
+                    tau_window[1:] \  # noqa
+                    + [self._infectious_individuals(self.cases_data,  # noqa
+                                                    end_window-1)]  # noqa
                 tau_window_imp = \
                     tau_window_imp[1:] \
-                        + [self._infectious_individuals(self.imp_cases_data,
-                                                        end_window-1)]
+                    + [self._infectious_individuals(self.imp_cases_data,
+                                                    end_window-1)]
             except UnboundLocalError:
                 # First iteration, so set up the sliding windows
                 tau_window = self._infectives_in_tau(
