@@ -10,6 +10,7 @@ Overview:
 - :class:`BranchProPosteriorMultSI`
 - :class:`LocImpBranchProPosterior`
 - :class:`LocImpBranchProPosteriorMultSI`
+- :class:`GammaDist`
 
 Branch Process Posterior Distribution
 *************************************
@@ -33,4 +34,10 @@ Local and Imported Branch Process Posterior Distribution with Multiple Serial In
 ***************************************************************************************
 
 .. autoclass:: LocImpBranchProPosteriorMultSI
+  :members:
+
+Gamma distribution
+******************
+
+.. autoclass:: GammaDist
   :members:
