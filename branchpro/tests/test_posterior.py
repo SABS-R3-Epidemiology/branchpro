@@ -10,8 +10,91 @@ import unittest
 import pandas as pd
 import numpy as np
 import numpy.testing as npt
+import scipy.stats
 
 import branchpro as bp
+
+
+class TestGammaDist(unittest.TestCase):
+    """Test the gamma distribution class.
+    """
+    @classmethod
+    def setUpClass(cls):
+        cls.shape = np.array([1.6, 0.001, 1000, 2.5, 2.5])
+        cls.rate = np.array([0.0001, 1.0, 1.2, 1.5, 0.01])
+
+    def test_ppf(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+
+        test_points = [0.0001, 0.5, 0.75, 0.99]
+        for point in test_points:
+            npt.assert_almost_equal(d_class.ppf(point), d_scipy.ppf(point))
+
+    def test_pdf(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+
+        test_points = [0.001, 1, 10, 1000]
+        for point in test_points:
+            npt.assert_almost_equal(d_class.pdf(point), d_scipy.pdf(point))
+
+        # Test on array inputs
+        test_points = [np.array([0.001, 10.0, 1.0, 2.0, 3.0]),
+                       np.asarray([[0.001, 10.0, 1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0, 7.0, 8.0]])]
+        for point in test_points:
+            npt.assert_almost_equal(d_class.pdf(point), d_scipy.pdf(point))
+
+    def test_big_pdf(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+
+        test_points = [0.001, 1, 10, 1000]
+        for point in test_points:
+            npt.assert_almost_equal(d_class.big_pdf(point), d_scipy.pdf(point))
+
+        # Test on array inputs
+        test_points = [np.array([0.001, 10.0, 1.0, 2.0, 3.0]),
+                       np.asarray([[0.001, 10.0, 1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0, 7.0, 8.0]])]
+        for point in test_points:
+            npt.assert_almost_equal(d_class.big_pdf(point), d_scipy.pdf(point))
+
+    def test_mean(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+        npt.assert_almost_equal(d_class.mean(), d_scipy.mean())
+
+    def test_median(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+        npt.assert_almost_equal(d_class.median(), d_scipy.median())
+
+    def test_interval(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+
+        central_probs = [0.1, 0.5, 0.95]
+        for central_prob in central_probs:
+            npt.assert_almost_equal(
+                d_class.interval(central_prob)[0],
+                d_scipy.interval(central_prob)[0])
+            npt.assert_almost_equal(
+                d_class.interval(central_prob)[1],
+                d_scipy.interval(central_prob)[1])
 
 
 class TestBranchProPosteriorClass(unittest.TestCase):
