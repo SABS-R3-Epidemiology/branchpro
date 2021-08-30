@@ -52,6 +52,18 @@ class GammaDist:
         a = self.shape
         logpdf = -scipy.special.gammaln(a)  # noqa
         pdf = ne.evaluate('exp(logpdf + (a-1.0) * log(r * x) - r * x) * r')
+
+        # If a=1 and x=0, there will be nans. Correct them using the following
+        # formula:
+        if np.any(a == 1.0) and np.any(x == 0.0):
+            a1_indices = np.broadcast_to(a == 1.0, pdf.shape)
+            pdf[a1_indices] = \
+                ne.evaluate('exp(logpdf - r * x) * r')[a1_indices]
+
+        # Set pdf to zero where x<0
+        if np.any(x < 0):
+            pdf[np.broadcast_to(x < 0, pdf.shape)] = 0.0
+
         return pdf
 
     def pdf(self, x):

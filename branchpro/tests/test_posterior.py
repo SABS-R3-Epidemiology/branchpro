@@ -20,7 +20,7 @@ class TestGammaDist(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        cls.shape = np.array([1.6, 0.001, 1000, 2.5, 2.5])
+        cls.shape = np.array([1.6, 0.001, 1000, 2.5, 1.0])
         cls.rate = np.array([0.0001, 1.0, 1.2, 1.5, 0.01])
 
     def test_ppf(self):
@@ -61,11 +61,36 @@ class TestGammaDist(unittest.TestCase):
             npt.assert_almost_equal(d_class.big_pdf(point), d_scipy.pdf(point))
 
         # Test on array inputs
-        test_points = [np.array([0.001, 10.0, 1.0, 2.0, 3.0]),
+        test_points = [np.array([0.001, 10.0, 1.0, 2.0, 0.0]),
                        np.asarray([[0.001, 10.0, 1.0, 2.0, 3.0],
                                    [4.0, 5.0, 6.0, 7.0, 8.0]])]
         for point in test_points:
             npt.assert_almost_equal(d_class.big_pdf(point), d_scipy.pdf(point))
+
+        # Test the a=1, x=0 case as a float input
+        d_class = bp.GammaDist(1.0, 1.0)
+        d_scipy = scipy.stats.gamma(1.0, scale=1.0)
+        npt.assert_almost_equal(d_class.big_pdf(0.0), d_scipy.pdf(0.0))
+
+        # Test arrays containing the a=1, x=0 case
+        shape = np.ones(3)
+        rate = np.ones(3)
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+        x = np.asarray([[[0.0, 1.0, 0.0], [0.5, 1.0, 0.0]],
+                        [[0.0, 1, 2], [1, 2, 3]],
+                        [[1, 0, 0], [5, 6, 0]],
+                        [[0, 0, 0], [0, 0, 0]],
+                        [[10, 11, 12], [13, 14, 15]]])
+        npt.assert_almost_equal(d_class.big_pdf(x), d_scipy.pdf(x))
+
+        # Test x < 0
+        x = np.asarray([[[0.0, -1.0, 0.0], [0.5, 1.0, 0.0]],
+                        [[0.0, 1, -2], [1, -2, -3]],
+                        [[1, 0, 0], [-5, -6, 0]],
+                        [[0, 0, 0], [0, 0, 0]],
+                        [[10, -11, 12], [-13, -14, 15]]])
+        npt.assert_almost_equal(d_class.big_pdf(x), d_scipy.pdf(x))
 
     def test_mean(self):
         shape = self.shape
