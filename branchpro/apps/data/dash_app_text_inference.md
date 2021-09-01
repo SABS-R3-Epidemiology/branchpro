@@ -4,6 +4,8 @@ In order to make predictions about how case numbers will evolve in the future, w
 
 The model also calculates a 95% *credible interval* for the reproduction number; this simply tells us that we are 95% sure that the value for $R$ (the reproduction number value assumed to be constant over the last $\tau$ days) lies between a lower and an upper bound. So, for example, for day 16, our model might calculate that $R\_{16}$ was most likely equal to 1.3 and that we are 95% sure that it lay between 1.0 and 1.5. This credible interval is an important output of the model because it highlights that we can only *estimate* values for $R\_t$ and also *quantifies the uncertainty* of the model.
 
+You can upload your own data to this app, including imported case data if desired.
+
  All of the code can be found on [our GitHub page](https://github.com/SABS-R3-Epidemiology/branchpro).
 
 *Disclaimer: The modelling framework adopted by this software tool involves a number of simplifying assumptions. Furthermore, the validity of any outputs is contingent on appropriate choices for the parameter values and the accuracy of user-uploaded data. The developers urge cautious interpretation of all results and renounce any responsibility for decisions made on the basis of this software. Please refer to the paper above for full details.*
