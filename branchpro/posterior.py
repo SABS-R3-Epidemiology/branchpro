@@ -9,9 +9,74 @@
 
 import copy
 import numpy as np
+import numexpr as ne
 import pandas as pd
 import scipy.stats
+import scipy.special
 import scipy.integrate
+
+
+class GammaDist:
+    r"""Gamma distribution.
+
+    Smaller version of the scipy.stats class. It uses the scipy methods, but
+    only saves the shape and rate parameters in the object. Instantiation
+    is much faster than scipy; method calls are similar in speed. It also uses
+    less memory than scipy.
+
+    It also has a new density function, :meth:`big_pdf`, which is faster on
+    large array inputs.
+
+    We use the shape/rate parametrization, under which the gamma pdf is:
+
+    .. math::
+        f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}
+
+    for shape :math:`alpha` and rate :`beta`.
+    """
+    def __init__(self, shape, rate):
+        self.shape = np.asarray(shape)
+        self.rate = np.asarray(rate)
+        self.scipy_args = {'a': self.shape, 'scale': 1/self.rate}
+
+    def ppf(self, q):
+        return scipy.stats.gamma.ppf(q, **self.scipy_args)
+
+    def big_pdf(self, x):
+        """Probability density function optimized for large inputs.
+
+        For small arrays x, it will be slower than the regular pdf. However it
+        can be much faster if x is a large array.
+        """
+        r = self.rate  # noqa
+        a = self.shape
+        logpdf = -scipy.special.gammaln(a)  # noqa
+        pdf = ne.evaluate('exp(logpdf + (a-1.0) * log(r * x) - r * x) * r')
+
+        # If a=1 and x=0, there will be nans. Correct them using the following
+        # formula:
+        if np.any(a == 1.0) and np.any(x == 0.0):
+            a1_indices = np.broadcast_to(a == 1.0, pdf.shape)
+            pdf[a1_indices] = \
+                ne.evaluate('exp(logpdf - r * x) * r')[a1_indices]
+
+        # Set pdf to zero where x<0
+        if np.any(x < 0):
+            pdf[np.broadcast_to(x < 0, pdf.shape)] = 0.0
+
+        return pdf
+
+    def pdf(self, x):
+        return scipy.stats.gamma.pdf(x, **self.scipy_args)
+
+    def mean(self):
+        return self.shape / self.rate
+
+    def interval(self, central_prob):
+        return scipy.stats.gamma.interval(central_prob, **self.scipy_args)
+
+    def median(self):
+        return scipy.stats.gamma.median(**self.scipy_args)
 
 
 class BranchProPosterior(object):
@@ -144,18 +209,19 @@ class BranchProPosterior(object):
         if t > len(self._serial_interval):
             start_date = t - len(self._serial_interval) - 1
             eff_num = (
-                np.sum(cases_data[start_date:(t-1)] * self._serial_interval) /
+                (cases_data[start_date:(t-1)] * self._serial_interval).sum() /
                 self._normalizing_const)
             return eff_num
 
         eff_num = (
-            np.sum(cases_data[:(t-1)] * self._serial_interval[-(t-1):]) /
+            (cases_data[:(t-1)] * self._serial_interval[-(t-1):]).sum() /
             self._normalizing_const)
+
         return eff_num
 
     def _infectives_in_tau(self, cases_data, start, end):
         """
-        Sum total number of infectives in tau window.
+        Get number of infectives in tau window.
 
         Parameters
         ----------
@@ -172,7 +238,7 @@ class BranchProPosterior(object):
         num = []
         for time in range(start, end):
             num += [self._infectious_individuals(cases_data, time)]
-        return np.sum(num)
+        return num
 
     def run_inference(self, tau):
         """
@@ -206,16 +272,24 @@ class BranchProPosterior(object):
                 alpha + np.sum(
                     self.cases_data[(start_window-1):(end_window-1)]))
 
-            # compute rate parameter of the posterior over time
+            try:
+                # try to shift the window by 1 time point
+                tau_window = (tau_window[1:] +  # noqa
+                              [self._infectious_individuals(self.cases_data,
+                                                            end_window-1)])
+            except UnboundLocalError:
+                # First iteration, so set up the sliding window
+                tau_window = self._infectives_in_tau(
+                    self.cases_data, start_window, end_window)
 
-            rate.append(beta + self._infectives_in_tau(
-                self.cases_data, start_window, end_window))
+            # compute rate parameter of the posterior over time
+            rate.append(beta + sum(tau_window))
 
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
 
         # compute the Gamma-shaped posterior distribution
-        post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
+        post_dist = GammaDist(shape, rate)
 
         self.inference_times = list(range(
             self.cases_times.min()+1+tau, self.cases_times.max()+1))
@@ -520,7 +594,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         # the class docstring for further details.
         pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
         for dist in samples:
-            pdf_values += dist.pdf(integration_grid[:, np.newaxis])
+            pdf_values += dist.big_pdf(integration_grid[:, np.newaxis])
         pdf_values *= 1 / N
 
         # Perform a cumulative integration of the posterior density using the
@@ -732,18 +806,32 @@ class LocImpBranchProPosterior(BranchProPosterior):
                 alpha + np.sum(
                     self.cases_data[(start_window-1):(end_window-1)]))
 
-            # compute rate parameter of the posterior over time
+            try:
+                # try to shift the windows by 1 time point
+                tau_window = (tau_window[1:] +  # noqa
+                              [self._infectious_individuals(self.cases_data,
+                                                            end_window-1)])
+                tau_window_imp = (tau_window_imp[1:] +  # noqa
+                                  [self._infectious_individuals(
+                                    self.imp_cases_data,
+                                    end_window-1)])
 
-            rate.append(beta + self._infectives_in_tau(
-                self.cases_data, start_window, end_window) +
-                self.epsilon * self._infectives_in_tau(
-                self.imp_cases_data, start_window, end_window))
+            except UnboundLocalError:
+                # First iteration, so set up the sliding windows
+                tau_window = self._infectives_in_tau(
+                    self.cases_data, start_window, end_window)
+                tau_window_imp = self._infectives_in_tau(
+                    self.imp_cases_data, start_window, end_window)
+
+            # compute rate parameter of the posterior over time
+            rate.append(beta + sum(tau_window)
+                        + self.epsilon * sum(tau_window_imp))
 
         # compute the mean of the Gamma-shaped posterior over time
         mean = np.divide(shape, rate)
 
         # compute the Gamma-shaped posterior distribution
-        post_dist = scipy.stats.gamma(shape, scale=1/np.array(rate))
+        post_dist = GammaDist(shape, rate)
 
         self.inference_times = list(range(
             self.cases_times.min()+1+tau, self.cases_times.max()+1))
