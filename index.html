@@ -16,12 +16,21 @@
       .title{
         font-variant: small-caps;
         text-align: center;
+        letter-spacing: 1px;
       }
       p {
         text-align: justify;
       }
       .reference {
         text-indent: 2em;
+      }
+      .disclaimer_title {
+        font-style: italic;
+        letter-spacing: 0.5px;
+      }
+      .disclaimer {
+        margin-top: 0.25cm;
+        color: gray;
       }
     </style>
   </head>
@@ -40,6 +49,10 @@
       </p>
       <p class="reference">
         Authors, etc. “Title,” <em>Journal</em> (2021). <sup>†</sup>Joint first authors.
+      </p>
+      <br>
+      <p class="disclaimer">
+        <span class="disclaimer_title">Disclaimer:</span> The modelling framework adopted by this software tool involves a number of simplifying assumptions. Furthermore, the validity of any outputs is contingent on appropriate choices for the parameter values and the accuracy of user-uploaded data. The developers urge cautious interpretation of all results and renounce any responsibility for decisions made on the basis of this software. Please refer to the paper above for full details.
       </p>
     </div>
   </body>
