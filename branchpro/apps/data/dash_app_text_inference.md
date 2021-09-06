@@ -6,6 +6,8 @@ The model also calculates a 95% *credible interval* for the reproduction number;
 
 You can upload your own data to this app, including imported case data if desired.
 
+When imported cases are uploaded, a slider will appear allowing you to choose the value of ε, the relative transmission risk of an imported case compared to a local one.
+
  All of the code can be found on [our GitHub page](https://github.com/SABS-R3-Epidemiology/branchpro).
 
 *Disclaimer: The modelling framework adopted by this software tool involves a number of simplifying assumptions. Furthermore, the validity of any outputs is contingent on appropriate choices for the parameter values and the accuracy of user-uploaded data. The developers urge cautious interpretation of all results and renounce any responsibility for decisions made on the basis of this software. Please refer to the paper above for full details.*
