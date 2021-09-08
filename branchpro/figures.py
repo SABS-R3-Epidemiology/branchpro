@@ -354,7 +354,8 @@ def plot_regions_inference(first_day_data,
                            R_t_results,
                            default_epsilon=1,
                            inset_region=[],
-                           show=True):
+                           show=True,
+                           mers=False):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
@@ -394,6 +395,8 @@ def plot_regions_inference(first_day_data,
         List of regions name where insets are to be included.
     show : bool, optional (True)
         Whether or not to plt.show() the figure after it has been generated
+    mers : bool, optional (False)
+        If True, use settings for the MERS data
 
     Returns
     -------
@@ -403,13 +406,13 @@ def plot_regions_inference(first_day_data,
     # Use 0.01 height ratio subplot rows to space out the panels
     region_num = len(region_names)
     fig = plt.figure()
-    gs = fig.add_gridspec(3, region_num, height_ratios=[1, 0.01, 1])
+    gs = fig.add_gridspec(2, region_num, height_ratios=[1, 1])
 
     # Ax for case data
     top_axs = [fig.add_subplot(gs[0, i]) for i in range(region_num)]
 
     # Axes for R_t inference
-    axs = [fig.add_subplot(gs[2, j]) for j in range(region_num)]
+    axs = [fig.add_subplot(gs[1, j]) for j in range(region_num)]
 
     # Make inference panel share x axis of its incidence data
     for i in range(len(region_names)):
@@ -417,6 +420,8 @@ def plot_regions_inference(first_day_data,
 
     # Plot local and imported cases
     width = datetime.timedelta(hours=10)
+    if mers:
+        width = datetime.timedelta(hours=14)
 
     for region in range(len(region_names)):
         data_times = [first_day_data + datetime.timedelta(days=int(i))
@@ -434,7 +439,10 @@ def plot_regions_inference(first_day_data,
                             edgecolor='w',
                             lw=0.1,
                             label='Imported cases',
-                            color='deeppink')
+                            color='deeppink',
+                            zorder=10)
+
+        top_axs[region].set_ylabel('Number of cases')
 
         # Plot a zoomed in part of the graph as an inset
         if region_names[region] in inset_region:
@@ -512,7 +520,7 @@ def plot_regions_inference(first_day_data,
                     linewidth=0)
 
                 # Add labels if the subplot is on the left side of the figure
-                ax.set_ylabel(r'$R_t^\mathrm{local}$')
+                ax.set_ylabel('Local reproduction\nnumber ' + r'$(R_t)$')
 
                 # Add dotted line for R_t = 1
                 ax.axhline(1,
@@ -555,6 +563,9 @@ def plot_regions_inference(first_day_data,
         axs[i].xaxis.set_major_formatter(
             matplotlib.dates.DateFormatter('%b %d'))
 
+        top_axs[i].set_xlabel('Date (2020)')
+        axs[i].set_xlabel('Date (2020)')
+
     # Set ticks once per week
     for j in range(region_num):
         axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
@@ -562,6 +573,11 @@ def plot_regions_inference(first_day_data,
 
         top_axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
                               for i in range(len(local_cases[j]))][::7])
+
+    # Remove full box
+    for ax in fig.axes:
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
 
     # Rotate labels
     plt.xticks(rotation=45, ha='center')
@@ -575,8 +591,8 @@ def plot_regions_inference(first_day_data,
         top_axs[i].set_title(region_names[i], fontsize=14)
 
     # Add panel labels
-    fig.text(0.025, 0.975, '(a)', fontsize=14)
-    fig.text(0.025, 0.45, '(b)', fontsize=14)
+    fig.text(0.025, 0.965, '(a)', fontsize=14)
+    fig.text(0.025, 0.5, '(b)', fontsize=14)
 
     fig.set_size_inches(4 * region_num, 6)
     fig.set_tight_layout(True)
