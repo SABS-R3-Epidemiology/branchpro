@@ -98,7 +98,7 @@ def plot_forward_simulations(import_cases,
     # Plot line for R_t
     ax2.plot(R_t_times, R_t, color='k')
     ax2.axhline(1, ls='-', color='gray', lw=1.5, alpha=0.4, zorder=-10)
-    ax2.set_ylabel(r'$R_t^\mathrm{local}$')
+    ax2.set_ylabel(r'$R_t$')
     ax2.set_ylim(0, 1.1*max(R_t))
     ax2.tick_params(labelbottom=False)
 
@@ -354,7 +354,8 @@ def plot_regions_inference(first_day_data,
                            R_t_results,
                            default_epsilon=1,
                            inset_region=[],
-                           show=True):
+                           show=True,
+                           mers=False):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
@@ -394,6 +395,8 @@ def plot_regions_inference(first_day_data,
         List of regions name where insets are to be included.
     show : bool, optional (True)
         Whether or not to plt.show() the figure after it has been generated
+    mers : bool, optional (False)
+        If True, use settings for the MERS data
 
     Returns
     -------
@@ -403,13 +406,13 @@ def plot_regions_inference(first_day_data,
     # Use 0.01 height ratio subplot rows to space out the panels
     region_num = len(region_names)
     fig = plt.figure()
-    gs = fig.add_gridspec(3, region_num, height_ratios=[1, 0.01, 1])
+    gs = fig.add_gridspec(2, region_num, height_ratios=[1, 1])
 
     # Ax for case data
     top_axs = [fig.add_subplot(gs[0, i]) for i in range(region_num)]
 
     # Axes for R_t inference
-    axs = [fig.add_subplot(gs[2, j]) for j in range(region_num)]
+    axs = [fig.add_subplot(gs[1, j]) for j in range(region_num)]
 
     # Make inference panel share x axis of its incidence data
     for i in range(len(region_names)):
@@ -417,6 +420,8 @@ def plot_regions_inference(first_day_data,
 
     # Plot local and imported cases
     width = datetime.timedelta(hours=10)
+    if mers:
+        width = datetime.timedelta(hours=14)
 
     for region in range(len(region_names)):
         data_times = [first_day_data + datetime.timedelta(days=int(i))
@@ -434,7 +439,10 @@ def plot_regions_inference(first_day_data,
                             edgecolor='w',
                             lw=0.1,
                             label='Imported cases',
-                            color='deeppink')
+                            color='deeppink',
+                            zorder=10)
+
+        top_axs[region].set_ylabel('Number of cases')
 
         # Plot a zoomed in part of the graph as an inset
         if region_names[region] in inset_region:
@@ -512,7 +520,7 @@ def plot_regions_inference(first_day_data,
                     linewidth=0)
 
                 # Add labels if the subplot is on the left side of the figure
-                ax.set_ylabel(r'$R_t^\mathrm{local}$')
+                ax.set_ylabel('Local reproduction\nnumber ' + r'$(R_t)$')
 
                 # Add dotted line for R_t = 1
                 ax.axhline(1,
@@ -555,6 +563,9 @@ def plot_regions_inference(first_day_data,
         axs[i].xaxis.set_major_formatter(
             matplotlib.dates.DateFormatter('%b %d'))
 
+        top_axs[i].set_xlabel('Date (2020)')
+        axs[i].set_xlabel('Date (2020)')
+
     # Set ticks once per week
     for j in range(region_num):
         axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
@@ -562,6 +573,11 @@ def plot_regions_inference(first_day_data,
 
         top_axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
                               for i in range(len(local_cases[j]))][::7])
+
+    # Remove full box
+    for ax in fig.axes:
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
 
     # Rotate labels
     plt.xticks(rotation=45, ha='center')
@@ -575,8 +591,8 @@ def plot_regions_inference(first_day_data,
         top_axs[i].set_title(region_names[i], fontsize=14)
 
     # Add panel labels
-    fig.text(0.025, 0.975, '(a)', fontsize=14)
-    fig.text(0.025, 0.45, '(b)', fontsize=14)
+    fig.text(0.025, 0.965, '(a)', fontsize=14)
+    fig.text(0.025, 0.5, '(b)', fontsize=14)
 
     fig.set_size_inches(4 * region_num, 6)
     fig.set_tight_layout(True)
@@ -587,7 +603,15 @@ def plot_regions_inference(first_day_data,
     return fig
 
 
-def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
+def plot_r_heatmap(region_names,
+                   epsilons,
+                   R_t_results,
+                   first_day,
+                   show=True,
+                   figsize=None,
+                   max_R=None,
+                   aspect=1.0,
+                   date_interval=10):
     """Plot a heatmap of R_t for different epsilons.
 
     It assumes that about 20 values of epsilon are provided.
@@ -605,13 +629,25 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         First day of inference results
     show : bool, optional (True)
         Whether or not to plt.show() the figure after it has been generated
+    figsize : tuple of float, optional (None)
+        Size of matplotlib figure. If None, it will default to
+        (3.33 * num_regions, 4)
+    max_R : float, optional (None)
+        Maximum value of R_t on the legend. If None, it will be the maximum
+        value in the results.
+    aspect : float, optional (1.0)
+        Aspect ratio for each tile in the heatmap.
+    date_interval : int, optional (10)
+        How many days in between x-axis date labels
 
     Returns
     -------
     matplotlib.figure.Figure
     """
     num_regions = len(region_names)
-    fig = plt.figure(figsize=(3.33 * num_regions, 4))
+    if figsize is None:
+        figsize = (3.33 * num_regions, 4)
+    fig = plt.figure(figsize=figsize)
 
     R_t_arrays = []
     num_time_points = []
@@ -627,7 +663,8 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
         R_t_arrays.append(X)
         num_time_points.append(n)
 
-    max_R = max([np.max(X) for X in R_t_arrays])
+    if max_R is None:
+        max_R = max([np.max(X) for X in R_t_arrays])
     max_n = max(num_time_points)
 
     for k, (name, nt, X) in enumerate(zip(region_names,
@@ -639,30 +676,37 @@ def plot_r_heatmap(region_names, epsilons, R_t_results, first_day, show=True):
             X,
             cmap='seismic',
             norm=colors.TwoSlopeNorm(vmin=0, vcenter=1.0, vmax=max_R),
-            aspect=nt/max_n)
+            aspect=nt/max_n*aspect)
+
+        ax.contour(X, [1], colors='k', linestyles='--', linewidths=1)
 
         # Add horizontal lines to divide the epsilons
         for i, eps in enumerate(epsilons):
             ax.axhline(i+0.5, color='k', lw=1)
 
-        e_ticks = [0, 4, 8, 12, 15, 18]
+        e_ticks = [0, 4, 9, 14, 19, 23]
+        # e_labels = [0.1, 0.5, 1, 1.5, 2, 2.4]
         ax.set_yticks(e_ticks)
-        ax.set_yticklabels([epsilons[i] for i in e_ticks[::-1]])
-        ax.set_ylabel(r'$ϵ$')
+        ax.set_yticklabels([round(epsilons[i], 1) for i in e_ticks[::-1]])
+        ax.set_ylabel('Relative transmissibility\n of imported cases '
+                      + r'($ϵ$)')
 
-        x_ticks = list(range(0, nt, 10))
+        x_ticks = list(range(0, nt, date_interval))
         ax.set_xticks(x_ticks)
         ax.set_xticklabels(
             [(first_day + datetime.timedelta(days=i)).strftime('%b %d')
              for i in x_ticks])
-        ax.set_xlabel('Date')
+        ax.set_xlabel('Date (2020)')
 
         ax.set_title(region_names[k])
 
     # Add key for R values
     cax = plt.axes([0.47, 0.15, 0.1, 0.04])
     fig.colorbar(im, cax=cax, orientation='horizontal')
-    cax.set_xlabel(r'$R_t^{\mathrm{local}}$')
+    cax.set_xlabel('Local reproduction number ' + r'$(R_t)$')
+
+    cax.axvline(1, color='k', ls='--', lw=1)
+
     fig.set_tight_layout(True)
 
     if show:
