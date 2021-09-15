@@ -30,6 +30,7 @@ def callback(n_clicks):
     time.sleep(2.0)
     return [f"Clicked {n_clicks} times"]
 
+server = app.server
 
 if __name__ == "__main__":
     app.run_server(debug=True)
