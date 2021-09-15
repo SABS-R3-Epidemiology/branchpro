@@ -23,10 +23,19 @@ class BranchProInferenceApp(BranchProDashApp):
     Class for the inference dash app with figure and sliders for the
     BranchPro models.
     """
-    def __init__(self):
+    def __init__(self, long_callback_manager=None):
+        """
+        Parameters
+        ----------
+        long_callback_manager
+            Optional callback manager for long callbacks.
+            See https://dash.plotly.com/long-callbacks
+        """
         super(BranchProInferenceApp, self).__init__()
 
-        self.app = dash.Dash(__name__, external_stylesheets=self.css)
+        self.app = dash.Dash(__name__,
+                             external_stylesheets=self.css,
+                             long_callback_manager=long_callback_manager)
         self.app.title = 'BranchproInf'
 
         self.session_data = {
@@ -147,6 +156,10 @@ class BranchProInferenceApp(BranchProDashApp):
                         align='center',
                     ),
                     html.H2('Plot of R values'),
+                    html.Div(id='running_text'),
+                    html.Div(id='first_run',  # see flip_first_run() in the app
+                             children='True',
+                             style={'display': 'none'}),
                     dbc.Row(
                         [
                             dbc.Col(
