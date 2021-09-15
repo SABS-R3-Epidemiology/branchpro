@@ -181,6 +181,8 @@ def update_slider_ranges(*args):
     State('data_storage', 'children'),
     running=[
         (Output('running_text', 'children'), 'Running inference...', ''),
+        (Output('posterior-fig', 'style'),
+         {'display': 'none'}, {'display': 'block'})
     ],
     cancel=[Input('first_run', 'children')],
 )

@@ -163,13 +163,11 @@ class BranchProInferenceApp(BranchProDashApp):
                     dbc.Row(
                         [
                             dbc.Col(
-                                dcc.Loading(
-                                    id='loading',
-                                    children=dcc.Graph(
-                                        figure=bp.ReproductionNumberPlot(
-                                            ).figure,
-                                        id='posterior-fig'),
-                                    type="circle")),
+                                children=dcc.Graph(
+                                    figure=bp.ReproductionNumberPlot(
+                                        ).figure,
+                                    id='posterior-fig',
+                                    style={'display': 'block'})),
                             dbc.Col(self.update_sliders(), id='all-sliders')
                         ],
                         align='center',
