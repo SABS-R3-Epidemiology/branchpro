@@ -1,1 +1,1 @@
-web: gunicorn -t 250 --pythonpath branchpro/apps inference_dash_app:server
+web: gunicorn -t 500 --pythonpath branchpro/apps inference_dash_app:server
