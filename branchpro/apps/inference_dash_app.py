@@ -194,14 +194,14 @@ def update_posterior_storage(*args):
 
 @app.app.callback(
     Output('posterior-fig', 'figure'),
-    Input('data_storage', 'children'),
-    Input('interval_storage', 'children'),
     Input('posterior_storage', 'children'),
+    State('data_storage', 'children'),
+    State('interval_storage', 'children'),
 )
 def update_posterior_figure(*args):
     """Handles all updates to the posterior figure.
     """
-    data_json, interval_json, posterior_json = args
+    posterior_json, data_json, interval_json = args
 
     with app.lock:
         app.refresh_user_data_json(
