@@ -366,7 +366,6 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
         inference3 = bp.BranchProPosteriorMultSI(df, ser_int2, 1, 0.2)
         inference3.run_inference(tau=2, progress_fn=progress_fn)
 
-
     def test_get_intervals(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
