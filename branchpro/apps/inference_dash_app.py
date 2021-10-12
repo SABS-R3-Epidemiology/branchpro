@@ -21,12 +21,18 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from dash.long_callback import DiskcacheLongCallbackManager
 
 import branchpro as bp
 from branchpro.apps import BranchProInferenceApp
 
+import diskcache
+
+cache = diskcache.Cache('./cache')
+long_callback_manager = DiskcacheLongCallbackManager(cache)
+
 np.random.seed(100)
-app = BranchProInferenceApp()
+app = BranchProInferenceApp(long_callback_manager=long_callback_manager)
 
 # Generate synthetic data
 
@@ -166,11 +172,17 @@ def update_slider_ranges(*args):
         return app.update_sliders()
 
 
-@app.app.callback(
+@app.app.long_callback(
     Output('posterior_storage', 'children'),
     [Input(s, 'value') for s in sliders],
     Input('interval_storage', 'children'),
     State('data_storage', 'children'),
+    running=[
+        (Output('running_text', 'children'), 'Running inference...', ''),
+        (Output('posterior-fig', 'style'),
+         {'display': 'none'}, {'display': 'block'})
+    ],
+    cancel=[Input('first_run', 'children')],
 )
 def update_posterior_storage(*args):
     """Handles all updates to the posterior storage.
@@ -209,6 +221,22 @@ def update_posterior_figure(*args):
             interval_storage=interval_json,
             posterior_storage=posterior_json)
         return app.update_inference_figure()
+
+
+@app.app.callback(
+    Output('first_run', 'children'),
+    Input('first_run', 'children'),
+)
+def flip_first_run(first_run):
+    """Flip the first_run div from True to False.
+
+    This is needed to prevent the long callback from getting in an endless loop
+    when the app is loaded.
+    """
+    if first_run == 'True':
+        return 'False'
+    else:
+        return 'True'
 
 
 @app.app.callback(
