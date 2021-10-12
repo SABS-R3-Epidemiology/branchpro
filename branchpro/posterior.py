@@ -544,7 +544,7 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._serial_intervals = np.flip(np.asarray(serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau):
+    def run_inference(self, tau, progress_fn=None):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
@@ -557,7 +557,12 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         tau
             size sliding time window over which the reproduction number is
             estimated.
+        progress_fn
+            A function with integer argument. If provided, it will be called
+            every 10 iterations of the loop over serial intervals, with the
+            current iteration number passed as the argument.
         """
+        progress_fn_avl = progress_fn is not None
         samples = []  # For saving each gamma posterior (scipy.stats object)
 
         for nc, si in zip(self._normalizing_consts, self._serial_intervals):
@@ -566,16 +571,32 @@ class BranchProPosteriorMultSI(BranchProPosterior):
             super().run_inference(tau)
             samples.append(copy.deepcopy(self.inference_posterior))
 
+            if i % 10 == 0 and progress_fn_avl:
+                progress_fn(i)
+
         self._inference_samples = samples
 
         self._calculate_posterior_mean()
-        self._calculate_posterior_percentiles()
+        
+        # Make a new progress function which accounts for the progress made
+        # in this method
+        percentile_prog_fn = lambda x : progress_fn(x + i)
+        self._calculate_posterior_percentiles(progress_fn=percentile_prog_fn)
 
-    def _calculate_posterior_percentiles(self):
+    def _calculate_posterior_percentiles(self, progress_fn=None):
         """Calculate the posterior inverse CDF.
 
         To be called after self._inference_samples has been populated.
+
+        Parameters
+        ----------
+        progress_fn
+            A function with integer argument. If provided, it will be called
+            every 10 iterations of the loop over serial intervals, with the
+            current iteration number passed as the argument.
         """
+        progress_fn_avl = progress_fn is not None
+
         samples = self._inference_samples
         N = len(samples)
 
@@ -593,8 +614,10 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         # conditional posteriors (those saved in self._inference_samples.) See
         # the class docstring for further details.
         pdf_values = np.zeros((len(integration_grid), len(max_Rs[0])))
-        for dist in samples:
+        for i, dist in enumerate(samples):
             pdf_values += dist.big_pdf(integration_grid[:, np.newaxis])
+            if i % 10 == 0 and progress_fn_avl:
+                progress_fn(i)
         pdf_values *= 1 / N
 
         # Perform a cumulative integration of the posterior density using the
@@ -864,7 +887,7 @@ class LocImpBranchProPosteriorMultSI(
             np.asarray(daily_serial_intervals), axis=1)
         self._normalizing_consts = np.sum(self._serial_intervals, axis=1)
 
-    def run_inference(self, tau):
+    def run_inference(self, tau, progress_fn=None):
         """
         Runs the inference of the reproduction numbers based on the entirety
         of the incidence data available.
@@ -877,16 +900,29 @@ class LocImpBranchProPosteriorMultSI(
         tau
             size sliding time window over which the reproduction number is
             estimated.
+        progress_fn
+            A function with integer argument. If provided, it will be called
+            every 10 iterations of the loop over serial intervals, with the
+            current iteration number passed as the argument.
         """
+        progress_fn_avl = progress_fn is not None
         samples = []  # For saving each gamma posterior (scipy.stats object)
 
-        for nc, si in zip(self._normalizing_consts, self._serial_intervals):
+        for i, (nc, si) in enumerate(zip(self._normalizing_consts,
+                                         self._serial_intervals)):
             self._serial_interval = si
             self._normalizing_const = nc
             LocImpBranchProPosterior.run_inference(self, tau)
             samples.append(copy.deepcopy(self.inference_posterior))
 
+            if i % 10 == 0 and progress_fn_avl:
+                progress_fn(i)
+
         self._inference_samples = samples
 
         self._calculate_posterior_mean()
-        self._calculate_posterior_percentiles()
+
+        # Make a new progress function which accounts for the progress made
+        # in this method
+        percentile_prog_fn = lambda x : progress_fn(x + i)
+        self._calculate_posterior_percentiles(progress_fn=percentile_prog_fn)
