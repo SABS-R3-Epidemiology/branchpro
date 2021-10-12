@@ -360,6 +360,13 @@ class TestBranchProPosteriorMultSIClass(unittest.TestCase):
         self.assertEqual(len(inference2.inference_times), 3)
         self.assertEqual(len(inference2.inference_posterior.mean()), 3)
 
+        def progress_fn(i):
+            pass
+
+        inference3 = bp.BranchProPosteriorMultSI(df, ser_int2, 1, 0.2)
+        inference3.run_inference(tau=2, progress_fn=progress_fn)
+
+
     def test_get_intervals(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -550,3 +557,10 @@ class TestLocImpBranchProPosteriorMultSIClass(unittest.TestCase):
         self.assertEqual(len(inference2.inference_estimates), 3)
         self.assertEqual(len(inference2.inference_times), 3)
         self.assertEqual(len(inference2.inference_posterior.mean()), 3)
+
+        def progress_fn(i):
+            pass
+
+        inference3 = bp.LocImpBranchProPosteriorMultSI(
+            local_df, imp_df, 0.3, ser_int2, 1, 0.2)
+        inference3.run_inference(tau=2, progress_fn=progress_fn)
