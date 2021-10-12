@@ -565,7 +565,8 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         progress_fn_avl = progress_fn is not None
         samples = []  # For saving each gamma posterior (scipy.stats object)
 
-        for nc, si in zip(self._normalizing_consts, self._serial_intervals):
+        for i, (nc, si) in enumerate(zip(self._normalizing_consts,
+                                         self._serial_intervals)):
             self._serial_interval = si
             self._normalizing_const = nc
             super().run_inference(tau)
@@ -577,10 +578,10 @@ class BranchProPosteriorMultSI(BranchProPosterior):
         self._inference_samples = samples
 
         self._calculate_posterior_mean()
-        
+
         # Make a new progress function which accounts for the progress made
         # in this method
-        percentile_prog_fn = lambda x : progress_fn(x + i)
+        percentile_prog_fn = lambda x: progress_fn(x + i)
         self._calculate_posterior_percentiles(progress_fn=percentile_prog_fn)
 
     def _calculate_posterior_percentiles(self, progress_fn=None):
