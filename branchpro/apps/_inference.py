@@ -156,21 +156,18 @@ class BranchProInferenceApp(BranchProDashApp):
                         align='center',
                     ),
                     html.H2('Plot of R values'),
-                    html.Div(id='running_text'),
+                    html.Progress(id='progress_bar'),
                     html.Div(id='first_run',  # see flip_first_run() in the app
                              children='True',
                              style={'display': 'none'}),
                     dbc.Row(
                         [
                             dbc.Col(
-                                dcc.Loading(
-                                    id='loading',
-                                    children=dcc.Graph(
-                                        figure=bp.ReproductionNumberPlot(
-                                            ).figure,
-                                        id='posterior-fig',
-                                        style={'display': 'block'}),
-                                    type='circle')),
+                                children=dcc.Graph(
+                                    figure=bp.ReproductionNumberPlot(
+                                        ).figure,
+                                    id='posterior-fig',
+                                    style={'display': 'block'})),
                             dbc.Col(self.update_sliders(), id='all-sliders')
                         ],
                         align='center',
@@ -254,7 +251,13 @@ class BranchProInferenceApp(BranchProDashApp):
 
         return sliders.get_sliders_div()
 
-    def update_posterior(self, mean, stdev, tau, central_prob, epsilon=None):
+    def update_posterior(self,
+                         mean,
+                         stdev,
+                         tau,
+                         central_prob,
+                         epsilon=None,
+                         progress_fn=None):
         """Update the posterior distribution based on slider values.
 
         Parameters
@@ -276,6 +279,10 @@ class BranchProInferenceApp(BranchProDashApp):
             (float) updated position on the slider for the constant of
             proportionality between local and imported cases for the Branch Pro
             model in the posterior.
+        progress_fn
+            Function of integer argument to send to posterior run_inference.
+            It can be used for dash callbacks set_progress (see
+            update_posterior_storage in the app script)
 
         Returns
         -------
@@ -326,6 +333,8 @@ class BranchProInferenceApp(BranchProDashApp):
                     *prior_params,
                     **labels)
 
+            posterior.run_inference(tau)
+
         else:
             serial_intervals = self.session_data.get(
                 'interval_storage').values.T
@@ -353,7 +362,8 @@ class BranchProInferenceApp(BranchProDashApp):
                     *prior_params,
                     **labels)
 
-        posterior.run_inference(tau)
+            posterior.run_inference(tau, progress_fn=progress_fn)
+
         return posterior.get_intervals(central_prob)
 
     def update_inference_figure(self,
