@@ -581,7 +581,8 @@ class BranchProPosteriorMultSI(BranchProPosterior):
 
         # Make a new progress function which accounts for the progress made
         # in this method
-        percentile_prog_fn = lambda x: progress_fn(x + i)
+        def percentile_prog_fn(x):
+            progress_fn(x + i)
         self._calculate_posterior_percentiles(progress_fn=percentile_prog_fn)
 
     def _calculate_posterior_percentiles(self, progress_fn=None):
@@ -925,5 +926,6 @@ class LocImpBranchProPosteriorMultSI(
 
         # Make a new progress function which accounts for the progress made
         # in this method
-        percentile_prog_fn = lambda x : progress_fn(x + i)
+        def percentile_prog_fn(x):
+            progress_fn(x + i)
         self._calculate_posterior_percentiles(progress_fn=percentile_prog_fn)

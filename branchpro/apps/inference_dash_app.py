@@ -205,7 +205,8 @@ def update_posterior_storage(*args):
         total_runtime = 2 * num_serial_intervals
 
         # Make a function for updating the progress
-        update_progress = lambda x: set_progress((str(x), str(total_runtime)))
+        def update_progress(x):
+            set_progress((str(x), str(total_runtime)))
 
     else:
         # Progress bar only matters when there are multiple serial intervals
