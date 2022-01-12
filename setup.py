@@ -67,14 +67,17 @@ setup(
         # Dependencies go here!
         'matplotlib',
         'numpy>=1.8',
-        'dash>=1.18',
+        'dash>=2.0',
         'dash_bootstrap_components>=0.12',
         'dash_daq',
         'dash_defer_js_import',
         'pandas',
         'plotly',
         'scipy>=1.6',
-        'numexpr'
+        'numexpr',
+        'diskcache',
+        'multiprocess',
+        'psutil',
     ],
     extras_require={
         'docs': [
