@@ -178,23 +178,48 @@ def update_slider_ranges(*args):
     Input('interval_storage', 'children'),
     State('data_storage', 'children'),
     running=[
-        (Output('running_text', 'children'), 'Running inference...', ''),
         (Output('posterior-fig', 'style'),
-         {'display': 'none'}, {'display': 'block'})
+         {'display': 'none'}, {'display': 'block'}),
+        (Output('progress_bar', 'style'),
+         {'visibility': 'visible'}, {'visibility': 'hidden'}),
     ],
     cancel=[Input('first_run', 'children')],
+    progress=[Output('progress_bar', 'value'), Output('progress_bar', 'max')],
 )
 def update_posterior_storage(*args):
     """Handles all updates to the posterior storage.
     """
-    epsilon, mean, stdev, tau, central_prob, interval_json, data_json = args
+    set_progress, epsilon, mean, stdev, tau, central_prob, interval_json, \
+        data_json = args
+
+    # Get number of serial intervals
+    serial_intervals = np.array(json.loads(interval_json))
+    try:
+        num_serial_intervals = serial_intervals.shape[1]
+    except IndexError:
+        num_serial_intervals = 1
+
+    if num_serial_intervals > 1:
+        # Approximate runtime as 1 unit of time per serial interval, plus the
+        # same amount of time for combining the posteriors
+        total_runtime = 2 * num_serial_intervals
+
+        # Make a function for updating the progress
+        def update_progress(x):
+            set_progress((str(x), str(total_runtime)))
+
+    else:
+        # Progress bar only matters when there are multiple serial intervals
+        set_progress(('1', '1'))
+        update_progress = None
 
     with app.lock:
         app.refresh_user_data_json(
             data_storage=data_json, interval_storage=interval_json)
 
         posterior_data = app.update_posterior(
-            mean, stdev, tau, central_prob, epsilon).to_json()
+            mean, stdev, tau, central_prob, epsilon,
+            progress_fn=update_progress).to_json()
 
         app.refresh_user_data_json(
             data_storage=data_json,
