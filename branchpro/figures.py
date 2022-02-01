@@ -25,6 +25,7 @@ import matplotlib.dates
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 
 def plot_forward_simulations(import_cases,
@@ -243,6 +244,11 @@ def plot_r_inference(first_day_data,
     # Get R_t for the default epsilon
     default_results = R_t_results[epsilons.index(default_epsilon)]
 
+    # Make sure bounds are numeric type
+    numeric_columns = ['Lower bound CI', 'Upper bound CI']
+    for col in numeric_columns:
+        default_results[col] = pd.to_numeric(default_results[col])
+
     # Build time vector for all R_t
     times = len(default_results['Mean'])
     date_times = [first_day_inference + datetime.timedelta(days=int(i))
@@ -252,6 +258,9 @@ def plot_r_inference(first_day_data,
     for epsilon, results in zip(epsilons, R_t_results):
         if epsilon != default_epsilon:
             ax = axs[i]
+
+            for col in numeric_columns:
+                results[col] = pd.to_numeric(results[col])
 
             # Plot shaded region for R_t
             line, = ax.plot(date_times,
@@ -465,6 +474,11 @@ def plot_regions_inference(first_day_data,
         # Get R_t for the default epsilon
         default_results = R_t_results[region][epsilons.index(default_epsilon)]
 
+        # Make sure bounds are numeric type
+        numeric_columns = ['Lower bound CI', 'Upper bound CI']
+        for col in numeric_columns:
+            default_results[col] = pd.to_numeric(default_results[col])
+
         # Build time vector for all R_t
         times = len(default_results['Mean'])
         date_times = [first_day_inference + datetime.timedelta(days=int(i))
@@ -477,6 +491,9 @@ def plot_regions_inference(first_day_data,
         for epsilon, results in zip(epsilons, R_t_results[region]):
             if epsilon != default_epsilon:
                 ax = axs[region]
+
+                for col in numeric_columns:
+                    results[col] = pd.to_numeric(results[col])
 
                 # Plot shaded region for R_t
                 line, = ax.plot(date_times,
