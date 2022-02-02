@@ -568,10 +568,12 @@ def plot_regions_inference(first_day_data,
     top_axs[0].legend()
     axs[0].legend([(lines[0], shades[0]),
                    (zerorange, zerorangelines, zeroline),
-                   (lines[1], shades[1]), ],
+                   # (lines[1], shades[1]),
+                   ],
                   [r'$ϵ={}$'.format(epsilons[0]),
                    r'$ϵ={}$'.format(default_epsilon),
-                   r'$ϵ={}$'.format(epsilons[2]), ])
+                   # r'$ϵ={}$'.format(epsilons[2]),
+                   ])
 
     # Use "Jan 01", etc as the date format
     for i in range(len(region_names)):
