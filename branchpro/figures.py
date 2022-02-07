@@ -391,8 +391,8 @@ def plot_regions_inference(first_day_data,
         Daily incident imported cases
     first_day_inference : datetime.datetime
         First day of inference results
-    epsilons : list of float
-        Values of epsilon for which inference was performed
+    epsilons : list of lists of floats
+        Values of epsilon for which inference was performed for each region
     R_t_results : list of lists of pandas.DataFrame
         For each epsilon, a dataframe giving the inference results for R_t. It
         must have the three columns 'Mean', 'Lower bound CI', and
@@ -472,7 +472,8 @@ def plot_regions_inference(first_day_data,
                       color='deeppink')
 
         # Get R_t for the default epsilon
-        default_results = R_t_results[region][epsilons.index(default_epsilon)]
+        default_results = R_t_results[region][
+            epsilons[region].index(default_epsilon)]
 
         # Make sure bounds are numeric type
         numeric_columns = ['Lower bound CI', 'Upper bound CI']
@@ -485,10 +486,10 @@ def plot_regions_inference(first_day_data,
                       for i in range(times)]
 
         ind = 0
-        color_list = ['blue', 'red']
+        color_list = ['green', 'orange']
         lines = []
         shades = []
-        for epsilon, results in zip(epsilons, R_t_results[region]):
+        for epsilon, results in zip(epsilons[region], R_t_results[region]):
             if epsilon != default_epsilon:
                 ax = axs[region]
 
@@ -564,16 +565,17 @@ def plot_regions_inference(first_day_data,
 
             top_axs[region].indicate_inset_zoom(axins, edgecolor="black")
 
-    # Add the legend for epsilons
-    top_axs[0].legend()
-    axs[0].legend([(lines[0], shades[0]),
-                   (zerorange, zerorangelines, zeroline),
-                   # (lines[1], shades[1]),
-                   ],
-                  [r'$ϵ={}$'.format(epsilons[0]),
-                   r'$ϵ={}$'.format(default_epsilon),
-                   # r'$ϵ={}$'.format(epsilons[2]),
-                   ])
+        # Add the legend for epsilons
+        top_axs[region].legend()
+        axs[region].legend([
+            (lines[0], shades[0]),
+            (zerorange, zerorangelines, zeroline),
+            # (lines[1], shades[1]),
+            ],
+            [r'$ϵ={}$'.format(epsilons[region][0]),
+             r'$ϵ={}$'.format(default_epsilon),
+             # r'$ϵ={}$'.format(epsilons[2]),
+             ])
 
     # Use "Jan 01", etc as the date format
     for i in range(len(region_names)):
