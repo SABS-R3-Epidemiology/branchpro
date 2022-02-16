@@ -299,7 +299,7 @@ class TestPlotRegionsInference(unittest.TestCase):
                 [self.locally_infected_cases, self.locally_infected_cases],
                 [self.imported_cases, self.imported_cases],
                 datetime.datetime(2020, 3, 7),
-                self.epsilon_range,
+                [self.epsilon_range, self.epsilon_range],
                 [[self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                  [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
@@ -319,7 +319,7 @@ class TestPlotRegionsInference(unittest.TestCase):
                 [self.locally_infected_cases, self.locally_infected_cases],
                 [self.imported_cases, self.imported_cases],
                 datetime.datetime(2020, 3, 7),
-                self.epsilon_range,
+                [self.epsilon_range, self.epsilon_range],
                 [[self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                  [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
