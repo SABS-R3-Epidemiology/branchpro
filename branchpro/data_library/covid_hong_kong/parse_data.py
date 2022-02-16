@@ -12,9 +12,10 @@ into the format expected by our app.
 
 References
 ----------
-.. [1] Price, David J., et al. "Early analysis of the Australian COVID-19
-       epidemic." Elife 9 (2020): e58785.
-       https://elifesciences.org/articles/58785/figures#content
+.. [1] Department of Health. (2020, January 27). Data in Coronavirus Disease
+       (COVID-19) - Latest local situation of COVID-19 (English). DATA.GOV.HK.
+       (Retrieved February 2, 2022).
+       https://data.gov.hk/en-data/dataset/hk-dh-chpsebcddr-novel-infectious-agent/resource/ec4b49af-83e0-4c71-a3ba-14120e453b9d
 """
 
 import datetime
