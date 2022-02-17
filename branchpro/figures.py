@@ -392,7 +392,8 @@ def plot_regions_inference(first_day_data,
         Daily incident imported cases
     first_day_inference : datetime.datetime
         First day of inference results
-    epsilons : list of float (hkhn=False) or list of lists of floats (hkhn=True)
+    epsilons : list of float (hkhn=False)
+               or list of lists of floats (hkhn=True)
         Values of epsilon for which inference was performed for each region
     R_t_results : list of lists of pandas.DataFrame
         For each epsilon, a dataframe giving the inference results for R_t. It
