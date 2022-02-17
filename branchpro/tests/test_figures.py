@@ -306,7 +306,24 @@ class TestPlotRegionsInference(unittest.TestCase):
                     for e in self.epsilon_range]],
                 default_epsilon=1,
                 inset_region=['Ontario'],
-                show=True)
+                show=True,
+                hkhn=True)
+
+            fig = branchpro.figures.plot_regions_inference(
+                datetime.datetime(2020, 3, 1),
+                ['Ontario', 'Ontario'],
+                [self.locally_infected_cases, self.locally_infected_cases],
+                [self.imported_cases, self.imported_cases],
+                datetime.datetime(2020, 3, 7),
+                self.epsilon_range,
+                [[self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
+                    for e in self.epsilon_range],
+                 [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
+                    for e in self.epsilon_range]],
+                default_epsilon=1,
+                inset_region=['Ontario'],
+                show=True,
+                hkhn=False)
 
         # Check that all plots are present
         assert len(fig.axes) == 4
@@ -319,7 +336,7 @@ class TestPlotRegionsInference(unittest.TestCase):
                 [self.locally_infected_cases, self.locally_infected_cases],
                 [self.imported_cases, self.imported_cases],
                 datetime.datetime(2020, 3, 7),
-                [self.epsilon_range, self.epsilon_range],
+                self.epsilon_range,
                 [[self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
                  [self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
@@ -327,7 +344,8 @@ class TestPlotRegionsInference(unittest.TestCase):
                 default_epsilon=1,
                 inset_region=['Ontario'],
                 show=True,
-                mers=True)
+                mers=True,
+                hkhn=False)
 
         # Check that all plots are present
         assert len(fig.axes) == 4

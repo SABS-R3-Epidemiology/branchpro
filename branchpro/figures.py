@@ -364,7 +364,8 @@ def plot_regions_inference(first_day_data,
                            default_epsilon=1,
                            inset_region=[],
                            show=True,
-                           mers=False):
+                           mers=False,
+                           hkhn=False):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
@@ -391,7 +392,7 @@ def plot_regions_inference(first_day_data,
         Daily incident imported cases
     first_day_inference : datetime.datetime
         First day of inference results
-    epsilons : list of lists of floats
+    epsilons : list of float (hkhn=False) or list of lists of floats (hkhn=True)
         Values of epsilon for which inference was performed for each region
     R_t_results : list of lists of pandas.DataFrame
         For each epsilon, a dataframe giving the inference results for R_t. It
@@ -406,6 +407,8 @@ def plot_regions_inference(first_day_data,
         Whether or not to plt.show() the figure after it has been generated
     mers : bool, optional (False)
         If True, use settings for the MERS data
+    hkhn : bool, optional (False)
+        If True, use settings for Hong kong/Hainan results
 
     Returns
     -------
@@ -472,8 +475,12 @@ def plot_regions_inference(first_day_data,
                       color='deeppink')
 
         # Get R_t for the default epsilon
-        default_results = R_t_results[region][
-            epsilons[region].index(default_epsilon)]
+        if not hkhn:
+            default_results = R_t_results[region][
+                epsilons.index(default_epsilon)]
+        else:
+            default_results = R_t_results[region][
+                epsilons[region].index(default_epsilon)]
 
         # Make sure bounds are numeric type
         numeric_columns = ['Lower bound CI', 'Upper bound CI']
@@ -486,10 +493,16 @@ def plot_regions_inference(first_day_data,
                       for i in range(times)]
 
         ind = 0
-        color_list = ['green', 'orange']
+        if hkhn:
+            color_list = ['green', 'orange']
+        else:
+            color_list = ['blue', 'red']
         lines = []
         shades = []
-        for epsilon, results in zip(epsilons[region], R_t_results[region]):
+
+        epsilons_to_loop = epsilons[region] if hkhn else epsilons
+
+        for epsilon, results in zip(epsilons_to_loop, R_t_results[region]):
             if epsilon != default_epsilon:
                 ax = axs[region]
 
@@ -567,15 +580,25 @@ def plot_regions_inference(first_day_data,
 
         # Add the legend for epsilons
         top_axs[region].legend()
-        axs[region].legend([
-            (lines[0], shades[0]),
-            (zerorange, zerorangelines, zeroline),
-            # (lines[1], shades[1]),
-            ],
-            [r'$ϵ={}$'.format(epsilons[region][0]),
-             r'$ϵ={}$'.format(default_epsilon),
-             # r'$ϵ={}$'.format(epsilons[2]),
-             ])
+
+        if hkhn:
+            axs[region].legend([
+                (lines[0], shades[0]),
+                (zerorange, zerorangelines, zeroline),
+                # (lines[1], shades[1]),
+                ],
+                [r'$ϵ={}$'.format(epsilons[region][0]),
+                 r'$ϵ={}$'.format(default_epsilon),
+                 # r'$ϵ={}$'.format(epsilons[2]),
+                 ])
+    if not hkhn:
+        top_axs[0].legend()
+        axs[0].legend([(lines[0], shades[0]),
+                       (zerorange, zerorangelines, zeroline),
+                       (lines[1], shades[1]), ],
+                      [r'$ϵ={}$'.format(epsilons[0]),
+                       r'$ϵ={}$'.format(default_epsilon),
+                       r'$ϵ={}$'.format(epsilons[2]), ])
 
     # Use "Jan 01", etc as the date format
     for i in range(len(region_names)):
