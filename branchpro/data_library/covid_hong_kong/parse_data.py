@@ -58,7 +58,7 @@ def write_state_data(start_date='23/01/2020', end_date='31/03/2020'):
 
     local_data = data[data['Classification*'].isin([
         'Local case', 'Epidemiologically linked with imported case',
-        'Epidemiologically linked with imported case'])]
+        'Epidemiologically linked with local case'])]
     local_data = local_data.groupby(
         'processed-date', as_index=False).sum()
 
