@@ -382,7 +382,8 @@ def plot_regions_inference(first_day_data,
 
     Parameters
     ----------
-    first_day_data : datetime.datetime
+    first_day_data : datetime.datetime (hkhn=False) or list of datetimes
+        (hkhn=True)
         First day of incidence data
     region_names: list of str
         Name of regions
@@ -390,7 +391,8 @@ def plot_regions_inference(first_day_data,
         Daily incident local cases
     import_cases : list of lists of int
         Daily incident imported cases
-    first_day_inference : datetime.datetime
+    first_day_inference : datetime.datetime (hkhn=False) or list of datetimes
+        (hkhn=True)
         First day of inference results
     epsilons : list of float (hkhn=False)
                or list of lists of floats (hkhn=True)
@@ -437,7 +439,11 @@ def plot_regions_inference(first_day_data,
         width = datetime.timedelta(hours=14)
 
     for region in range(len(region_names)):
-        data_times = [first_day_data + datetime.timedelta(days=int(i))
+        if hkhn:
+            first_day_data_r = first_day_data[region]
+        else:
+            first_day_data_r = first_day_data
+        data_times = [first_day_data_r + datetime.timedelta(days=int(i))
                       for i in range(len(local_cases[region]))]
         top_axs[region].bar([x - width/2 for x in data_times],
                             local_cases[region],
@@ -490,7 +496,11 @@ def plot_regions_inference(first_day_data,
 
         # Build time vector for all R_t
         times = len(default_results['Mean'])
-        date_times = [first_day_inference + datetime.timedelta(days=int(i))
+        if hkhn:
+            first_day_inference_r = first_day_inference[region]
+        else:
+            first_day_inference_r = first_day_inference
+        date_times = [first_day_inference_r + datetime.timedelta(days=int(i))
                       for i in range(times)]
 
         ind = 0
@@ -569,7 +579,11 @@ def plot_regions_inference(first_day_data,
 
         # define sub region of the original image for zoom in plot
         if region_names[region] in inset_region:
-            x1, x2 = first_day_data, datetime.datetime(2020, 3, 10)
+            if hkhn:
+                first_day_data_r = first_day_data[region]
+            else:
+                first_day_data_r = first_day_data
+            x1, x2 = first_day_data_r, datetime.datetime(2020, 3, 10)
             y1, y2 = 0, 10
             axins.set_xlim(x1, x2)
             axins.set_ylim(y1, y2)
@@ -613,10 +627,15 @@ def plot_regions_inference(first_day_data,
 
     # Set ticks once per week
     for j in range(region_num):
-        axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+        if hkhn:
+            first_day_data_r = first_day_data[j]
+        else:
+            first_day_data_r = first_day_data
+        axs[j].set_xticks([first_day_data_r + datetime.timedelta(days=int(i))
                           for i in range(len(local_cases[j]))][::7])
 
-        top_axs[j].set_xticks([first_day_data + datetime.timedelta(days=int(i))
+        top_axs[j].set_xticks([first_day_data_r +
+                               datetime.timedelta(days=int(i))
                               for i in range(len(local_cases[j]))][::7])
 
     # Remove full box
