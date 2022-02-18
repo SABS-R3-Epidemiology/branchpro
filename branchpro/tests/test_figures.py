@@ -294,11 +294,11 @@ class TestPlotRegionsInference(unittest.TestCase):
         # Test plotting the figure
         with patch('matplotlib.pyplot.show') as _:
             fig = branchpro.figures.plot_regions_inference(
-                datetime.datetime(2020, 3, 1),
+                [datetime.datetime(2020, 3, 1), datetime.datetime(2020, 3, 2)],
                 ['Ontario', 'Ontario'],
                 [self.locally_infected_cases, self.locally_infected_cases],
                 [self.imported_cases, self.imported_cases],
-                datetime.datetime(2020, 3, 7),
+                [datetime.datetime(2020, 3, 7), datetime.datetime(2020, 3, 8)],
                 [self.epsilon_range, self.epsilon_range],
                 [[self.all_intervals.loc[self.all_intervals['Epsilon'] == e]
                     for e in self.epsilon_range],
