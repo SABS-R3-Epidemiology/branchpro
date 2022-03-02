@@ -79,6 +79,7 @@ setup(
         'multiprocess',
         'psutil',
     ],
+    python_requires='>3.8',
     extras_require={
         'docs': [
             # Sphinx for doc generation. Version 1.7.3 has a bug:
