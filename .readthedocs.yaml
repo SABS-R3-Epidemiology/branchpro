@@ -16,4 +16,4 @@ python:
    - method: setup.py
      path: .
    - type: pip
-     path: docs/requirements.txt
+     path: .requirements-docs.txt
