@@ -14,5 +14,6 @@ python:
    install:
    - requirements: .requirements-docs.txt
    - type: setup.py
+     path: .
    - type: pip
      path: docs/requirements.txt
