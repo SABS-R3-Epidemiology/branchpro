@@ -85,7 +85,7 @@ setup(
             # Sphinx for doc generation. Version 1.7.3 has a bug:
             'sphinx>=1.5, !=1.7.3',
             # Nice theme for docs
-            'sphinx_rtd_theme',
+            'karma-sphinx-theme',
         ],
         'dev': [
             # Flake8 for code style checking
