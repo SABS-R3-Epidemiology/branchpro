@@ -15,5 +15,3 @@ python:
    - requirements: .requirements-docs.txt
    - method: setuptools
      path: .
-   - type: pip
-     path: .requirements-docs.txt
