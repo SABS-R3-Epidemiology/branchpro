@@ -464,22 +464,23 @@ def plot_regions_inference(first_day_data,
         top_axs[region].set_ylabel('Number of cases')
 
         # Plot a zoomed in part of the graph as an inset
-        if region_names[region] in inset_region:
-            axins = top_axs[region].inset_axes([0.08, 0.27, 0.4, 0.3])
-            axins.bar([x - width/2 for x in data_times],
-                      local_cases[region],
-                      width,
-                      label='Local cases',
-                      color='k',
-                      alpha=0.8)
-            axins.bar([x + width/2 for x in data_times],
-                      import_cases[region],
-                      width,
-                      hatch='/////',
-                      edgecolor='w',
-                      lw=0.1,
-                      label='Imported cases',
-                      color='deeppink')
+        if not hkhn:
+            if region_names[region] in inset_region:
+                axins = top_axs[region].inset_axes([0.08, 0.27, 0.4, 0.3])
+                axins.bar([x - width/2 for x in data_times],
+                          local_cases[region],
+                          width,
+                          label='Local cases',
+                          color='k',
+                          alpha=0.8)
+                axins.bar([x + width/2 for x in data_times],
+                          import_cases[region],
+                          width,
+                          hatch='/////',
+                          edgecolor='w',
+                          lw=0.1,
+                          label='Imported cases',
+                          color='deeppink')
 
         # Get R_t for the default epsilon
         if not hkhn:
@@ -583,29 +584,40 @@ def plot_regions_inference(first_day_data,
                 first_day_data_r = first_day_data[region]
             else:
                 first_day_data_r = first_day_data
-            x1, x2 = first_day_data_r, datetime.datetime(2020, 3, 10)
-            y1, y2 = 0, 10
-            axins.set_xlim(x1, x2)
-            axins.set_ylim(y1, y2)
-            axins.set_xticklabels('')
-            axins.set_yticks([0, 7])
-            axins.set_yticklabels(['0', '7'], fontdict={'fontsize': 9})
+                x1, x2 = first_day_data_r, datetime.datetime(2020, 3, 10)
+                y1, y2 = 0, 10
+                axins.set_xlim(x1, x2)
+                axins.set_ylim(y1, y2)
+                axins.set_xticklabels('')
+                axins.set_yticks([0, 7])
+                axins.set_yticklabels(['0', '7'], fontdict={'fontsize': 9})
 
-            top_axs[region].indicate_inset_zoom(axins, edgecolor="black")
+                top_axs[region].indicate_inset_zoom(axins, edgecolor="black")
 
         # Add the legend for epsilons
         top_axs[region].legend()
 
         if hkhn:
-            axs[region].legend([
-                (lines[0], shades[0]),
-                (zerorange, zerorangelines, zeroline),
-                # (lines[1], shades[1]),
-                ],
-                [r'$ϵ={}$'.format(epsilons[region][0]),
-                 r'$ϵ={}$'.format(default_epsilon),
-                 # r'$ϵ={}$'.format(epsilons[2]),
-                 ])
+            if region == 1:
+                axs[region].legend([
+                    (lines[0], shades[0]),
+                    (zerorange, zerorangelines, zeroline),
+                    # (lines[1], shades[1]),
+                    ],
+                    [r'$ϵ={}$'.format(epsilons[region][0]),
+                     r'$ϵ={}$'.format(default_epsilon),
+                     # r'$ϵ={}$'.format(epsilons[2]),
+                     ], loc=(0.02, 0.62))
+            else:
+                axs[region].legend([
+                    (lines[0], shades[0]),
+                    (zerorange, zerorangelines, zeroline),
+                    # (lines[1], shades[1]),
+                    ],
+                    [r'$ϵ={}$'.format(epsilons[region][0]),
+                     r'$ϵ={}$'.format(default_epsilon),
+                     # r'$ϵ={}$'.format(epsilons[2]),
+                     ])
     if not hkhn:
         top_axs[0].legend()
         axs[0].legend([(lines[0], shades[0]),
