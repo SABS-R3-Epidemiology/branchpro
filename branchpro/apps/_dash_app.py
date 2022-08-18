@@ -83,8 +83,8 @@ inc_modal = [
                     'font-weight':
                         'bold'}
             ),
-            ' (comma separated values) format and will be displayed as a table with the \
-                following column names:',
+            ' (comma separated values) format and will be displayed as a' +
+            ' table with the following column names:',
             dbc.ListGroup(
                 [
                     dbc.ListGroupItem(
@@ -161,8 +161,8 @@ si_modal = [
                     'font-weight':
                         'bold'}
             ),
-            ' (comma separated values) format and will be displayed as a table with no \
-                    columns names. ',
+            ' (comma separated values) format and will be displayed as a' +
+            ' table with no columns names. ',
             html.P([
                 'Each ',
                 html.Span(
@@ -303,8 +303,8 @@ class BranchProDashApp:
                     for _ in range(data.shape[1]):
                         if isinstance(data[0, _], str) and \
                                 not data[0, _].isnumeric():
-                            return html.Div(['Incorrect format; file must not have a \
-                            header.']), None
+                            return html.Div(['Incorrect format; file must not \
+                            have a header.']), None
                 else:
                     if not csv.Sniffer().has_header(
                             io.StringIO(decoded.decode('utf-8')).getvalue()):
@@ -384,8 +384,8 @@ class BranchProDashApp:
         if message is None:
             if not is_si:
                 if ('Time' not in data.columns) or inc_col_cond:
-                    message = html.Div(['Incorrect format; file must contain a `Time` \
-                        and {}.'.format(str_message)])
+                    message = html.Div(['Incorrect format; file must contain \
+                        a `Time` and {}.'.format(str_message)])
                     data = None
                 else:
                     message = html.Div(
@@ -393,8 +393,8 @@ class BranchProDashApp:
             else:
                 num_cols = data.shape[1]
                 if num_cols > 1000:
-                    message = html.Div(['Exceeded maximum number of serial intervals \
-                        allowed (Max = 1000).'])
+                    message = html.Div(['Exceeded maximum number of serial \
+                        intervals allowed (Max = 1000).'])
                     data = None
                 else:
                     message = html.Div(
