@@ -367,7 +367,7 @@ class BranchProPosterior(object):
         proportion_time_r_more_than_1_UpperCI = \
             subset_with_upper/total_length
 
-        return(
+        return (
             proportion_time_r_more_than_1,
             proportion_time_r_more_than_1_LowerCI,
             proportion_time_r_more_than_1_UpperCI)
@@ -436,7 +436,7 @@ class BranchProPosterior(object):
         else:
             last_time_r_threshold_UpperCI = subset_with_upper[-1] + 1
 
-        return(
+        return (
             last_time_r_threshold,
             last_time_r_threshold_LowerCI,
             last_time_r_threshold_UpperCI)
