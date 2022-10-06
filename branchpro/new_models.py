@@ -64,13 +64,6 @@ class NegBinBranchProModel(BranchProModel):
     def __init__(self, initial_r, serial_interval, phi):
         super(NegBinBranchProModel, self).__init__(initial_r, serial_interval)
 
-        if np.asarray(serial_interval).ndim != 1:
-            raise ValueError(
-                'Serial interval values storage format must be 1-dimensional')
-        if np.sum(serial_interval) <= 0:
-            raise ValueError('Sum of serial interval values must be > 0.')
-        if not isinstance(initial_r, (int, float)):
-            raise TypeError('Value of R must be integer or float.')
         if not isinstance(phi, (int, float)):
             raise TypeError(
                 'Value of overdispersion must be integer or float.')
