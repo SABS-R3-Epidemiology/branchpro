@@ -107,7 +107,7 @@ class TestNegBinBranchProModelClass(unittest.TestCase):
         self.assertEqual(simulated_sample_model_2.shape, (3,))
 
         nbbr_model3 = bp.NegBinBranchProModel(0, [1, 2], 0.05)
-        nbbr_model3.set_r_profile([3, 0], [1, 2], 3)
+        nbbr_model3.set_r_profile([0, 0], [1, 2], 3)
         simulated_sample_model_3 = nbbr_model3.simulate(10, [2, 4, 7])
         self.assertEqual(simulated_sample_model_3.shape, (3,))
 
