@@ -44,7 +44,7 @@ class NegBinBranchProModel(BranchProModel):
     Poisson distributed, reducing to the simple class:`BranchProModel` class.
 
     Always apply method :meth:`set_r_profile` before calling
-    :meth:`DiffNoiseBranchProModel.simulate` for a change of R_t profile!
+    :meth:`NegBinBranchProModel.simulate` for a change of R_t profile!
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ class NegBinBranchProModel(BranchProModel):
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_interval)[::-1]
         self._r_profile = np.array([initial_r])
-        self._overdispesion = phi
+        self._overdispersion = phi
         self._normalizing_const = np.sum(self._serial_interval)
 
     def set_overdispersion(self, phi):
@@ -104,14 +104,14 @@ class NegBinBranchProModel(BranchProModel):
                 'Value of overdispersion must be must be > 0. For \
                 overdispesion = 0, please use `BranchProModel` class type.')
 
-        self._overdispesion = phi
+        self._overdispersion = phi
 
     def get_overdispersion(self):
         """
         Returns overdispersion noise parameter for the model.
 
         """
-        return self._overdispesion
+        return self._overdispersion
 
     def simulate(self, parameters, times):
         """
@@ -153,11 +153,11 @@ class NegBinBranchProModel(BranchProModel):
             norm_daily_mean = self._r_profile[t-1] * (
                 self._effective_no_infectives(t, incidences))
             if norm_daily_mean != 0:
-                nu = self._overdispesion * norm_daily_mean
                 incidences[t] = nbinom.rvs(
-                    n=nu * norm_daily_mean,
-                    p=1 / (1 + nu),
-                    size=1)
+                    1/self._overdispersion,
+                    float(1/self._overdispersion)/(1/self._overdispersion + norm_daily_mean),  # noqa
+                    0,
+                    1)
             else:
                 incidences[t] = 0
 
@@ -257,14 +257,14 @@ class LocImpNegBinBranchProModel(LocImpBranchProModel):
                 overdispesion = 0, please use `LocImpBranchProModel` class \
                 type.')
 
-        self._overdispesion = phi
+        self._overdispersion = phi
 
     def get_overdispersion(self):
         """
         Returns overdispersion noise parameter for the model.
 
         """
-        return self._overdispesion
+        return self._overdispersion
 
     def simulate(self, parameters, times):
         """
@@ -321,8 +321,8 @@ class LocImpNegBinBranchProModel(LocImpBranchProModel):
                             t, imported_incidences)))
             if norm_daily_mean != 0:
                 incidences[t] = nbinom.rvs(
-                    1/self._overdispesion,
-                    float(1/self._overdispesion)/(1/self._overdispesion + norm_daily_mean),  # noqa
+                    1/self._overdispersion,
+                    float(1/self._overdispersion)/(1/self._overdispersion + norm_daily_mean),  # noqa
                     0,
                     1)
             else:
