@@ -201,7 +201,7 @@ class LocImpNegBinBranchProModel(LocImpBranchProModel):
     binomial noise distribution.
 
     For the edge case, :math:`\phi = 0`, the incidence at time t becomes
-    Poisson distributed, reducing to the simple class:`LocImpBranchProModel`
+    Poisson distributed, reducing to the simple :class:`LocImpBranchProModel`
     class.
 
     Always apply methods :meth:`set_r_profile` and :meth:`set_imported_cases`
