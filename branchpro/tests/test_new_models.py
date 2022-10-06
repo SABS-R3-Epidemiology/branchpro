@@ -107,7 +107,7 @@ class TestNegBinBranchProModelClass(unittest.TestCase):
         self.assertEqual(simulated_sample_model_2.shape, (3,))
 
         nbbr_model3 = bp.NegBinBranchProModel(0, [1, 2], 0.05)
-        nbbr_model3.set_r_profile([3, 1], [1, 2], 3)
+        nbbr_model3.set_r_profile([3, 0], [1, 2], 3)
         simulated_sample_model_3 = nbbr_model3.simulate(10, [2, 4, 7])
         self.assertEqual(simulated_sample_model_3.shape, (3,))
 
@@ -160,7 +160,7 @@ class TestLocImpNegBinBranchProModelClass(unittest.TestCase):
         self.assertEqual(simulated_sample_model_2.shape, (3,))
 
         linbbr_model_3 = bp.LocImpNegBinBranchProModel(0, [1, 2], 0, 0.05)
-        linbbr_model_3.set_r_profile([3, 1], [1, 2], 3)
+        linbbr_model_3.set_r_profile([3, 0], [1, 2], 3)
         linbbr_model_3.set_imported_cases([1, 2, 4, 8], [5, 10, 9, 2])
         simulated_sample_model_3 = linbbr_model_3.simulate(10, [2, 4, 7])
         self.assertEqual(simulated_sample_model_3.shape, (3,))
