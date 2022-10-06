@@ -22,3 +22,6 @@ from .apps import IncidenceNumberPlot, _SliderComponent, BranchProDashApp, Incid
 from ._dataset_library_api import DatasetLibrary # noqa
 from .posterior import GammaDist, BranchProPosterior, BranchProPosteriorMultSI, LocImpBranchProPosterior, LocImpBranchProPosteriorMultSI # noqa
 from . import figures  # noqa
+
+# Import main classes for negative binomial noise
+from .new_models import NegBinBranchProModel, LocImpNegBinBranchProModel  # noqa
