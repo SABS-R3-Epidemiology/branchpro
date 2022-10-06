@@ -41,7 +41,7 @@ class NegBinBranchProModel(BranchProModel):
     binomial noise distribution.
 
     For the edge case, :math:`\phi = 0`, the incidence at time t becomes
-    Poisson distributed, reducing to the simple class:`BranchProModel` class.
+    Poisson distributed, reducing to the simple :class:`BranchProModel` class.
 
     Always apply method :meth:`set_r_profile` before calling
     :meth:`NegBinBranchProModel.simulate` for a change of R_t profile!
