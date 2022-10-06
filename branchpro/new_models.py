@@ -70,7 +70,7 @@ class NegBinBranchProModel(BranchProModel):
         if phi <= 0:
             raise ValueError(
                 'Value of overdispersion must be must be > 0. For \
-                overdispesion = 0, please use `BranchProModel` class type.')
+                overdispersion = 0, please use `BranchProModel` class type.')
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._serial_interval = np.asarray(serial_interval)[::-1]
@@ -95,7 +95,7 @@ class NegBinBranchProModel(BranchProModel):
         if phi <= 0:
             raise ValueError(
                 'Value of overdispersion must be must be > 0. For \
-                overdispesion = 0, please use `BranchProModel` class type.')
+                overdispersion = 0, please use `BranchProModel` class type.')
 
         self._overdispersion = phi
 
