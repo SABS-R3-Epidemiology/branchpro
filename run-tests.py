@@ -148,6 +148,7 @@ def doctest_rst_and_public_interface():
         'branchpro.simulation',
         'branchpro.apps',
         'branchpro.posterior',
+        'branchpro.new_posterior',
         'branchpro.figures'
         ]
 
