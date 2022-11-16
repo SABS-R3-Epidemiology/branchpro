@@ -13,14 +13,9 @@ Overview:
     - :class:`GammaDist`
 
   - MCMC Sampling-based Log-Posterior Classes
-    - Log-likelihood 
-      - :class:`PoissonBranchProLogLik`
-
-    - Log-prior
-      - :class:`PoissonBranchProLogPrior`
-
-    - Log-posterior
-      - :class:`PoissonBranchProLogPosterior`
+    - :class:`PoissonBranchProLogLik`
+    - :class:`PoissonBranchProLogPrior`
+    - :class:`PoissonBranchProLogPosterior`
 
 Branch Process Posterior Distribution
 *************************************
