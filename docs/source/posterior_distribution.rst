@@ -5,12 +5,22 @@ Posterior Distribution
 .. currentmodule:: branchpro
 
 Overview:
+  - Exact Posterior Classes
+    - :class:`BranchProPosterior`
+    - :class:`BranchProPosteriorMultSI`
+    - :class:`LocImpBranchProPosterior`
+    - :class:`LocImpBranchProPosteriorMultSI`
+    - :class:`GammaDist`
 
-- :class:`BranchProPosterior`
-- :class:`BranchProPosteriorMultSI`
-- :class:`LocImpBranchProPosterior`
-- :class:`LocImpBranchProPosteriorMultSI`
-- :class:`GammaDist`
+  - MCMC Sampling-based Log-Posterior Classes
+    - Log-likelihood 
+      - :class:`PoissonBranchProLogLik`
+
+    - Log-prior
+      - :class:`PoissonBranchProLogPrior`
+
+    - Log-posterior
+      - :class:`PoissonBranchProLogPosterior`
 
 Branch Process Posterior Distribution
 *************************************
@@ -40,4 +50,26 @@ Gamma distribution
 ******************
 
 .. autoclass:: GammaDist
+  :members:
+
+New Posterior Classes using MCMC Sampling algorithms
+****************************************************
+Branch Process with Poisson Noise
+*********************************
+Log-likelihood Class
+********************
+
+.. autoclass:: PoissonBranchProLogLik
+  :members:
+
+Log-prior Class
+***************
+  
+.. autoclass:: PoissonBranchProLogPrior
+  :members:
+
+Log-posterior Class
+*******************
+
+.. autoclass:: PoissonBranchProLogPosterior
   :members:

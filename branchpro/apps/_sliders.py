@@ -8,7 +8,7 @@
 #
 
 import dash_daq as daq
-import dash_html_components as html
+from dash import html
 
 import numpy as np
 

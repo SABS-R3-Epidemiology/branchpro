@@ -80,7 +80,7 @@ class PoissonBranchProLogLik(pints.LogPDF):
             Number of parameters for log-likelihood object.
 
         """
-        return np.shape(self.cases_data)[0] - self._tau
+        return np.shape(self.cases_data)[0] - self._tau - 1
 
     def _check_serial(self, si):
         """
@@ -188,20 +188,30 @@ class PoissonBranchProLogLik(pints.LogPDF):
             start_window = time - self._tau
             end_window = time + 1
 
-            Ll += np.log(r_profile[_]) * np.sum(
-                    self.cases_data[(start_window-1):(end_window-1)])
+            slice_cases = self.cases_data[(start_window-1):(end_window-1)]
 
             try:
                 # try to shift the window by 1 time point
                 tau_window = (tau_window[1:] +  # noqa
                               [self._infectious_individuals(self.cases_data,
                                                             end_window-1)])
+
             except UnboundLocalError:
                 # First iteration, so set up the sliding window
                 tau_window = self._infectives_in_tau(
                     self.cases_data, start_window, end_window)
 
-            Ll += - sum(tau_window) * r_profile[_]
+            Ll += np.log(r_profile[_]) * np.sum(slice_cases)
+
+            log_tau_window = np.zeros_like(tau_window)
+            for tv, tau_val in enumerate(tau_window):
+                if tau_val == 0:
+                    log_tau_window[tv] = 0
+                else:
+                    log_tau_window[tv] = np.log(tau_window[tv])
+
+            Ll += np.sum(np.multiply(slice_cases, log_tau_window))
+            Ll += - r_profile[_] * np.sum(tau_window)
 
         return Ll
 
@@ -338,7 +348,14 @@ class PoissonBranchProLogPrior(pints.LogPrior):
             Number of parameters for log-likelihood object.
 
         """
-        return np.shape(self.cases_data)[0] - self._tau
+        return np.shape(self.cases_data)[0] - self._tau - 1
+
+    def evaluateS1(self, x):
+        """
+        """
+        alpha, beta = self.prior_parameters
+
+        return pints.GammaLogPrior(alpha, beta).evaluateS1(x)
 
     def __call__(self, x):
         """
@@ -455,7 +472,7 @@ class PoissonBranchProLogPosterior(object):
             parameter space.
 
         """
-        return self.ll(x)
+        return self.lprior(x)
 
     def return_logposterior(self, x):
         """
@@ -473,7 +490,7 @@ class PoissonBranchProLogPosterior(object):
             parameter space.
 
         """
-        return self.ll(x)
+        return self._log_posterior(x)
 
     def run_inference(self, num_iter):
         """
@@ -493,13 +510,18 @@ class PoissonBranchProLogPosterior(object):
         """
         # Starting points using optimisation object
         x0 = [self.lprior.mean()]*3
+        transformation = pints.RectangularBoundariesTransformation(
+            [0] * self.lprior.n_parameters(),
+            [20] * self.lprior.n_parameters()
+        )
 
         # Create MCMC routine
         mcmc = pints.MCMCController(
-            self._log_posterior, 3, x0)
+            self._log_posterior, 3, x0, method=pints.NoUTurnMCMC,
+            transformation=transformation)
         mcmc.set_max_iterations(num_iter)
         mcmc.set_log_to_screen(True)
-        mcmc.set_parallel(True)
+        # mcmc.set_parallel(True)
 
         print('Running...')
         chains = mcmc.run()
@@ -508,7 +530,7 @@ class PoissonBranchProLogPosterior(object):
         param_names = []
 
         for _ in range(self.lprior.n_parameters()):
-            param_names.append('R_t{}'.format(_))
+            param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
 
         # Check convergence and other properties of chains
         results = pints.MCMCSummary(

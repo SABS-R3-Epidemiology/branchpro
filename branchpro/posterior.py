@@ -69,6 +69,9 @@ class GammaDist:
     def pdf(self, x):
         return scipy.stats.gamma.pdf(x, **self.scipy_args)
 
+    def logpdf(self, x):
+        return scipy.stats.gamma.logpdf(x, **self.scipy_args)
+
     def mean(self):
         return self.shape / self.rate
 
