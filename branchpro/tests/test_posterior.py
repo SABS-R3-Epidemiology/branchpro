@@ -491,7 +491,6 @@ class TestLocImpBranchProPosteriorClass(unittest.TestCase):
         self.assertEqual(len(inference2.inference_times), 3)
         self.assertEqual(len(inference2.inference_posterior.mean()), 3)
 
-
 #
 # TestLocImpBranchProPosteriorMultSI Class
 #

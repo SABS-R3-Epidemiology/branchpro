@@ -27,10 +27,7 @@ from . import figures  # noqa
 from .new_models import NegBinBranchProModel, LocImpNegBinBranchProModel  # noqa
 
 # Import log-likelihood classes
-from .new_posterior import PoissonBranchProLogLik  # noqa
-
-# Import log-prior classes
-from .new_posterior import PoissonBranchProLogPrior  # noqa
+from .new_posterior import PoissonBranchProLogLik, LocImpPoissonBranchProLogLik, NegBinBranchProLogLik, LocImpNegBinBranchProLogLik  # noqa
 
 # Import log-posterior classes
-from .new_posterior import PoissonBranchProLogPosterior  # noqa
+from .new_posterior import PoissonBranchProLogPosterior, LocImpPoissonBranchProLogPosterior, NegBinBranchProLogPosterior, LocImpNegBinBranchProLogPosterior  # noqa
