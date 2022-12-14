@@ -757,6 +757,9 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
     phi
         (numeric) Value of the overdispersion parameter for the negative
         binomial noise distribution.
+    infer_phi
+        (boolean) Indicator value of whether the overdispersion parameter
+        for the negative binomial noise distribution is inferred or not.
     time_key
         label key given to the temporal data in the inc_data dataframe.
     inc_key
@@ -764,10 +767,13 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
 
     """
     def __init__(self, inc_data, daily_serial_interval, tau, phi,
+                 infer_phi=True,
                  time_key='Time', inc_key='Incidence Number'):
 
         PoissonBranchProLogLik.__init__(
             self, inc_data, daily_serial_interval, tau, time_key, inc_key)
+
+        self._infer_phi = infer_phi
 
         self.set_overdispersion(phi)
 
@@ -810,12 +816,20 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
             Number of parameters for log-likelihood object.
 
         """
-        return np.shape(self.cases_data)[0] - self._tau
+        if self._infer_phi is True:
+            return np.shape(self.cases_data)[0] - self._tau
+        else:
+            return np.shape(self.cases_data)[0] - self._tau - 1
 
-    def _compute_log_likelihood(self, r_profile):
+    def _compute_log_likelihood(self, param):
         """
         """
-        self._overdispersion = r_profile[-1]
+        if self._infer_phi is True:
+            phi = param[-1]
+            r_profile = param[:-1]
+        else:
+            phi = self._overdispersion
+            r_profile = param
 
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
@@ -830,11 +844,9 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
             slice_cases = self.cases_data[(start_window-1):(end_window-1)]
 
             loggamma_slice_cases_phi = loggamma(
-                slice_cases + 1 / self._overdispersion) - loggamma(
-                1 / self._overdispersion)
+                slice_cases + 1 / phi) - loggamma(1 / phi)
 
-            Ll += np.sum(loggamma_slice_cases_phi - np.log(
-                self._overdispersion) / self._overdispersion)
+            Ll += np.sum(loggamma_slice_cases_phi - np.log(phi) / phi)
 
             try:
                 # try to shift the window by 1 time point
@@ -858,19 +870,23 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
                     log_tau_window[tv] = np.log(tau_window[tv])
 
                 log_phi_r_tau_window[tv] = np.log(
-                    1 / self._overdispersion +
-                    r_profile[_] * tau_window[tv])
+                    1 / phi + r_profile[_] * tau_window[tv])
 
             Ll += np.sum(np.multiply(slice_cases, log_tau_window))
             Ll += - np.sum(np.multiply(
-                slice_cases + 1 / self._overdispersion, log_phi_r_tau_window))
+                slice_cases + 1 / phi, log_phi_r_tau_window))
 
         return Ll
 
-    def _compute_derivative_log_likelihood(self, r_profile):
+    def _compute_derivative_log_likelihood(self, param):
         """
         """
-        self._overdispersion = r_profile[-1]
+        if self._infer_phi is True:
+            phi = param[-1]
+            r_profile = param[:-1]
+        else:
+            phi = self._overdispersion
+            r_profile = param
 
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
@@ -901,31 +917,27 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
             for tv, tau_val in enumerate(tau_window):
                 inv_phi_r_tau_window[tv] = \
                     tau_window[tv] * np.reciprocal(
-                    1 / self._overdispersion +
-                    r_profile[_] * tau_window[tv])
+                    1 / phi + r_profile[_] * tau_window[tv])
                 inv_phi_r_tau_window2[tv] = np.reciprocal(
-                    1 / self._overdispersion +
-                    r_profile[_] * tau_window[tv])
+                    1 / phi + r_profile[_] * tau_window[tv])
                 log_phi_r_tau_window[tv] = np.log(
-                    1 / self._overdispersion +
-                    r_profile[_] * tau_window[tv])
+                    1 / phi + r_profile[_] * tau_window[tv])
 
             dLl.append(
                 (1/r_profile[_]) * np.sum(slice_cases) - np.sum(np.multiply(
-                    slice_cases + 1 / self._overdispersion,
-                    inv_phi_r_tau_window)))
+                    slice_cases + 1 / phi, inv_phi_r_tau_window)))
 
             dLl_phi += np.sum(
-                digamma(slice_cases + 1 / self._overdispersion) -
-                digamma(1 / self._overdispersion) + np.log(
-                    1 / self._overdispersion) + 1)
+                digamma(slice_cases + 1 / phi) - digamma(1 / phi) + np.log(
+                    1 / phi) + 1)
 
             dLl_phi -= np.sum(log_phi_r_tau_window) + np.sum(np.multiply(
-                slice_cases + 1 / self._overdispersion, inv_phi_r_tau_window2))
+                slice_cases + 1 / phi, inv_phi_r_tau_window2))
 
-        dLl_phi *= - 1 / (self._overdispersion ** 2)
+        dLl_phi *= - 1 / (phi ** 2)
 
-        dLl.append(dLl_phi)
+        if self._infer_phi is True:
+            dLl.append(dLl_phi)
 
         return dLl
 
@@ -959,6 +971,9 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
     lam
         the mean parameter of the Exponential distribution of the prior of
         the overdispersion.
+    infer_phi
+        (boolean) Indicator value of whether the overdispersion parameter
+        for the negative binomial noise distribution is inferred or not.
     time_key
         label key given to the temporal data in the inc_data dataframe.
     inc_key
@@ -966,20 +981,26 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
 
     """
     def __init__(self, inc_data, daily_serial_interval, tau, phi, alpha, beta,
-                 lam=1, time_key='Time', inc_key='Incidence Number'):
+                 lam=1, infer_phi=True,
+                 time_key='Time', inc_key='Incidence Number'):
         PoissonBranchProLogPosterior.__init__(
             self, inc_data, daily_serial_interval, tau, alpha, beta,
             time_key, inc_key)
 
+        self._infer_phi = infer_phi
+
         loglikelihood = NegBinBranchProLogLik(
-            inc_data, daily_serial_interval, tau, phi, time_key, inc_key)
+            inc_data, daily_serial_interval, tau, phi, infer_phi, time_key,
+            inc_key)
 
         # Create a prior
         list_priors = [pints.GammaLogPrior(alpha, beta) for _ in range(
             np.shape(
-                loglikelihood.cases_data)[0] - loglikelihood._tau - 1)] + [
-                    pints.ExponentialLogPrior(lam)
-                ]
+                loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
+
+        if infer_phi is True:
+            list_priors.append(pints.ExponentialLogPrior(lam))
+
         logprior = pints.ComposedLogPrior(*list_priors)
 
         self.lprior = logprior
@@ -1026,9 +1047,13 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
 
         param_names = []
 
-        for _ in range(self.lprior.n_parameters() - 1):
-            param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
-        param_names.append('Phi')
+        if self._infer_phi is True:
+            for _ in range(self.lprior.n_parameters() - 1):
+                param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
+            param_names.append('Phi')
+        else:
+            for _ in range(self.lprior.n_parameters()):
+                param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
 
         # Check convergence and other properties of chains
         results = pints.MCMCSummary(
@@ -1111,6 +1136,9 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
     phi
         (numeric) Value of the overdispersion parameter for the negative
         binomial noise distribution.
+    infer_phi
+        (boolean) Indicator value of whether the overdispersion parameter
+        for the negative binomial noise distribution is inferred or not.
     time_key
         label key given to the temporal data in the inc_data dataframe.
     inc_key
@@ -1118,12 +1146,14 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
 
     """
     def __init__(self, inc_data, imported_inc_data, epsilon,
-                 daily_serial_interval, tau, phi,
+                 daily_serial_interval, tau, phi, infer_phi=True,
                  time_key='Time', inc_key='Incidence Number'):
 
         LocImpPoissonBranchProLogLik.__init__(
             self, inc_data, imported_inc_data, epsilon,
             daily_serial_interval, tau, time_key, inc_key)
+
+        self._infer_phi = infer_phi
 
         self.set_overdispersion(phi)
 
@@ -1166,11 +1196,21 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
             Number of parameters for log-likelihood object.
 
         """
-        return np.shape(self.cases_data)[0] - self._tau - 1
+        if self._infer_phi is True:
+            return np.shape(self.cases_data)[0] - self._tau
+        else:
+            return np.shape(self.cases_data)[0] - self._tau - 1
 
-    def _compute_log_likelihood(self, r_profile):
+    def _compute_log_likelihood(self, param):
         """
         """
+        if self._infer_phi is True:
+            phi = param[-1]
+            r_profile = param[:-1]
+        else:
+            phi = self._overdispersion
+            r_profile = param
+
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
 
@@ -1184,11 +1224,9 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
             slice_cases = self.cases_data[(start_window-1):(end_window-1)]
 
             loggamma_slice_cases_phi = loggamma(
-                slice_cases + 1 / self._overdispersion) - loggamma(
-                1 / self._overdispersion)
+                slice_cases + 1 / phi) - loggamma(1 / phi)
 
-            Ll += np.sum(loggamma_slice_cases_phi - np.log(
-                self._overdispersion) / self._overdispersion)
+            Ll += np.sum(loggamma_slice_cases_phi - np.log(phi) / phi)
 
             try:
                 # try to shift the window by 1 time point
@@ -1219,20 +1257,26 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
                         tau_window[tv] + self.epsilon * tau_window_imp[tv])
 
                 log_phi_r_tau_window[tv] = np.log(
-                    1 / self._overdispersion +
-                    r_profile[_] * (
+                    1 / phi + r_profile[_] * (
                         tau_window[tv] + self.epsilon * tau_window_imp[tv]
                     ))
 
             Ll += np.sum(np.multiply(slice_cases, log_tau_window))
             Ll += - np.sum(np.multiply(
-                slice_cases + 1 / self._overdispersion, log_phi_r_tau_window))
+                slice_cases + 1 / phi, log_phi_r_tau_window))
 
         return Ll
 
-    def _compute_derivative_log_likelihood(self, r_profile):
+    def _compute_derivative_log_likelihood(self, param):
         """
         """
+        if self._infer_phi is True:
+            phi = param[-1]
+            r_profile = param[:-1]
+        else:
+            phi = self._overdispersion
+            r_profile = param
+
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
 
@@ -1270,37 +1314,33 @@ class LocImpNegBinBranchProLogLik(LocImpPoissonBranchProLogLik):
                 inv_phi_r_tau_window[tv] = \
                     (tau_window[tv] + self.epsilon * tau_window_imp[tv]) \
                     * np.reciprocal(
-                    1 / self._overdispersion +
-                    r_profile[_] * (
+                    1 / phi + r_profile[_] * (
                         tau_window[tv] + self.epsilon * tau_window_imp[tv]
                     ))
                 inv_phi_r_tau_window2[tv] = np.reciprocal(
-                    1 / self._overdispersion +
-                    r_profile[_] * (
+                    1 / phi + r_profile[_] * (
                         tau_window[tv] + self.epsilon * tau_window_imp[tv]
                     ))
                 log_phi_r_tau_window[tv] = np.log(
-                    1 / self._overdispersion +
-                    r_profile[_] * (
+                    1 / phi + r_profile[_] * (
                         tau_window[tv] + self.epsilon * tau_window_imp[tv]
                     ))
 
             dLl.append(
                 (1/r_profile[_]) * np.sum(slice_cases) - np.sum(np.multiply(
-                    slice_cases + 1 / self._overdispersion,
-                    inv_phi_r_tau_window)))
+                    slice_cases + 1 / phi, inv_phi_r_tau_window)))
 
             dLl_phi += np.sum(
-                digamma(slice_cases + 1 / self._overdispersion) -
-                digamma(1 / self._overdispersion) + np.log(
-                    1 / self._overdispersion) + 1)
+                digamma(slice_cases + 1 / phi) - digamma(1 / phi) + np.log(
+                    1 / phi) + 1)
 
             dLl_phi -= np.sum(log_phi_r_tau_window) + np.sum(np.multiply(
-                slice_cases + 1 / self._overdispersion, inv_phi_r_tau_window2))
+                slice_cases + 1 / phi, inv_phi_r_tau_window2))
 
-        dLl_phi *= - 1 / (self._overdispersion ** 2)
+        dLl_phi *= - 1 / (phi ** 2)
 
-        # dLl.append(dLl_phi)
+        if self._infer_phi is True:
+            dLl.append(dLl_phi)
 
         return dLl
 
@@ -1342,6 +1382,9 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
     lam
         the mean parameter of the Exponential distribution of the prior of
         the overdispersion.
+    infer_phi
+        (boolean) Indicator value of whether the overdispersion parameter
+        for the negative binomial noise distribution is inferred or not.
     time_key
         label key given to the temporal data in the inc_data dataframe.
     inc_key
@@ -1350,7 +1393,8 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
     """
     def __init__(self, inc_data, imported_inc_data, epsilon,
                  daily_serial_interval, tau, phi, alpha, beta,
-                 lam=1, time_key='Time', inc_key='Incidence Number'):
+                 lam=1, infer_phi=True,
+                 time_key='Time', inc_key='Incidence Number'):
         LocImpPoissonBranchProLogPosterior.__init__(
             self, inc_data, imported_inc_data, epsilon,
             daily_serial_interval, tau, alpha, beta,
@@ -1358,14 +1402,18 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
 
         loglikelihood = LocImpNegBinBranchProLogLik(
             inc_data, imported_inc_data, epsilon,
-            daily_serial_interval, tau, phi, time_key, inc_key)
+            daily_serial_interval, tau, phi, infer_phi, time_key, inc_key)
+
+        self._infer_phi = infer_phi
 
         # Create a prior
         list_priors = [pints.GammaLogPrior(alpha, beta) for _ in range(
             np.shape(
-                loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]  # + [
-        #             pints.ExponentialLogPrior(lam)
-        #         ]
+                loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
+
+        if infer_phi is True:
+            list_priors.append(pints.ExponentialLogPrior(lam))
+
         logprior = pints.ComposedLogPrior(*list_priors)
 
         self.lprior = logprior
@@ -1412,9 +1460,13 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
 
         param_names = []
 
-        for _ in range(self.lprior.n_parameters()):
-            param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
-        # param_names.append('Phi')
+        if self._infer_phi is True:
+            for _ in range(self.lprior.n_parameters() - 1):
+                param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
+            param_names.append('Phi')
+        else:
+            for _ in range(self.lprior.n_parameters()):
+                param_names.append('R_t{}'.format(_ + 1 + self.ll._tau))
 
         # Check convergence and other properties of chains
         results = pints.MCMCSummary(
