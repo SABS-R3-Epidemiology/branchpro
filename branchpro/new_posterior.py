@@ -815,6 +815,8 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
     def _compute_log_likelihood(self, r_profile):
         """
         """
+        self._overdispersion = r_profile[-1]
+
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
 
@@ -868,6 +870,8 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
     def _compute_derivative_log_likelihood(self, r_profile):
         """
         """
+        self._overdispersion = r_profile[-1]
+
         total_time = self.cases_times.max() - self.cases_times.min() + 1
         time_init_inf_r = self._tau + 1
 
