@@ -50,6 +50,25 @@ class TestGammaDist(unittest.TestCase):
         for point in test_points:
             npt.assert_almost_equal(d_class.pdf(point), d_scipy.pdf(point))
 
+    def test_logpdf(self):
+        shape = self.shape
+        rate = self.rate
+        d_class = bp.GammaDist(shape, rate)
+        d_scipy = scipy.stats.gamma(shape, scale=1/rate)
+
+        test_points = [0.001, 1, 10, 1000]
+        for point in test_points:
+            npt.assert_almost_equal(
+                d_class.logpdf(point), d_scipy.logpdf(point))
+
+        # Test on array inputs
+        test_points = [np.array([0.001, 10.0, 1.0, 2.0, 3.0]),
+                       np.asarray([[0.001, 10.0, 1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0, 7.0, 8.0]])]
+        for point in test_points:
+            npt.assert_almost_equal(
+                d_class.logpdf(point), d_scipy.logpdf(point))
+
     def test_big_pdf(self):
         shape = self.shape
         rate = self.rate

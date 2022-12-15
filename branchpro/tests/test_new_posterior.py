@@ -158,6 +158,19 @@ class TestPoissonBranchProLogPosteriorClass(unittest.TestCase):
             inference.return_logprior([1, 1, 1]),
             inference.lprior([1, 1, 1]))
 
+    def test_return_logposterior(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.PoissonBranchProLogPosterior(df, ser_int, 2, 1, 0.2)
+
+        self.assertEqual(
+            inference.return_logposterior([1, 1, 1]),
+            inference._log_posterior([1, 1, 1]))
+
     def test_run_inference(self):
         df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -424,7 +437,7 @@ class TestLocImpPoissonBranchProLogPosteriorClass(unittest.TestCase):
             inference.return_logprior([1, 1, 1]),
             inference.lprior([1, 1, 1]))
 
-    def test_run_inference(self):
+    def test_return_logposterior(self):
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [0, 0, 0, 0, 0]
@@ -432,6 +445,24 @@ class TestLocImpPoissonBranchProLogPosteriorClass(unittest.TestCase):
         imp_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [0, 0, 0, 0, 0]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.LocImpPoissonBranchProLogPosterior(
+            local_df, imp_df, 0.3, ser_int, 2, 1, 0.2)
+
+        self.assertEqual(
+            inference.return_logposterior([1, 1, 1]),
+            inference._log_posterior([1, 1, 1]))
+
+    def test_run_inference(self):
+        local_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        imp_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
@@ -455,7 +486,7 @@ class TestLocImpPoissonBranchProLogPosteriorClass(unittest.TestCase):
     def test_run_optimisation(self):
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [0, 0, 0, 0, 0]
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         imp_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -677,6 +708,25 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(
             inference1.return_logprior([1, 1, 1]),
             inference1.lprior([1, 1, 1]))
+
+    def test_return_logposterior(self):
+        df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.NegBinBranchProLogPosterior(df, ser_int, 2, 0.5, 1, 0.2)
+        inference1 = bp.NegBinBranchProLogPosterior(
+            df, ser_int, 2, 0.5, 1, 0.2, 1, False)
+
+        self.assertEqual(
+            inference.return_logposterior([1, 1, 1, 0.5]),
+            inference._log_posterior([1, 1, 1, 0.5]))
+
+        self.assertEqual(
+            inference1.return_logposterior([1, 1, 1]),
+            inference1._log_posterior([1, 1, 1]))
 
     def test_run_inference(self):
         df = pd.DataFrame({
@@ -1051,7 +1101,7 @@ class TestLocImpNegBinBranchProLogPosteriorClass(unittest.TestCase):
             inference1.return_logprior([1, 1, 1]),
             inference1.lprior([1, 1, 1]))
 
-    def test_run_inference(self):
+    def test_return_logposterior(self):
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [0, 0, 0, 0, 0]
@@ -1059,6 +1109,29 @@ class TestLocImpNegBinBranchProLogPosteriorClass(unittest.TestCase):
         imp_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number': [0, 0, 0, 0, 0]
+        })
+        ser_int = [1, 2]
+
+        inference = bp.LocImpNegBinBranchProLogPosterior(
+            local_df, imp_df, 0.3, ser_int, 2, 0.5, 1, 0.2)
+        inference1 = bp.LocImpNegBinBranchProLogPosterior(
+            local_df, imp_df, 0.3, ser_int, 2, 0.5, 1, 0.2, 1, False)
+
+        self.assertEqual(
+            inference.return_logposterior([1, 1, 1, 0.5]),
+            inference._log_posterior([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference1.return_logposterior([1, 1, 1]),
+            inference1._log_posterior([1, 1, 1]))
+
+    def test_run_inference(self):
+        local_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
+        })
+        imp_df = pd.DataFrame({
+            'Time': [1, 2, 3, 5, 6],
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
@@ -1098,7 +1171,7 @@ class TestLocImpNegBinBranchProLogPosteriorClass(unittest.TestCase):
     def test_run_optimisation(self):
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
-            'Incidence Number': [0, 0, 0, 0, 0]
+            'Incidence Number': [10, 3, 4, 6, 9]
         })
         imp_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
