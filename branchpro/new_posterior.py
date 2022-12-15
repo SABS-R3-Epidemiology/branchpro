@@ -968,8 +968,11 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         the shape parameter of the Gamma distribution of the prior.
     beta
         the rate parameter of the Gamma distribution of the prior.
-    lam
-        the mean parameter of the Exponential distribution of the prior of
+    phi_shape
+        the shape parameter of the Exponential distribution of the prior of
+        the overdispersion.
+    phi_rate
+        the rate parameter of the Exponential distribution of the prior of
         the overdispersion.
     infer_phi
         (boolean) Indicator value of whether the overdispersion parameter
@@ -981,7 +984,7 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
 
     """
     def __init__(self, inc_data, daily_serial_interval, tau, phi, alpha, beta,
-                 lam=1, infer_phi=True,
+                 phi_shape, phi_rate, infer_phi=True,
                  time_key='Time', inc_key='Incidence Number'):
         PoissonBranchProLogPosterior.__init__(
             self, inc_data, daily_serial_interval, tau, alpha, beta,
@@ -999,7 +1002,7 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
                 loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
 
         if infer_phi is True:
-            list_priors.append(pints.ExponentialLogPrior(lam))
+            list_priors.append(pints.GammaLogPrior(phi_shape, phi_rate))
 
         logprior = pints.ComposedLogPrior(*list_priors)
 
@@ -1030,7 +1033,7 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         x0 = [self.lprior.mean()]*3
         transformation = pints.RectangularBoundariesTransformation(
             [0] * self.lprior.n_parameters(),
-            [20] * self.lprior.n_parameters()
+            (5 * np.array(self.lprior.mean())).tolist()
         )
 
         # Create MCMC routine
@@ -1379,8 +1382,11 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
         the shape parameter of the Gamma distribution of the prior.
     beta
         the rate parameter of the Gamma distribution of the prior.
-    lam
-        the mean parameter of the Exponential distribution of the prior of
+    phi_shape
+        the shape parameter of the Exponential distribution of the prior of
+        the overdispersion.
+    phi_rate
+        the rate parameter of the Exponential distribution of the prior of
         the overdispersion.
     infer_phi
         (boolean) Indicator value of whether the overdispersion parameter
@@ -1393,7 +1399,7 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
     """
     def __init__(self, inc_data, imported_inc_data, epsilon,
                  daily_serial_interval, tau, phi, alpha, beta,
-                 lam=1, infer_phi=True,
+                 phi_shape, phi_rate, infer_phi=True,
                  time_key='Time', inc_key='Incidence Number'):
         LocImpPoissonBranchProLogPosterior.__init__(
             self, inc_data, imported_inc_data, epsilon,
@@ -1412,7 +1418,7 @@ class LocImpNegBinBranchProLogPosterior(LocImpPoissonBranchProLogPosterior):
                 loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
 
         if infer_phi is True:
-            list_priors.append(pints.ExponentialLogPrior(lam))
+            list_priors.append(pints.GammaLogPrior(phi_shape, phi_rate))
 
         logprior = pints.ComposedLogPrior(*list_priors)
 
