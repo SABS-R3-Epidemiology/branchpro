@@ -74,7 +74,7 @@ setup(
         'pandas',
         'plotly',
         'scipy>=1.6',
-        'pints @ git+https://github.com/pints-team/pints.git#egg=pints-latest',
+        'pints',
         'numexpr',
         'diskcache',
         'multiprocess',
