@@ -691,9 +691,8 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
                 'Value of overdispersion must be integer or float.')
         if phi <= 0:
             raise ValueError(
-                'Value of overdispersion must be must be > 0. For \
-                overdispesion = 0, please use `LocImpBranchProModel` class \
-                type.')
+                'Value of overdispersion must be > 0. For overdispesion = 0, \
+                please use `LocImpBranchProModel` class type.')
 
         self._overdispersion = phi
 
@@ -1006,7 +1005,7 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
 
         transformation = pints.RectangularBoundariesTransformation(
             [0] * self.lprior.n_parameters(),
-            (5 * np.array(self.lprior.mean())).tolist()
+            [200] * self.lprior.n_parameters()
         )
 
         # Create MCMC routine
