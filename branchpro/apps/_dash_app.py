@@ -15,7 +15,7 @@ import csv
 import pandas as pd
 import dash_defer_js_import as dji  # For mathjax
 import dash_bootstrap_components as dbc
-import dash_html_components as html
+from dash import html
 
 
 # Import the mathjax

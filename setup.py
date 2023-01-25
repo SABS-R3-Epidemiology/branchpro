@@ -74,6 +74,7 @@ setup(
         'pandas',
         'plotly',
         'scipy>=1.6',
+        'pints',
         'numexpr',
         'diskcache',
         'multiprocess',

@@ -25,3 +25,9 @@ from . import figures  # noqa
 
 # Import main classes for negative binomial noise
 from .new_models import NegBinBranchProModel, LocImpNegBinBranchProModel  # noqa
+
+# Import log-likelihood classes
+from .new_posterior import PoissonBranchProLogLik, NegBinBranchProLogLik  # noqa
+
+# Import log-posterior classes
+from .new_posterior import PoissonBranchProLogPosterior, NegBinBranchProLogPosterior  # noqa
