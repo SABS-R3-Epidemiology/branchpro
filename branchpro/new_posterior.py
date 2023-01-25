@@ -552,10 +552,10 @@ class PoissonBranchProLogPosterior(object):
         """
         # Starting points arround from prior mean
         x0 = [
-            (np.array(self.lprior.mean()) - 0.1 *
+            (np.array(self.lprior.mean()) + 0.1 *
                 np.array(self.logprior_std)).tolist(),
             self.lprior.mean(),
-            (np.array(self.lprior.mean()) + 0.1 *
+            (np.array(self.lprior.mean()) + 0.2 *
                 np.array(self.logprior_std)).tolist()]
         transformation = pints.RectangularBoundariesTransformation(
             [0] * self.lprior.n_parameters(),
@@ -934,11 +934,14 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         (boolean) Indicator value of whether the overdispersion parameter
         for the negative binomial noise distribution is inferred or not.
     phi_shape
-        the shape parameter of the Exponential distribution of the prior of
+        the shape parameter of the Gamma distribution of the prior of
         the overdispersion.
     phi_rate
-        the rate parameter of the Exponential distribution of the prior of
+        the rate parameter of the Gamma distribution of the prior of
         the overdispersion.
+    phi_prior
+        (pints.LogPrior) Prior distribution of the phi parameter. Can be
+        non-Gamma.
     imported_inc_data
         (pandas Dataframe) contains numbers of imported new cases by time unit
         (usually days).
@@ -955,8 +958,8 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
     """
     def __init__(self, inc_data, daily_serial_interval, tau, phi, alpha, beta,
                  infer_phi=False, phi_shape=None, phi_rate=None,
-                 imported_inc_data=None, epsilon=None, time_key='Time',
-                 inc_key='Incidence Number'):
+                 phi_prior=None, imported_inc_data=None, epsilon=None,
+                 time_key='Time', inc_key='Incidence Number'):
         PoissonBranchProLogPosterior.__init__(
             self, inc_data, daily_serial_interval, tau, alpha, beta,
             imported_inc_data, epsilon, time_key, inc_key)
@@ -977,8 +980,12 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
                 loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
 
         if infer_phi is True:
-            list_priors.append(pints.GammaLogPrior(phi_shape, phi_rate))
-            logprior_std.append(np.sqrt(phi_shape) / phi_rate)
+            if phi_prior is not None:
+                list_priors.append(phi_prior)
+                logprior_std.append(1)
+            else:
+                list_priors.append(pints.GammaLogPrior(phi_shape, phi_rate))
+                logprior_std.append(np.sqrt(phi_shape) / phi_rate)
 
         logprior = pints.ComposedLogPrior(*list_priors)
 
@@ -1008,10 +1015,10 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         """
         # Starting points arround from prior mean
         x0 = [
-            (np.array(self.lprior.mean()) - 0.1 *
+            (np.array(self.lprior.mean()) + 0.1 *
                 np.array(self.logprior_std)).tolist(),
             self.lprior.mean(),
-            (np.array(self.lprior.mean()) + 0.1 *
+            (np.array(self.lprior.mean()) + 0.2 *
                 np.array(self.logprior_std)).tolist()]
 
         transformation = pints.RectangularBoundariesTransformation(

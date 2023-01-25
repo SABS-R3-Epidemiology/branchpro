@@ -10,6 +10,7 @@ import unittest
 import pandas as pd
 import numpy as np
 import numpy.testing as npt
+import pints
 
 import branchpro as bp
 
@@ -957,11 +958,14 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2)
         bp.NegBinBranchProLogPosterior(
-            df, ser_int, 2, 0.5, 1, 0.2, 0.25, 0.5, True)
+            df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
+        bp.NegBinBranchProLogPosterior(
+            df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -972,11 +976,17 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [0, 0, 0, 0, 0]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
         bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
+        bp.NegBinBranchProLogPosterior(
+            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
 
     def test_return_loglikelihood(self):
         df = pd.DataFrame({
@@ -984,19 +994,24 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
         inference1 = bp.NegBinBranchProLogPosterior(
+            df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
+        inference2 = bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2)
 
         self.assertEqual(
             inference.return_loglikelihood([1, 1, 1, 0.5]),
             inference.ll([1, 1, 1, 0.5]))
-
         self.assertEqual(
-            inference1.return_loglikelihood([1, 1, 1]),
-            inference1.ll([1, 1, 1]))
+            inference1.return_loglikelihood([1, 1, 1, 0.5]),
+            inference1.ll([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_loglikelihood([1, 1, 1]),
+            inference2.ll([1, 1, 1]))
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -1007,18 +1022,27 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [0, 0, 0, 0, 0]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
         inference1 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
+        inference2 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
 
         self.assertEqual(
             inference.return_loglikelihood([1, 1, 1, 0.5]),
             inference.ll([1, 1, 1, 0.5]))
         self.assertEqual(
-            inference1.return_loglikelihood([1, 1, 1]),
-            inference1.ll([1, 1, 1]))
+            inference1.return_loglikelihood([1, 1, 1, 0.5]),
+            inference1.ll([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_loglikelihood([1, 1, 1]),
+            inference2.ll([1, 1, 1]))
 
     def test_return_logprior(self):
         df = pd.DataFrame({
@@ -1026,19 +1050,24 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
-            df, ser_int, 2, 0.5, 1, 0.2, True,  0.25, 0.5)
+            df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
         inference1 = bp.NegBinBranchProLogPosterior(
+            df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
+        inference2 = bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2)
 
         self.assertEqual(
             inference.return_logprior([1, 1, 1, 0.5]),
             inference.lprior([1, 1, 1, 0.5]))
-
         self.assertEqual(
-            inference1.return_logprior([1, 1, 1]),
-            inference1.lprior([1, 1, 1]))
+            inference1.return_logprior([1, 1, 1, 0.5]),
+            inference1.lprior([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_logprior([1, 1, 1]),
+            inference2.lprior([1, 1, 1]))
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -1049,18 +1078,27 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [0, 0, 0, 0, 0]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
         inference1 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
+        inference2 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
 
         self.assertEqual(
             inference.return_logprior([1, 1, 1, 0.5]),
             inference.lprior([1, 1, 1, 0.5]))
         self.assertEqual(
-            inference1.return_logprior([1, 1, 1]),
-            inference1.lprior([1, 1, 1]))
+            inference1.return_logprior([1, 1, 1, 0.5]),
+            inference1.lprior([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_logprior([1, 1, 1]),
+            inference2.lprior([1, 1, 1]))
 
     def test_return_logposterior(self):
         df = pd.DataFrame({
@@ -1068,19 +1106,24 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [10, 3, 4, 6, 9]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
         inference1 = bp.NegBinBranchProLogPosterior(
+            df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
+        inference2 = bp.NegBinBranchProLogPosterior(
             df, ser_int, 2, 0.5, 1, 0.2)
 
         self.assertEqual(
             inference.return_logposterior([1, 1, 1, 0.5]),
             inference._log_posterior([1, 1, 1, 0.5]))
-
         self.assertEqual(
-            inference1.return_logposterior([1, 1, 1]),
-            inference1._log_posterior([1, 1, 1]))
+            inference1.return_logposterior([1, 1, 1, 0.5]),
+            inference1._log_posterior([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_logposterior([1, 1, 1]),
+            inference2._log_posterior([1, 1, 1]))
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -1091,18 +1134,27 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
             'Incidence Number': [0, 0, 0, 0, 0]
         })
         ser_int = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
+        inference = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
         inference1 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
 
         self.assertEqual(
             inference.return_logposterior([1, 1, 1, 0.5]),
             inference._log_posterior([1, 1, 1, 0.5]))
         self.assertEqual(
-            inference1.return_logposterior([1, 1, 1]),
-            inference1._log_posterior([1, 1, 1]))
+            inference1.return_logposterior([1, 1, 1, 0.5]),
+            inference1._log_posterior([1, 1, 1, 0.5]))
+        self.assertEqual(
+            inference2.return_logposterior([1, 1, 1]),
+            inference2._log_posterior([1, 1, 1]))
 
     def test_run_inference(self):
         df = pd.DataFrame({
@@ -1111,6 +1163,7 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference1 = bp.NegBinBranchProLogPosterior(
             df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
@@ -1129,17 +1182,33 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(samples[0].shape, (100, 4))
 
         inference3 = bp.NegBinBranchProLogPosterior(
-            df, ser_int1, 2, 0.5, 1, 0.2)
+            df, ser_int1, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
 
         samples = inference3.run_inference(num_iter=100)
 
         self.assertEqual(len(samples), 3)
-        self.assertEqual(samples[0].shape, (100, 3))
+        self.assertEqual(samples[0].shape, (100, 4))
 
         inference4 = bp.NegBinBranchProLogPosterior(
-            df, ser_int2, 2, 0.5, 1, 0.2)
+            df, ser_int2, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
 
         samples = inference4.run_inference(num_iter=100)
+
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(samples[0].shape, (100, 4))
+
+        inference5 = bp.NegBinBranchProLogPosterior(
+            df, ser_int1, 2, 0.5, 1, 0.2)
+
+        samples = inference5.run_inference(num_iter=100)
+
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(samples[0].shape, (100, 3))
+
+        inference6 = bp.NegBinBranchProLogPosterior(
+            df, ser_int2, 2, 0.5, 1, 0.2)
+
+        samples = inference6.run_inference(num_iter=100)
 
         self.assertEqual(len(samples), 3)
         self.assertEqual(samples[0].shape, (100, 3))
@@ -1154,9 +1223,11 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         inference1 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
 
         samples = inference1.run_inference(num_iter=100)
 
@@ -1164,7 +1235,8 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(samples[0].shape, (100, 4))
 
         inference2 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int2, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int2, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
 
         samples = inference2.run_inference(num_iter=100)
 
@@ -1172,17 +1244,37 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(samples[0].shape, (100, 4))
 
         inference3 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int1, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int1, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
 
         samples = inference3.run_inference(num_iter=100)
 
         self.assertEqual(len(samples), 3)
-        self.assertEqual(samples[0].shape, (100, 3))
+        self.assertEqual(samples[0].shape, (100, 4))
 
         inference4 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int2, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int2, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
 
         samples = inference4.run_inference(num_iter=100)
+
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(samples[0].shape, (100, 4))
+
+        inference5 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int1, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
+
+        samples = inference5.run_inference(num_iter=100)
+
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(samples[0].shape, (100, 3))
+
+        inference6 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int2, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
+
+        samples = inference6.run_inference(num_iter=100)
 
         self.assertEqual(len(samples), 3)
         self.assertEqual(samples[0].shape, (100, 3))
@@ -1194,6 +1286,7 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         optimisation1 = bp.NegBinBranchProLogPosterior(
             df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5)
@@ -1212,17 +1305,33 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(len(found), 4)
 
         optimisation3 = bp.NegBinBranchProLogPosterior(
-            df, ser_int1, 2, 0.5, 1, 0.2)
+            df, ser_int1, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
 
         found, val = optimisation3.run_optimisation()
 
         self.assertTrue(isinstance(val, (int, float)))
-        self.assertEqual(len(found), 3)
+        self.assertEqual(len(found), 4)
 
         optimisation4 = bp.NegBinBranchProLogPosterior(
-            df, ser_int2, 2, 0.5, 1, 0.2)
+            df, ser_int2, 2, 0.5, 1, 0.2, True, None, None, logprior_phi)
 
         found, val = optimisation4.run_optimisation()
+
+        self.assertTrue(isinstance(val, (int, float)))
+        self.assertEqual(len(found), 4)
+
+        optimisation5 = bp.NegBinBranchProLogPosterior(
+            df, ser_int1, 2, 0.5, 1, 0.2)
+
+        found, val = optimisation5.run_optimisation()
+
+        self.assertTrue(isinstance(val, (int, float)))
+        self.assertEqual(len(found), 3)
+
+        optimisation6 = bp.NegBinBranchProLogPosterior(
+            df, ser_int2, 2, 0.5, 1, 0.2)
+
+        found, val = optimisation6.run_optimisation()
 
         self.assertTrue(isinstance(val, (int, float)))
         self.assertEqual(len(found), 3)
@@ -1237,9 +1346,11 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         })
         ser_int1 = [1, 2, 1, 0, 0, 0]
         ser_int2 = [1, 2]
+        logprior_phi = pints.GammaLogPrior(0.25, 0.5)
 
         optimisation1 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int1, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
 
         found, val = optimisation1.run_optimisation()
 
@@ -1247,7 +1358,8 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(len(found), 4)
 
         optimisation2 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int2, 2, 0.5, 1, 0.2, True, 0.25, 0.5, imp_df, 0.3)
+            local_df, ser_int2, 2, 0.5, 1, 0.2, True, 0.25, 0.5, None,
+            imp_df, 0.3)
 
         found, val = optimisation2.run_optimisation()
 
@@ -1255,17 +1367,37 @@ class TestNegBinBranchProLogPosteriorClass(unittest.TestCase):
         self.assertEqual(len(found), 4)
 
         optimisation3 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int1, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int1, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
 
         found, val = optimisation3.run_optimisation()
 
         self.assertTrue(isinstance(val, (int, float)))
-        self.assertEqual(len(found), 3)
+        self.assertEqual(len(found), 4)
 
         optimisation4 = bp.NegBinBranchProLogPosterior(
-            local_df, ser_int2, 2, 0.5, 1, 0.2, False, None, None, imp_df, 0.3)
+            local_df, ser_int2, 2, 0.5, 1, 0.2, True, None, None, logprior_phi,
+            imp_df, 0.3)
 
         found, val = optimisation4.run_optimisation()
+
+        self.assertTrue(isinstance(val, (int, float)))
+        self.assertEqual(len(found), 4)
+
+        optimisation5 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int1, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
+
+        found, val = optimisation5.run_optimisation()
+
+        self.assertTrue(isinstance(val, (int, float)))
+        self.assertEqual(len(found), 3)
+
+        optimisation6 = bp.NegBinBranchProLogPosterior(
+            local_df, ser_int2, 2, 0.5, 1, 0.2, False, None, None, None,
+            imp_df, 0.3)
+
+        found, val = optimisation6.run_optimisation()
 
         self.assertTrue(isinstance(val, (int, float)))
         self.assertEqual(len(found), 3)
