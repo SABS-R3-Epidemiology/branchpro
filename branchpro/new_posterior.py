@@ -463,12 +463,17 @@ class PoissonBranchProLogPosterior(object):
             inc_data, daily_serial_interval, tau,
             imported_inc_data, epsilon, time_key, inc_key)
 
-        # Create a prior
+        # Create a prior and compute prior std vector
         logprior = pints.ComposedLogPrior(
             *[pints.GammaLogPrior(alpha, beta) for _ in range(np.shape(
                 loglikelihood.cases_data)[0] - loglikelihood._tau - 1)])
 
+        logprior_std = [np.sqrt(alpha) / beta for _ in range(
+            np.shape(
+                loglikelihood.cases_data)[0] - loglikelihood._tau - 1)]
+
         self.lprior = logprior
+        self.logprior_std = logprior_std
         self.ll = loglikelihood
 
         # Create a posterior log-likelihood (log(likelihood * prior))
@@ -546,7 +551,12 @@ class PoissonBranchProLogPosterior(object):
 
         """
         # Starting points arround from prior mean
-        x0 = self.lprior.sample(n=3).tolist()
+        x0 = [
+            (np.array(self.lprior.mean()) - 0.1 *
+                np.array(self.logprior_std)).tolist(),
+            self.lprior.mean(),
+            (np.array(self.lprior.mean()) + 0.1 *
+                np.array(self.logprior_std)).tolist()]
         transformation = pints.RectangularBoundariesTransformation(
             [0] * self.lprior.n_parameters(),
             [200] * self.lprior.n_parameters()
@@ -691,7 +701,7 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
                 'Value of overdispersion must be integer or float.')
         if phi <= 0:
             raise ValueError(
-                'Value of overdispersion must be > 0. For overdispesion = 0, \
+                'Value of overdispersion must be > 0. For overdispersion = 0, \
                 please use `LocImpBranchProModel` class type.')
 
         self._overdispersion = phi
@@ -920,15 +930,15 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         the shape parameter of the Gamma distribution of the prior.
     beta
         the rate parameter of the Gamma distribution of the prior.
+    infer_phi
+        (boolean) Indicator value of whether the overdispersion parameter
+        for the negative binomial noise distribution is inferred or not.
     phi_shape
         the shape parameter of the Exponential distribution of the prior of
         the overdispersion.
     phi_rate
         the rate parameter of the Exponential distribution of the prior of
         the overdispersion.
-    infer_phi
-        (boolean) Indicator value of whether the overdispersion parameter
-        for the negative binomial noise distribution is inferred or not.
     imported_inc_data
         (pandas Dataframe) contains numbers of imported new cases by time unit
         (usually days).
@@ -944,8 +954,9 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
 
     """
     def __init__(self, inc_data, daily_serial_interval, tau, phi, alpha, beta,
-                 phi_shape, phi_rate, infer_phi=True, imported_inc_data=None,
-                 epsilon=None, time_key='Time', inc_key='Incidence Number'):
+                 infer_phi=False, phi_shape=None, phi_rate=None,
+                 imported_inc_data=None, epsilon=None, time_key='Time',
+                 inc_key='Incidence Number'):
         PoissonBranchProLogPosterior.__init__(
             self, inc_data, daily_serial_interval, tau, alpha, beta,
             imported_inc_data, epsilon, time_key, inc_key)
@@ -997,10 +1008,10 @@ class NegBinBranchProLogPosterior(PoissonBranchProLogPosterior):
         """
         # Starting points arround from prior mean
         x0 = [
-            (np.array(self.lprior.mean()) - 0 *
+            (np.array(self.lprior.mean()) - 0.1 *
                 np.array(self.logprior_std)).tolist(),
             self.lprior.mean(),
-            (np.array(self.lprior.mean()) + 0 *
+            (np.array(self.lprior.mean()) + 0.1 *
                 np.array(self.logprior_std)).tolist()]
 
         transformation = pints.RectangularBoundariesTransformation(
