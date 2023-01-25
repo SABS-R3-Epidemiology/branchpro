@@ -15,12 +15,8 @@ Overview:
   - MCMC Sampling-based Log-Posterior Classes
     - :class:`PoissonBranchProLogLik`
     - :class:`PoissonBranchProLogPosterior`
-    - :class:`LocImpPoissonBranchProLogLik`
-    - :class:`LocImpPoissonBranchProLogPosterior`
     - :class:`NegBinBranchProLogLik`
     - :class:`NegBinBranchProLogPosterior`
-    - :class:`LocImpNegBinBranchProLogLik`
-    - :class:`LocImpNegBinBranchProLogPosterior`
 
 Branch Process Posterior Distribution
 *************************************
@@ -68,20 +64,6 @@ Log-posterior Class
 .. autoclass:: PoissonBranchProLogPosterior
   :members:
 
-Local and Imported Branch Process with Poisson Noise
-****************************************************
-Log-likelihood Class
-********************
-
-.. autoclass:: LocImpPoissonBranchProLogLik
-  :members:
-
-Log-posterior Class
-*******************
-
-.. autoclass:: LocImpPoissonBranchProLogPosterior
-  :members:
-
 Branch Process with Negative Binomial Noise
 *******************************************
 Log-likelihood Class
@@ -94,18 +76,4 @@ Log-posterior Class
 *******************
 
 .. autoclass:: NegBinBranchProLogPosterior
-  :members:
-
-Local and Imported Branch Process with Negative Binomial Noise
-**************************************************************
-Log-likelihood Class
-********************
-
-.. autoclass:: LocImpNegBinBranchProLogLik
-  :members:
-
-Log-posterior Class
-*******************
-
-.. autoclass:: LocImpNegBinBranchProLogPosterior
   :members:
