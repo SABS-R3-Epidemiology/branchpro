@@ -6,7 +6,9 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+
+ext = Extension('fast_posterior', [os.path.join('branchpro', 'fast_posterior.c')])
 
 
 def get_version():
@@ -93,4 +95,5 @@ setup(
             'flake8>=3',
         ],
     },
+    ext_modules=[ext],
 )
