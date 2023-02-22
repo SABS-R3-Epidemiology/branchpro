@@ -7,8 +7,10 @@
 # notice and full license details.
 #
 from setuptools import setup, find_packages, Extension
+import os
 
-ext = Extension('fast_posterior', [os.path.join('branchpro', 'fast_posterior.c')])
+ext = Extension(
+    'fast_posterior', [os.path.join('branchpro', 'fast_posterior.c')])
 
 
 def get_version():

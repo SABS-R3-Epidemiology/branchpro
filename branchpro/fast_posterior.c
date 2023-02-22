@@ -18,11 +18,11 @@
 
 //                         Internally Defined Routines                        //
 
-double DiGamma_Function( double x );
-long double xDiGamma_Function( long double x );
+double DiGamma_Function(double x);
+long double xDiGamma_Function(long double x);
 
 static long double xDiGamma(long double x);
-static long double xDiGamma_Asymptotic_Expansion( long double x );
+static long double xDiGamma_Asymptotic_Expansion(long double x);
 
 
 //                         Internally Defined Constants                       //
@@ -468,7 +468,7 @@ static PyMethodDef PosteriorMethods[] = {
 static struct PyModuleDef fast_posterior = {
   PyModuleDef_HEAD_INIT,
   "fast_posterior",
-  NULL,
+  "A C++ wrapper of the Python posterior function.",
   -1,
   PosteriorMethods
 };

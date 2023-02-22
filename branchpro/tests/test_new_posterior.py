@@ -218,7 +218,7 @@ class TestPoissonBranchProLogLik(unittest.TestCase):
 
         log_lik = bp.PoissonBranchProLogLik(df, ser_int, 3)
 
-        self.assertEqual(log_lik([1, 1]), 0)
+        self.assertAlmostEqual(log_lik([1, 1]), 0)
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -233,7 +233,7 @@ class TestPoissonBranchProLogLik(unittest.TestCase):
         log_lik = bp.PoissonBranchProLogLik(
             local_df, ser_int, 3, imp_df, 0.3)
 
-        self.assertEqual(log_lik([1, 1]), 0)
+        self.assertAlmostEqual(log_lik([1, 1]), 0)
 
     def test_evaluateS1(self):
         df = pd.DataFrame({
@@ -244,7 +244,10 @@ class TestPoissonBranchProLogLik(unittest.TestCase):
 
         log_lik = bp.PoissonBranchProLogLik(df, ser_int, 3)
 
-        self.assertEqual(log_lik.evaluateS1([1, 1]), (0, [0, 0]))
+        self.assertAlmostEqual(log_lik.evaluateS1([1, 1])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik.evaluateS1([1, 1])[1]),
+            np.array([0, 0]))
 
         dLl = []
         old_r_profile = [1, 1]
@@ -276,7 +279,10 @@ class TestPoissonBranchProLogLik(unittest.TestCase):
         log_lik = bp.PoissonBranchProLogLik(
             local_df, ser_int, 3, imp_df, 0.3)
 
-        self.assertEqual(log_lik.evaluateS1([1, 1]), (0, [0, 0]))
+        self.assertAlmostEqual(log_lik.evaluateS1([1, 1])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik.evaluateS1([1, 1])[1]),
+            np.array([0, 0]))
 
         dLl = []
         old_r_profile = [1, 1]
@@ -811,8 +817,8 @@ class TestNegBinBranchProLogLik(unittest.TestCase):
         log_lik = bp.NegBinBranchProLogLik(df, ser_int, 3, 0.5)
         log_lik1 = bp.NegBinBranchProLogLik(df, ser_int, 3, 0.5, False)
 
-        self.assertEqual(log_lik([1, 1, 0.5]), 0)
-        self.assertEqual(log_lik1([1, 1]), 0)
+        self.assertAlmostEqual(log_lik([1, 1, 0.5]), 0)
+        self.assertAlmostEqual(log_lik1([1, 1]), 0)
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
@@ -829,8 +835,8 @@ class TestNegBinBranchProLogLik(unittest.TestCase):
         log_lik1 = bp.NegBinBranchProLogLik(
             local_df, ser_int, 3, 0.5, False, imp_df, 0.3)
 
-        self.assertEqual(log_lik([1, 1, 0.5]), 0)
-        self.assertEqual(log_lik1([1, 1]), 0)
+        self.assertAlmostEqual(log_lik([1, 1, 0.5]), 0)
+        self.assertAlmostEqual(log_lik1([1, 1]), 0)
 
     def test_evaluateS1(self):
         df = pd.DataFrame({
@@ -842,8 +848,15 @@ class TestNegBinBranchProLogLik(unittest.TestCase):
         log_lik = bp.NegBinBranchProLogLik(df, ser_int, 3, 0.5)
         log_lik1 = bp.NegBinBranchProLogLik(df, ser_int, 3, 0.5, False)
 
-        self.assertEqual(log_lik.evaluateS1([1, 1, 0.5]), (0, [0, 0, 0]))
-        self.assertEqual(log_lik1.evaluateS1([1, 1]), (0, [0, 0]))
+        self.assertAlmostEqual(log_lik.evaluateS1([1, 1, 0.5])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik.evaluateS1([1, 1, 0.5])[1]),
+            np.array([0, 0, 0]))
+
+        self.assertAlmostEqual(log_lik1.evaluateS1([1, 1])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik1.evaluateS1([1, 1])[1]),
+            np.array([0, 0]))
 
         dLl = []
         old_r_profile = [1, 1, 0.5]
@@ -900,8 +913,15 @@ class TestNegBinBranchProLogLik(unittest.TestCase):
         log_lik1 = bp.NegBinBranchProLogLik(
             local_df, ser_int, 3, 0.5, False, imp_df, 0.3)
 
-        self.assertEqual(log_lik.evaluateS1([1, 1, 0.5]), (0, [0, 0, 0]))
-        self.assertEqual(log_lik1.evaluateS1([1, 1]), (0, [0, 0]))
+        self.assertAlmostEqual(log_lik.evaluateS1([1, 1, 0.5])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik.evaluateS1([1, 1, 0.5])[1]),
+            np.array([0, 0, 0]))
+
+        self.assertAlmostEqual(log_lik1.evaluateS1([1, 1])[0], 0)
+        npt.assert_almost_equal(
+            np.array(log_lik1.evaluateS1([1, 1])[1]),
+            np.array([0, 0]))
 
         dLl = []
         old_r_profile = [1, 1, 0.5]

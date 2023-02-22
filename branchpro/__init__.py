@@ -32,4 +32,4 @@ from .new_posterior import PoissonBranchProLogLik, NegBinBranchProLogLik  # noqa
 # Import log-posterior classes
 from .new_posterior import PoissonBranchProLogPosterior, NegBinBranchProLogPosterior  # noqa
 
-import fast_posterior
+import fast_posterior # noqa
