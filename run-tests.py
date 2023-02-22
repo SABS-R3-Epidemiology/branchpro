@@ -150,6 +150,7 @@ def doctest_rst_and_public_interface():
         'branchpro.posterior',
         'branchpro.new_posterior',
         'branchpro.figures',
+        'fast_posterior'
         ]
 
     doc_symbols = get_all_documented_symbols()
