@@ -10,9 +10,10 @@
 import warnings
 import numpy as np
 import pandas as pd
-from scipy.special import loggamma, digamma
+from scipy.special import loggamma
 
 import pints
+import branchpro
 
 
 class PoissonBranchProLogLik(pints.LogPDF):
@@ -754,29 +755,26 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
             phi = self._overdispersion
             r_profile = param
 
-        total_time = self.cases_times.max() - self.cases_times.min() + 1
+        # total_time = self.cases_times.max() - self.cases_times.min() + 1
+        total_time = self.total_time
         time_init_inf_r = self._tau + 1
 
         Ll = 0
 
         for _, time in enumerate(range(time_init_inf_r+1, total_time+1)):
-            loggamma_slice_cases_phi = loggamma(
-                self.slice_cases[_] + 1 / phi) - loggamma(1 / phi)
 
-            Ll += np.sum(loggamma_slice_cases_phi - np.log(phi) / phi)
-            Ll += np.log(r_profile[_]) * np.sum(self.slice_cases[_])
+            ll_step = branchpro.fast_posterior.update_neg_bin_ll_onestep(
+                phi,
+                r_profile[_],
+                len(self.slice_cases[_]),
+                self.slice_cases[_],
+                self.tau_window[_],
+                self.sum_tau_window[_],
+                self.log_tau_window[_],
+                self.ll_normalizing[_]
+            )
 
-            log_phi_r_tau_window = np.zeros_like(self.tau_window[_])
-            for tv, tau_val in enumerate(self.tau_window[_]):
-                log_phi_r_tau_window[tv] = np.log(
-                    1 / phi + r_profile[_] * self.sum_tau_window[_][tv])
-
-            Ll += np.sum(
-                np.multiply(self.slice_cases[_], self.log_tau_window[_]))
-            Ll += - np.sum(np.multiply(
-                self.slice_cases[_] + 1 / phi, log_phi_r_tau_window))
-
-            Ll += - np.sum(self.ll_normalizing[_])
+            Ll += ll_step
 
         return Ll
 
@@ -793,6 +791,7 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
         self.sum_tau_window = []
 
         total_time = self.cases_times.max() - self.cases_times.min() + 1
+        self.total_time = total_time
         time_init_inf_r = self._tau + 1
 
         for _, time in enumerate(range(time_init_inf_r+1, total_time+1)):
@@ -865,36 +864,26 @@ class NegBinBranchProLogLik(PoissonBranchProLogLik):
             phi = self._overdispersion
             r_profile = param
 
-        total_time = self.cases_times.max() - self.cases_times.min() + 1
+        # total_time = self.cases_times.max() - self.cases_times.min() + 1
+        total_time = self.total_time
         time_init_inf_r = self._tau + 1
 
         dLl = []
         dLl_phi = 0
 
         for _, time in enumerate(range(time_init_inf_r+1, total_time+1)):
-            inv_phi_r_tau_window = np.zeros_like(self.tau_window[_])
-            inv_phi_r_tau_window2 = np.zeros_like(self.tau_window[_])
-            log_phi_r_tau_window = np.zeros_like(self.tau_window[_])
-            for tv, tau_val in enumerate(self.tau_window[_]):
-                inv_phi_r_tau_window[tv] = (self.sum_tau_window[_][tv]) \
-                    * np.reciprocal(
-                    1 / phi + r_profile[_] * self.sum_tau_window[_][tv])
-                inv_phi_r_tau_window2[tv] = np.reciprocal(
-                    1 / phi + r_profile[_] * self.sum_tau_window[_][tv])
-                log_phi_r_tau_window[tv] = np.log(
-                    1 / phi + r_profile[_] * self.sum_tau_window[_][tv])
+            dLl_i, dLl_phi_step = \
+                branchpro.fast_posterior.update_neg_bin_deriv_onestep(
+                    phi,
+                    r_profile[_],
+                    len(self.tau_window[_]),
+                    self.tau_window[_],
+                    self.sum_tau_window[_],
+                    self.slice_cases[_]
+                )
 
-            dLl.append(
-                (1/r_profile[_]) * np.sum(self.slice_cases[_]) - np.sum(
-                    np.multiply(self.slice_cases[_] + 1 / phi,
-                                inv_phi_r_tau_window)))
-
-            dLl_phi += np.sum(
-                digamma(self.slice_cases[_] + 1 / phi) - digamma(1 / phi) +
-                np.log(1 / phi) + 1)
-
-            dLl_phi -= np.sum(log_phi_r_tau_window) + np.sum(np.multiply(
-                self.slice_cases[_] + 1 / phi, inv_phi_r_tau_window2))
+            dLl.append(dLl_i)
+            dLl_phi += dLl_phi_step
 
         dLl_phi *= - 1 / (phi ** 2)
 
