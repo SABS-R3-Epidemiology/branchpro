@@ -363,6 +363,14 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
     ll_diff -= ll_normalizing[index];
   }
 
+  free(slice_cases);
+  free(tau_window);
+  free(sum_tau_window);
+  free(log_tau_window);
+  free(ll_normalizing);
+  free(loggamma_slice_cases_phi);
+  free(log_phi_r_tau_window);
+
   return PyFloat_FromDouble(ll_diff);
 }
 
@@ -448,6 +456,12 @@ update_neg_bin_deriv_onestep(PyObject *self, PyObject *args) {
     dLl_phi_step -= (slice_cases[index] + 1.0 / phi) * inv_phi_r_tau_window2[index];
   }
 
+  free(slice_cases);
+  free(tau_window);
+  free(sum_tau_window);
+  free(inv_phi_r_tau_window);
+  free(inv_phi_r_tau_window2);
+  free(log_phi_r_tau_window);
 
   // Return as a python list of floats
   return Py_BuildValue("[ff]", dLl_i, dLl_phi_step);
