@@ -77,7 +77,3 @@ Log-posterior Class
 
 .. autoclass:: NegBinBranchProLogPosterior
   :members:
-
-C++ Posterior Wrapper Methods
-*****************************
-

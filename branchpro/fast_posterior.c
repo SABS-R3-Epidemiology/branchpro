@@ -259,7 +259,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
       &py_ll_normalizing))
     return NULL;
 
-  double slice_cases[window_size];
+  double* slice_cases = malloc(sizeof(double) * window_size);
   int i = 0;
   PyObject *iterator = PyObject_GetIter(py_slice_cases);
   PyObject *item;
@@ -274,7 +274,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
   Py_DECREF(iterator);
 
 
-  double tau_window[window_size];
+  double* tau_window = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_tau_window);
   if (iterator == NULL) {
@@ -287,7 +287,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
   }
   Py_DECREF(iterator);
 
-  double sum_tau_window[window_size];
+  double* sum_tau_window = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_sum_tau_window);
   if (iterator == NULL) {
@@ -300,7 +300,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
   }
   Py_DECREF(iterator);
 
-  double log_tau_window[window_size];
+  double* log_tau_window = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_log_tau_window);
   if (iterator == NULL) {
@@ -313,7 +313,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
   }
   Py_DECREF(iterator);
 
-  double ll_normalizing[window_size];
+  double* ll_normalizing = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_ll_normalizing);
   if (iterator == NULL) {
@@ -334,6 +334,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
   double ll_diff = 0;
 
   double loggamma_slice_cases_phi[window_size];
+  double* loggamma_slice_cases_phi = malloc(sizeof(double) * window_size);
   for (int index=0; index<window_size; index++) {
     loggamma_slice_cases_phi[index] = lgamma(slice_cases[index] + 1.0/phi) - lgamma(1.0/phi);
   }
@@ -346,7 +347,7 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
     ll_diff += log(Rt) * slice_cases[index];
   }
 
-  double log_phi_r_tau_window[window_size];
+  double* log_phi_r_tau_window = malloc(sizeof(double) * window_size);
   for (int index=0; index<window_size; index++) {
     log_phi_r_tau_window[index] = log(1.0/phi + Rt * sum_tau_window[index]);
   }
@@ -381,7 +382,7 @@ update_neg_bin_deriv_onestep(PyObject *self, PyObject *args) {
       &py_tau_window, &py_sum_tau_window, &py_slice_cases))
     return NULL;
 
-  double slice_cases[window_size];
+  double* slice_cases = malloc(sizeof(double) * window_size);
   int i = 0;
   PyObject *iterator = PyObject_GetIter(py_slice_cases);
   PyObject *item;
@@ -396,7 +397,7 @@ update_neg_bin_deriv_onestep(PyObject *self, PyObject *args) {
   Py_DECREF(iterator);
 
 
-  double tau_window[window_size];
+  double* tau_window = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_tau_window);
   if (iterator == NULL) {
@@ -410,7 +411,7 @@ update_neg_bin_deriv_onestep(PyObject *self, PyObject *args) {
   Py_DECREF(iterator);
 
 
-  double sum_tau_window[window_size];
+  double* sum_tau_window = malloc(sizeof(double) * window_size);
   i = 0;
   iterator = PyObject_GetIter(py_sum_tau_window);
   if (iterator == NULL) {
@@ -427,9 +428,9 @@ update_neg_bin_deriv_onestep(PyObject *self, PyObject *args) {
   double dLl_i = 0;
   double dLl_phi_step = 0;
 
-  double inv_phi_r_tau_window[window_size];
-  double inv_phi_r_tau_window2[window_size];
-  double log_phi_r_tau_window[window_size];
+  double* inv_phi_r_tau_window = malloc(sizeof(double) * window_size);
+  double* inv_phi_r_tau_window2 = malloc(sizeof(double) * window_size);
+  double* log_phi_r_tau_window = malloc(sizeof(double) * window_size);
 
   for (int index=0; index<window_size; index++) {
     inv_phi_r_tau_window[index] = sum_tau_window[index] * 1.0 / (1.0/ phi + Rt * sum_tau_window[index]);
