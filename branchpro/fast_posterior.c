@@ -333,7 +333,6 @@ update_neg_bin_ll_onestep(PyObject *self, PyObject *args) {
 
   double ll_diff = 0;
 
-  double loggamma_slice_cases_phi[window_size];
   double* loggamma_slice_cases_phi = malloc(sizeof(double) * window_size);
   for (int index=0; index<window_size; index++) {
     loggamma_slice_cases_phi[index] = lgamma(slice_cases[index] + 1.0/phi) - lgamma(1.0/phi);
