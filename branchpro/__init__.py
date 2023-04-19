@@ -18,13 +18,28 @@ from .version_info import VERSION_INT, VERSION  # noqa
 # Import main classes
 from .models import ForwardModel, BranchProModel, LocImpBranchProModel    # noqa
 from .simulation import SimulationController  # noqa
-from .apps import IncidenceNumberPlot, _SliderComponent, BranchProDashApp, IncidenceNumberSimulationApp, ReproductionNumberPlot, BranchProInferenceApp # noqa
+from .apps import (  # noqa
+    IncidenceNumberPlot,
+    _SliderComponent,
+    BranchProDashApp,
+    IncidenceNumberSimulationApp,
+    ReproductionNumberPlot,
+    BranchProInferenceApp)
 from ._dataset_library_api import DatasetLibrary # noqa
-from .posterior import GammaDist, BranchProPosterior, BranchProPosteriorMultSI, LocImpBranchProPosterior, LocImpBranchProPosteriorMultSI # noqa
+from .posterior import (  # noqa
+    GammaDist,
+    BranchProPosterior,
+    BranchProPosteriorMultSI,
+    LocImpBranchProPosterior,
+    LocImpBranchProPosteriorMultSI)
 from . import figures  # noqa
 
 # Import main classes for negative binomial noise
-from .new_models import NegBinBranchProModel, LocImpNegBinBranchProModel  # noqa
+from .new_models import (  # noqa
+    NegBinBranchProModel,
+    LocImpNegBinBranchProModel,
+    StochasticNegBinBranchProModel,
+    StochasticLocImpNegBinBranchProModel)
 
 # Import log-likelihood classes
 from .new_posterior import PoissonBranchProLogLik, NegBinBranchProLogLik  # noqa
