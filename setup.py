@@ -71,7 +71,7 @@ setup(
         'dash_bootstrap_components>=0.12',
         'dash_daq',
         'dash_defer_js_import',
-        'pandas',
+        'pandas<2.0.0',
         'plotly',
         'scipy>=1.6',
         'pints',
@@ -80,7 +80,7 @@ setup(
         'multiprocess',
         'psutil',
     ],
-    python_requires='>3.8',
+    python_requires='>3.9',
     extras_require={
         'docs': [
             # Sphinx for doc generation. Version 1.7.3 has a bug:
