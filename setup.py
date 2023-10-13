@@ -70,7 +70,7 @@ setup(
     install_requires=[
         # Dependencies go here!
         'matplotlib',
-        'numpy>=1.8',
+        'numpy<1.23.0,>=1.16.5',
         'dash>=2.0',
         'dash_bootstrap_components>=0.12',
         'dash_daq',
@@ -83,6 +83,7 @@ setup(
         'diskcache',
         'multiprocess',
         'psutil',
+        'fast_poibin'
     ],
     python_requires='>3.8',
     extras_require={

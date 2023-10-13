@@ -35,16 +35,25 @@ from .posterior import (  # noqa
 from . import figures  # noqa
 
 # Import main classes for negative binomial noise
-from .new_models import (  # noqa
+from .negbin_models import (  # noqa
     NegBinBranchProModel,
     LocImpNegBinBranchProModel,
     StochasticNegBinBranchProModel,
     StochasticLocImpNegBinBranchProModel)
 
 # Import log-likelihood classes
-from .new_posterior import PoissonBranchProLogLik, NegBinBranchProLogLik  # noqa
+from .negbin_posterior import PoissonBranchProLogLik, NegBinBranchProLogLik  # noqa
 
 # Import log-posterior classes
-from .new_posterior import PoissonBranchProLogPosterior, NegBinBranchProLogPosterior  # noqa
+from .negbin_posterior import PoissonBranchProLogPosterior, NegBinBranchProLogPosterior  # noqa
 
 import fast_posterior # noqa
+
+# Import main classes for poisson noise and multiple population categories
+from .multicat_models import (  # noqa
+    MultiCatPoissonBranchProModel,
+    LocImpMultiCatPoissonBranchProModel)
+
+# Import main classes for poisson binomial noise
+from .poibin_models import (  # noqa
+    PoiBinBranchProModel)

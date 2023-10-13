@@ -1,0 +1,155 @@
+#
+# This file is part of BRANCHPRO
+# (https://github.com/SABS-R3-Epidemiology/branchpro.git) which is released
+# under the BSD 3-clause license. See accompanying LICENSE.md for copyright
+# notice and full license details.
+#
+
+import unittest
+
+import numpy as np
+import numpy.testing as npt
+
+import branchpro as bp
+
+
+class TestMultiCatPoissonBranchProModelClass(unittest.TestCase):
+    """
+    Test the 'MultiCatPoissonBranchProModel' class.
+    """
+    def test__init__(self):
+        with self.assertRaises(ValueError):
+            bp.MultiCatPoissonBranchProModel([0, 0], 0, 2)
+
+        with self.assertRaises(ValueError):
+            bp.MultiCatPoissonBranchProModel([0, 0], [0, -1, 0.2], 2)
+
+        with self.assertRaises(TypeError):
+            bp.MultiCatPoissonBranchProModel([0, 0], [0], '2')
+
+        with self.assertRaises(TypeError):
+            bp.MultiCatPoissonBranchProModel([0, 0], [0], .2)
+
+        with self.assertRaises(ValueError):
+            bp.MultiCatPoissonBranchProModel(0, [0], 2)
+
+        with self.assertRaises(ValueError):
+            bp.MultiCatPoissonBranchProModel([0, 0, 0], [0], 2)
+
+        with self.assertRaises(TypeError):
+            bp.MultiCatPoissonBranchProModel([0, '0'], [0], 2)
+
+    def test_get_serial_intervals(self):
+        multicat_model = bp.MultiCatPoissonBranchProModel([0, 0], [1, 2], 2)
+        npt.assert_array_equal(
+            multicat_model.get_serial_intervals(), np.array([1, 2]))
+
+    def test_get_r_profile(self):
+        multicat_model = bp.MultiCatPoissonBranchProModel([0, 0], [1, 2], 2)
+        npt.assert_array_equal(
+            multicat_model.get_r_profile(), np.array([[0, 0]]))
+
+    def test_set_r_profile(self):
+        multicat_model1 = bp.MultiCatPoissonBranchProModel([0, 0], [1, 2], 2)
+        multicat_model1.set_r_profile([[1, 1]], [2])
+        npt.assert_array_equal(
+            multicat_model1.get_r_profile(), np.array([[0, 0], [1, 1]]))
+
+        multicat_model2 = bp.MultiCatPoissonBranchProModel([0, 0], [1, 2], 2)
+        multicat_model2.set_r_profile([[3, 3], [2, 1]], [1, 2], 3)
+        npt.assert_array_equal(
+            multicat_model2.get_r_profile(),
+            np.array([[3, 3], [2, 1], [2, 1]]))
+
+        with self.assertRaises(ValueError):
+            multicat_model1.set_r_profile(1, [1])
+
+        with self.assertRaises(ValueError):
+            multicat_model1.set_r_profile([1], 1)
+
+        with self.assertRaises(ValueError):
+            multicat_model1.set_r_profile([0.5, 1], [1])
+
+        with self.assertRaises(ValueError):
+            multicat_model1.set_r_profile([1], [-1])
+
+        with self.assertRaises(ValueError):
+            multicat_model1.set_r_profile([1, 2], [2, 1])
+
+    def test_set_serial_intervals(self):
+        multicat_model = bp.MultiCatPoissonBranchProModel([0, 0], [1, 2], 2)
+        multicat_model.set_serial_intervals([1, 3, 2])
+        npt.assert_array_equal(
+            multicat_model.get_serial_intervals(),
+            np.array([1, 3, 2])
+            )
+
+        with self.assertRaises(ValueError):
+            multicat_model.set_serial_intervals((1))
+
+    def test_simulate(self):
+        multicat_model_1 = bp.MultiCatPoissonBranchProModel(
+            [1, 1], np.array([1, 2, 3, 2, 1]), 2)
+        simulated_sample_model_1 = multicat_model_1.simulate(
+            [10, 10], np.array([2, 4]))
+        new_simulated_sample_model_1 = multicat_model_1.simulate(
+            [10, 10], [0, 2, 4])
+        self.assertEqual(simulated_sample_model_1.shape, (2, 2))
+        self.assertEqual(new_simulated_sample_model_1.shape, (3, 2))
+
+        multicat_model_2 = bp.MultiCatPoissonBranchProModel(
+            [1, 1], [1, 2, 3, 2, 1], 2)
+        simulated_sample_model_2 = multicat_model_2.simulate(
+            [10, 10], [2, 4, 7])
+        self.assertEqual(simulated_sample_model_2.shape, (3, 2))
+
+        multicat_model3 = bp.MultiCatPoissonBranchProModel(
+            [0, 0], [1, 2], 2)
+        multicat_model3.set_r_profile([[0, 0], [0, 0]], [1, 2], 3)
+        simulated_sample_model_3 = multicat_model3.simulate(
+            [10, 10], [2, 4, 7])
+        self.assertEqual(simulated_sample_model_3.shape, (3, 2))
+
+
+class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
+    """
+    Test the 'LocImpMultiCatPoissonBranchProModel' class.
+    """
+    def test__init__(self):
+        with self.assertRaises(TypeError):
+            bp.LocImpMultiCatPoissonBranchProModel([0, 0], [1], '0', 2)
+
+        with self.assertRaises(ValueError):
+            bp.LocImpMultiCatPoissonBranchProModel([0, 0], [1], -13, 2)
+
+    def test_simulate(self):
+        limulticat_model_1 = bp.LocImpMultiCatPoissonBranchProModel(
+            [1, 1], np.array([1, 2, 3, 2, 1]), 0, 2)
+        limulticat_model_1.set_imported_cases(
+            [1, 2.0, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+        simulated_sample_model_1 = limulticat_model_1.simulate(
+            [1, 1], np.array([2, 4]))
+        new_simulated_sample_model_1 = limulticat_model_1.simulate(
+            [10, 10], [0, 2, 4])
+        self.assertEqual(simulated_sample_model_1.shape, (2, 2))
+        self.assertEqual(new_simulated_sample_model_1.shape, (3, 2))
+
+        limulticat_model_2 = bp.LocImpMultiCatPoissonBranchProModel(
+            [1, 1], [1, 2, 3, 2, 1], 0, 2)
+        limulticat_model_2.set_imported_cases(
+            [1, 2, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+        simulated_sample_model_2 = limulticat_model_2.simulate(
+            [10, 10], [2, 4, 7])
+        self.assertEqual(simulated_sample_model_2.shape, (3, 2))
+
+        limulticat_model_3 = bp.LocImpMultiCatPoissonBranchProModel(
+            [0, 0], [1, 2], 0, 2)
+        limulticat_model_3.set_r_profile(
+            [[2, 1], [0, 0]], [1, 2], 3)
+        limulticat_model_3.set_imported_cases(
+            [1, 2, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+        simulated_sample_model_3 = limulticat_model_3.simulate(10, [2, 4, 7])
+        self.assertEqual(simulated_sample_model_3.shape, (3, 2))
