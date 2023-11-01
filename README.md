@@ -19,11 +19,14 @@ papers:
 
 ## References
 [1]
+R. Creswell,<sup>†</sup> D. Augustin,<sup>†</sup> I. Bouros,<sup>†</sup> H. J. Farm,<sup>†</sup> S. Miao,<sup>†</sup> A. Ahern,<sup>†</sup> M. Robinson, A. Lemenuel-Diot, D. J. Gavaghan, B. C. Lambert and R. N. Thompson: “Heterogeneity in the onwards transmission risk between local and imported cases affects practical estimates of the time-dependent reproduction number,” <em>Phil. Trans. R. Soc. A.</em> 380: 20210308 (2022).
+
+[2]
 Cori A, Ferguson NM, Fraser C, Cauchemez S. (2013). A new framework and
 software to estimate time-varying reproduction numbers during epidemics.
 American Journal of Epidemiology 178(9): 1505-12.
 
-[2]
+[3]
 Thompson RN, Stockwin JE, van Gaalen RD, Polonsky JA, Kamvar ZN, Demarsh PA,
 Dahlqwist E, Li S, Miguel E, Jombart T, Lessler J. (2019). Improved inference of
 time-varying reproduction numbers during infectious disease outbreaks.
