@@ -54,6 +54,13 @@ from .multicat_models import (  # noqa
     MultiCatPoissonBranchProModel,
     LocImpMultiCatPoissonBranchProModel)
 
+# Import log-likelihood classes
+from .multicat_posterior import MultiCatPoissonBranchProLogLik  # noqa
+
+# Import log-posterior classes
+from .multicat_posterior import MultiCatPoissonBranchProLogPosterior  # noqa
+
+
 # Import main classes for poisson binomial noise
 from .poibin_models import (  # noqa
     PoiBinBranchProModel)

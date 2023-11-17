@@ -61,7 +61,8 @@ class ReproductionNumberPlot():
     def add_interval_rt(
             self, df, time_key='Time Points', r_key='Mean',
             lr_key='Lower bound CI', ur_key='Upper bound CI',
-            cp_key='Central Probability'):
+            cp_key='Central Probability', colour='indigo', shape=None,
+            model_type=None):
         """
         Plots the estimated values of R_t as a line on the figure, as well
         as an area of confidence for the location of the true value.
@@ -85,6 +86,10 @@ class ReproductionNumberPlot():
         cp_key
             dataframe label for the central probability of the credible
             interval of r.
+        colour
+            colour of added r profile trajectory.
+        model_type
+            name of the type of model used to produce the r profile.
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
@@ -94,16 +99,17 @@ class ReproductionNumberPlot():
             y=df[r_key],
             x=df[time_key],
             mode='lines',
-            name='Estimated R',
-            line_color='indigo'
+            name='Estimated R' + ' {}'.format(model_type),
+            line_color=colour,
+            line_dash=shape
         )
 
         trace2 = go.Scatter(
             x=list(df[time_key]) + list(df[time_key])[::-1],
             y=list(df[ur_key]) + list(df[lr_key])[::-1],
             fill='toself',
-            fillcolor='indigo',
-            line_color='indigo',
+            fillcolor=colour,
+            line_color=colour,
             opacity=0.5,
             mode='lines',
             name='Credible interval {:.8f}'.format(df[cp_key][0]).rstrip('0'),

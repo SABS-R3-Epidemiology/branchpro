@@ -83,7 +83,9 @@ setup(
         'diskcache',
         'multiprocess',
         'psutil',
-        'fast_poibin'
+        'fast_poibin',
+        'pystan',
+        'arviz'
     ],
     python_requires='>3.8',
     extras_require={
