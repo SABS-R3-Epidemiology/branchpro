@@ -26,7 +26,8 @@ class ReproductionNumberPlot():
             if (x_label != time_key) or (y_label != r_key):
                 warnings.warn('Labels do not match. They will be updated.')
 
-    def add_ground_truth_rt(self, df, time_key='Time Points', r_key='R_t'):
+    def add_ground_truth_rt(self, df, time_key='Time Points', r_key='R_t',
+                            shape=None,):
         """
         Plots the true values of R_t as a line on the figure.
 
@@ -40,6 +41,8 @@ class ReproductionNumberPlot():
             x-axis label for the line plot.
         r_key
             y-axis label for the line plot.
+        shape
+            shape of added r profile trajectory.
         """
         if not issubclass(type(df), pd.DataFrame):
             raise TypeError('df needs to be a dataframe')
@@ -50,7 +53,8 @@ class ReproductionNumberPlot():
             x=df[time_key],
             mode='lines',
             name='True R',
-            line_color='green'
+            line_color='green',
+            line_dash=shape
         )
 
         self.figure.add_trace(trace)
@@ -62,7 +66,7 @@ class ReproductionNumberPlot():
             self, df, time_key='Time Points', r_key='Mean',
             lr_key='Lower bound CI', ur_key='Upper bound CI',
             cp_key='Central Probability', colour='indigo', shape=None,
-            model_type=None):
+            ci_legend=True, model_type=None):
         """
         Plots the estimated values of R_t as a line on the figure, as well
         as an area of confidence for the location of the true value.
@@ -88,6 +92,10 @@ class ReproductionNumberPlot():
             interval of r.
         colour
             colour of added r profile trajectory.
+        shape
+            shape of added r profile trajectory.
+        ci_legend
+            add legernd of the confidence interval.
         model_type
             name of the type of model used to produce the r profile.
         """
@@ -113,6 +121,7 @@ class ReproductionNumberPlot():
             opacity=0.5,
             mode='lines',
             name='Credible interval {:.8f}'.format(df[cp_key][0]).rstrip('0'),
+            showlegend=ci_legend
         )
 
         self.figure.add_trace(trace1)

@@ -39,7 +39,7 @@ class MultiCatPoissonBranchProModel(BranchProModel):
     serial_interval
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
-        symptoms.
+        symptoms for each category.
     num_cat
         (int) Number of categories in which the population is split.
     contact_matrix
@@ -47,16 +47,13 @@ class MultiCatPoissonBranchProModel(BranchProModel):
         the population is split.
     transm
         (list) List of overall reductions in transmissibility per category.
+    multipleSI
+        (boolean) Different serial intervals used for categories.
 
     """
 
     def __init__(self, initial_r, serial_interval, num_cat, contact_matrix,
-                 transm):
-        if np.asarray(serial_interval).ndim != 1:
-            raise ValueError(
-                'Serial interval values storage format must be 1-dimensional')
-        if np.sum(serial_interval) < 0:
-            raise ValueError('Sum of serial interval values must be >= 0.')
+                 transm, multipleSI=False):
         if not isinstance(initial_r, (int, float)):
             raise TypeError('Value of R must be integer or float.')
 
@@ -99,9 +96,33 @@ class MultiCatPoissonBranchProModel(BranchProModel):
         self._num_cat = num_cat
         self._contact_matrix = np.asarray(contact_matrix)
         self._transm = np.asarray(transm)
-        self._serial_interval = np.asarray(serial_interval)[::-1]
+
+        if multipleSI is False:
+            if np.asarray(serial_interval).ndim != 1:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    1-dimensional')
+            if np.sum(serial_interval) < 0:
+                raise ValueError('Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.tile(
+                np.asarray(serial_interval)[::-1], (num_cat, 1))
+        else:
+            if np.asarray(serial_interval).ndim != 2:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    2-dimensional')
+            if np.asarray(serial_interval).shape[0] != num_cat:
+                raise ValueError(
+                    'Serial interval values storage format must match\
+                    number of categories')
+            for _ in range(num_cat):
+                if np.sum(serial_interval[_, :]) < 0:
+                    raise ValueError(
+                        'Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.asarray(serial_interval)[:, ::-1]
+
         self._r_profile = np.array([initial_r])
-        self._normalizing_const = np.sum(self._serial_interval)
+        self._normalizing_const = np.sum(self._serial_interval, axis=1)
 
     def set_transmissibility(self, contact_matrix):
         """
@@ -147,6 +168,55 @@ class MultiCatPoissonBranchProModel(BranchProModel):
         """
         return self._contact_matrix
 
+    def get_serial_intervals(self):
+        """
+        Returns serial intervals for the model.
+
+        """
+        # Reverse inverting of order of serial intervals
+        return self._serial_interval[:, ::-1]
+
+    def set_serial_intervals(self, serial_intervals, multipleSI=False):
+        """
+        Updates serial intervals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms for each category.
+        multipleSI
+            (boolean) Different serial intervals used for categories.
+
+        """
+        # Invert order of serial intervals for ease in _effective_no_infectives
+        if multipleSI is False:
+            if np.asarray(serial_intervals).ndim != 1:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    1-dimensional')
+            if np.sum(serial_intervals) < 0:
+                raise ValueError('Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.tile(
+                np.asarray(serial_intervals)[::-1], (self._num_cat, 1))
+        else:
+            if np.asarray(serial_intervals).ndim != 2:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    2-dimensional')
+            if np.asarray(serial_intervals).shape[0] != self._num_cat:
+                raise ValueError(
+                    'Serial interval values storage format must match\
+                    number of categories')
+            for _ in range(self._num_cat):
+                if np.sum(serial_intervals[_, :]) < 0:
+                    raise ValueError(
+                        'Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.asarray(serial_intervals)[:, ::-1]
+
+        self._normalizing_const = np.sum(self._serial_interval, axis=1)
+
     def _effective_no_infectives(self, t, incidences):
         """
         Computes expected number of new cases at time t, using previous
@@ -159,19 +229,21 @@ class MultiCatPoissonBranchProModel(BranchProModel):
         incidences
             sequence of incidence numbers
         """
-        if t > len(self._serial_interval):
-            start_date = t - len(self._serial_interval)
-            mean = (
-                np.matmul(self._serial_interval, incidences[start_date:t, :]) /
+        if t > self._serial_interval.shape[1]:
+            start_date = t - self._serial_interval.shape[1]
+            mean = np.divide(np.diag(
+                np.matmul(self._serial_interval, incidences[start_date:t, :])),
                 self._normalizing_const)
             return mean
 
-        mean = (
-            np.matmul(self._serial_interval[-t:], incidences[:t, :]) /
+        mean = np.divide(np.diag(
+            np.matmul(self._serial_interval[:, -t:], incidences[:t, :])),
             self._normalizing_const)
         return mean
 
-    def simulate(self, parameters, times):
+    def simulate(
+            self, parameters, times, var_contacts=False, neg_binom=False,
+            niu=0.1):
         """
         Runs a forward simulation with the given ``parameters`` and returns a
         time-series with incidence numbers per population category
@@ -186,6 +258,13 @@ class MultiCatPoissonBranchProModel(BranchProModel):
             without duplicates, and without negative values.
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
+        var_contacts
+            (boolean) Wheteher there exists noise in number of contacts.
+        neg_binom
+            (boolean) Wheteher the noise in number of contacts is Negative
+            Binomial distributed.
+        niu
+            (float) Accepance probability.
 
         """
         initial_cond = parameters
@@ -207,9 +286,20 @@ class MultiCatPoissonBranchProModel(BranchProModel):
 
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
+        self.exact_contact_matrix = [np.random.poisson(self._contact_matrix)]
+
         for t in simulation_times:
+            if var_contacts is False:
+                contact_matrix = self._contact_matrix
+            else:
+                if neg_binom is False:
+                    contact_matrix = np.random.poisson(self._contact_matrix)
+                else:
+                    contact_matrix = np.random.negative_binomial(
+                        self._contact_matrix, niu)
+                self.exact_contact_matrix.append(contact_matrix)
             norm_daily_mean = self._r_profile[t-1] * np.matmul(
-                self._contact_matrix,
+                contact_matrix,
                 np.multiply(
                     self._transm,
                     self._effective_no_infectives(t, incidences)
@@ -266,7 +356,7 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
     serial_interval
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
-        symptoms.
+        symptoms for each category.
     epsilon
         (numeric) Proportionality constant of the R number for imported cases
         with respect to its analog for local ones.
@@ -351,6 +441,8 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
             without duplicates, and without negative values.
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
+        var_contacts
+            (boolean) Wheteher there exists noise in number of contacts.
 
         """
         initial_cond = parameters
@@ -591,6 +683,8 @@ class AggMultiCatPoissonBranchProModel(BranchProModel):
         p
             (list) List of time-dependent proprortions of the total infections
             that day in each category.
+        var_contacts
+            (boolean) Wheteher there exists noise in number of contacts.
 
         """
         initial_cond = parameters
@@ -756,6 +850,8 @@ class LocImpAggMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
             without duplicates, and without negative values.
             All simulations are started at time 0, regardless of whether this
             value appears in ``times``.
+        var_contacts
+            (boolean) Wheteher there exists noise in number of contacts.
 
         """
         initial_cond = parameters

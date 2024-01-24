@@ -85,7 +85,8 @@ setup(
         'psutil',
         'fast_poibin',
         'pystan',
-        'arviz'
+        'arviz',
+        'seaborn'
     ],
     python_requires='>3.8',
     extras_require={
