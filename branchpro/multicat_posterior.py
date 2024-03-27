@@ -32,7 +32,7 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
     daily_serial_interval
         (list) Unnormalised probability distribution of that the recipient
         first displays symptoms s days after the infector first displays
-        symptoms.
+        symptoms for each category.
     num_cat
         (int) Number of categories in which the population is split.
     contact_matrix
@@ -55,12 +55,15 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         label key given to the temporal data in the inc_data dataframe.
     inc_key
         label key given to the incidental data in the inc_data dataframe.
+    multipleSI
+        (boolean) Different serial intervals used for categories.
 
     """
     def __init__(self, inc_data, daily_serial_interval, num_cat,
                  contact_matrix, transm, tau,
                  imported_inc_data=None, epsilon=None,
-                 time_key='Time', inc_key='Incidence Number'):
+                 time_key='Time', inc_key='Incidence Number',
+                 multipleSI=False):
 
         if not isinstance(num_cat, int):
             raise TypeError('Number of population categories must be integer.')
@@ -140,8 +143,32 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
 
         self._contact_matrix = np.asarray(contact_matrix)
         self._transm = np.asarray(transm)
-        self._serial_interval = np.asarray(daily_serial_interval)[::-1]
-        self._normalizing_const = np.sum(self._serial_interval)
+
+        if multipleSI is False:
+            if np.asarray(daily_serial_interval).ndim != 1:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    1-dimensional')
+            if np.sum(daily_serial_interval) < 0:
+                raise ValueError('Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.tile(
+                np.asarray(daily_serial_interval)[::-1], (num_cat, 1))
+        else:
+            if np.asarray(daily_serial_interval).ndim != 2:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    2-dimensional')
+            if np.asarray(daily_serial_interval).shape[0] != num_cat:
+                raise ValueError(
+                    'Serial interval values storage format must match\
+                    number of categories')
+            for _ in range(num_cat):
+                if np.sum(daily_serial_interval[_, :]) < 0:
+                    raise ValueError(
+                        'Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.asarray(daily_serial_interval)[:, ::-1]
+
+        self._normalizing_const = np.sum(self._serial_interval, axis=1)
 
         # Sliding window length
         self._tau = tau
@@ -181,17 +208,20 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         t
             evaluation time
         """
-        if t > len(self._serial_interval):
-            start_date = t - len(self._serial_interval) - 1
-            eff_num = (
+        start_date = t - self._serial_interval.shape[1] - 1
+
+        if t > self._serial_interval.shape[1]:
+            eff_num = np.divide(np.diag(
                 np.matmul(
-                    self._serial_interval, cases_data[start_date:(t-1), :]) /
+                    self._serial_interval,
+                    cases_data[start_date:(t-1), :])),
                 self._normalizing_const)
             return eff_num
 
-        eff_num = (
+        eff_num = np.divide(np.diag(
             np.matmul(
-                self._serial_interval[-(t-1):], cases_data[:(t-1), :]) /
+                self._serial_interval[:, -start_date:],
+                cases_data[:(t-1), :])),
             self._normalizing_const)
 
         return eff_num
@@ -214,15 +244,13 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         """
         num = []
         for time in range(start, end):
-            num += [[np.sum(
-                        np.multiply(
-                            self._contact_matrix[i, :],
-                            np.multiply(
-                                self._transm,
-                                self._infectious_individuals(cases_data, time)
-                                )
-                            )
-                        ) for i in range(self._num_cat)]]
+            num.append([np.dot(
+                            np.matmul(
+                                self._contact_matrix,
+                                np.diag(self._transm)
+                            )[i, :],
+                            self._infectious_individuals(cases_data, time)
+                        ) for i in range(self._num_cat)])
         return num
 
     def _compute_log_likelihood(self, r_profile):
@@ -529,12 +557,7 @@ class MultiCatPoissonBranchProLogPosterior(object):
 
         """
         # Starting points arround from prior mean
-        x0 = [
-            (np.array(self.lprior.mean()) + 0.1 *
-                np.array(self.logprior_std)).tolist(),
-            self.lprior.mean(),
-            (np.array(self.lprior.mean()) + 0.2 *
-                np.array(self.logprior_std)).tolist()]
+        x0 = [self.run_optimisation()[0].tolist()]*3
         transformation = pints.RectangularBoundariesTransformation(
             [0] * self.lprior.n_parameters(),
             [200] * self.lprior.n_parameters()
