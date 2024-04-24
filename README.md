@@ -10,9 +10,9 @@ In this package, we use branching processes to model the time-dependent reproduc
 All features of our software are described in detail in our
 [full API documentation](https://branchpro.readthedocs.io/en/latest/).
 
-<!---
-A web app for performing inference for branching process models can be found [here](https://sabs-r3-epidemiology.github.io/branchpro/).
--->
+
+A web app for performing inference for branching process models is included in this package. Instructions for accessing the app are available [here](https://sabs-r3-epidemiology.github.io/branchpro/).
+
 
 More details on branching process models and inference can be found in these
 papers:
