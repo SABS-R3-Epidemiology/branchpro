@@ -8,6 +8,7 @@
 #
 from branchpro import BranchProModel
 import numpy as np
+import math
 
 
 class MultiCatPoissonBranchProModel(BranchProModel):
@@ -217,7 +218,7 @@ class MultiCatPoissonBranchProModel(BranchProModel):
 
         self._normalizing_const = np.sum(self._serial_interval, axis=1)
 
-    def _effective_no_infectives(self, t, incidences):
+    def _effective_no_infectives(self, t, incidences, contact_matrix):
         """
         Computes expected number of new cases at time t, using previous
         incidences and serial intervals at a rate of 1:1 reproduction.
@@ -228,17 +229,27 @@ class MultiCatPoissonBranchProModel(BranchProModel):
             evaluation time
         incidences
             sequence of incidence numbers
+        contact_matrix
+            matrix of contacts between categories
         """
-        if t > self._serial_interval.shape[1]:
-            start_date = t - self._serial_interval.shape[1]
-            mean = np.divide(np.diag(
-                np.matmul(self._serial_interval, incidences[start_date:t, :])),
-                self._normalizing_const)
-            return mean
+        mean = np.zeros(self._num_cat)
 
-        mean = np.divide(np.diag(
-            np.matmul(self._serial_interval[:, -t:], incidences[:t, :])),
-            self._normalizing_const)
+        for i in range(self._num_cat):
+            for j in range(self._num_cat):
+                if t > self._serial_interval.shape[1]:
+                    start_date = t - self._serial_interval.shape[1]
+                    sub_sum = math.fsum(np.multiply(
+                            self._serial_interval[j, :],
+                            incidences[start_date:t, j]
+                            )) / self._normalizing_const[j]
+                else:
+                    sub_sum = math.fsum(np.multiply(
+                            self._serial_interval[j, -t:],
+                            incidences[:t, j]
+                            )) / self._normalizing_const[j]
+                sub_sum *= contact_matrix[i, j] * self._transm[j]
+                mean[i] += sub_sum
+
         return mean
 
     def simulate(
@@ -298,12 +309,8 @@ class MultiCatPoissonBranchProModel(BranchProModel):
                     contact_matrix = np.random.negative_binomial(
                         self._contact_matrix, niu)
                 self.exact_contact_matrix.append(contact_matrix)
-            norm_daily_mean = self._r_profile[t-1] * np.matmul(
-                contact_matrix,
-                np.multiply(
-                    self._transm,
-                    self._effective_no_infectives(t, incidences)
-                ))
+            norm_daily_mean = self._r_profile[t-1] * \
+                self._effective_no_infectives(t, incidences, contact_matrix)
             incidences[t, :] = np.random.poisson(
                 lam=norm_daily_mean, size=self._num_cat)
 

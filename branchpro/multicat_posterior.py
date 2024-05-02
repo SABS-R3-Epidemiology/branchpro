@@ -11,6 +11,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy.special import loggamma
+import math
 
 import pints
 import branchpro as bp
@@ -195,7 +196,7 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         """
         return np.shape(self.cases_data)[0] - self._tau - 1
 
-    def _infectious_individuals(self, cases_data, t):
+    def _infectious_individuals(self, cases_data, t, contact_matrix):
         """
         Computes expected number of new cases at time t, using previous
         incidences and serial intervals.
@@ -207,22 +208,26 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
             unit (usually days) including zeros.
         t
             evaluation time
+        contact_matrix
+            matrix of contacts between categories
         """
+        eff_num = np.zeros(self._num_cat)
         start_date = t - self._serial_interval.shape[1] - 1
 
-        if t > self._serial_interval.shape[1]:
-            eff_num = np.divide(np.diag(
-                np.matmul(
-                    self._serial_interval,
-                    cases_data[start_date:(t-1), :])),
-                self._normalizing_const)
-            return eff_num
-
-        eff_num = np.divide(np.diag(
-            np.matmul(
-                self._serial_interval[:, -start_date:],
-                cases_data[:(t-1), :])),
-            self._normalizing_const)
+        for i in range(self._num_cat):
+            for j in range(self._num_cat):
+                if t > self._serial_interval.shape[1]:
+                    sub_sum = math.fsum(np.multiply(
+                            self._serial_interval[j, :],
+                            cases_data[start_date:(t-1), j]
+                            )) / self._normalizing_const[j]
+                else:
+                    sub_sum = math.fsum(np.multiply(
+                            self._serial_interval[j, -(t-1):],
+                            cases_data[:(t-1), j]
+                            )) / self._normalizing_const[j]
+                sub_sum *= contact_matrix[i, j] * self._transm[j]
+                eff_num[i] += sub_sum
 
         return eff_num
 
@@ -244,13 +249,8 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         """
         num = []
         for time in range(start, end):
-            num.append([np.dot(
-                            np.matmul(
-                                self._contact_matrix,
-                                np.diag(self._transm)
-                            )[i, :],
-                            self._infectious_individuals(cases_data, time)
-                        ) for i in range(self._num_cat)])
+            num += [self._infectious_individuals(
+                cases_data, time, self._contact_matrix)]
         return num
 
     def _compute_log_likelihood(self, r_profile):
@@ -276,11 +276,14 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         Ll = 0
 
         for _, time in enumerate(range(time_init_inf_r+1, total_time+1)):
-            Ll += np.log(r_profile[_]) * np.sum(self.slice_cases[_])
-            Ll += np.sum(
-                np.multiply(self.slice_cases[_], self.log_tau_window[_]))
-            Ll += - r_profile[_] * self.sum_tau_window[_]
-            Ll += - np.sum(self.ll_normalizing[_])
+            for j in range(self._num_cat):
+                Ll += np.log(r_profile[_]) * np.sum(
+                    self.slice_cases[_][:, j])
+                Ll += np.dot(
+                    self.slice_cases[_][:, j],
+                    self.log_tau_window[_][:, j])
+                Ll += - r_profile[_] * self.sum_tau_window[_][j]
+                Ll += - np.sum(self.ll_normalizing[_][:, j])
 
         return Ll
 
@@ -312,12 +315,15 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
             try:
                 # try to shift the window by 1 time point
                 tau_window = (tau_window[1:] +  # noqa
-                              [self._infectious_individuals(self.cases_data,
-                                                            end_window-1)])
+                              [self._infectious_individuals(
+                                  self.cases_data,
+                                  end_window-1,
+                                  self._contact_matrix)])
                 tau_window_imp = (tau_window_imp[1:] +  # noqa
                                   [self._infectious_individuals(
                                     self.imp_cases_data,
-                                    end_window-1)])
+                                    end_window-1,
+                                    self._contact_matrix)])
 
             except UnboundLocalError:
                 # First iteration, so set up the sliding window
@@ -342,7 +348,8 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
             self.log_tau_window.append(log_tau_window)
 
             self.sum_tau_window.append(
-                np.sum(tau_window) + self.epsilon * np.sum(tau_window_imp))
+                np.sum(tau_window, axis=0) +
+                self.epsilon * np.sum(tau_window_imp, axis=0))
 
     def _compute_derivative_log_likelihood(self, r_profile):
         """
@@ -368,9 +375,12 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         dLl = []
 
         for _, time in enumerate(range(time_init_inf_r+1, total_time+1)):
-            dLl.append(
-                (1/r_profile[_]) * np.sum(self.slice_cases[_]) -
-                self.sum_tau_window[_])
+            dLl_el = 0
+            for j in range(self._num_cat):
+                dLl_el += (1/r_profile[_]) * np.sum(
+                    self.slice_cases[_][:, j]) - self.sum_tau_window[_][j]
+
+            dLl.append(dLl_el)
 
         return dLl
 
