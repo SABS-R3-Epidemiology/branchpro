@@ -7,7 +7,7 @@
 # notice and full license details.
 #
 """This is an app which shows forward simulation of the branching process model
-with fixed example data. To run the app, use ``python dash_app.py``.
+with fixed example data. To run the app, use ``python simulation_dash_app.py``.
 """
 
 import os
@@ -199,4 +199,4 @@ def toggle_modal_si(n1, n2, is_open):
 
 
 if __name__ == "__main__":
-    app.app.run_server(debug=True)
+    app.app.run_server(debug=True, host='127.0.0.1', port=8050)
