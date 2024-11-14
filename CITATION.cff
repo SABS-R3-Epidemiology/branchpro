@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: BranchPro
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ioana
+    family-names: Bouros
+  - given-names: Richard
+    family-names: Creswell
+  - given-names: Andrew
+    family-names: Ahern
+  - given-names: Hui Jia
+    family-names: Farm
+  - given-names: Siting
+    family-names: Miao
+  - given-names: David
+    family-names: Augustin
+  - given-names: Benjamin
+    family-names: Lee
+  - given-names: Kit
+    family-names: Gallagher
+repository-code: 'https://github.com/SABS-R3-Epidemiology/branchpro'
+url: 'https://sabs-r3-epidemiology.github.io/branchpro/'
+license: BSD-3-Clause
