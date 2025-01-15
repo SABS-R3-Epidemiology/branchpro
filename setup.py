@@ -68,7 +68,7 @@ setup(
 
     # List of dependencies
     setup_requires=[
-        'setuptools = 68.2.2'],
+        'setuptools==68.2.2'],
     install_requires=[
         # Dependencies go here!
         'setuptools==69.5.1',
