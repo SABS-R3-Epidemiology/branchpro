@@ -45,7 +45,7 @@ docs = [
 Homepage = "https://github.com/SABS-R3-Epidemiology/branchpro.git"
 
 [tool.hatch.version]
-path = "branchpro/__init__.py"
+path = "branchpro/version_info.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
