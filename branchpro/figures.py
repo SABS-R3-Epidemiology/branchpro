@@ -365,7 +365,9 @@ def plot_regions_inference(first_day_data,
                            inset_region=[],
                            show=True,
                            mers=False,
-                           hkhn=False):
+                           hkhn=False,
+                           bar=True,
+                           separate_imported=False):
     """Make a figure showing R_t inference for different choices of epsilon and
     regions.
 
@@ -421,13 +423,20 @@ def plot_regions_inference(first_day_data,
     # Use 0.01 height ratio subplot rows to space out the panels
     region_num = len(region_names)
     fig = plt.figure()
-    gs = fig.add_gridspec(2, region_num, height_ratios=[1, 1])
+    if not separate_imported:
+        gs = fig.add_gridspec(2, region_num, height_ratios=[1, 1])
+    else:
+        gs = fig.add_gridspec(3, region_num, height_ratios=[1, 1, 1])
 
     # Ax for case data
     top_axs = [fig.add_subplot(gs[0, i]) for i in range(region_num)]
 
+    if separate_imported:
+        imported_axs = [fig.add_subplot(gs[1, i]) for i in range(region_num)]
+
     # Axes for R_t inference
-    axs = [fig.add_subplot(gs[1, j]) for j in range(region_num)]
+    axs = [fig.add_subplot(gs[1 if not separate_imported else 2, j])
+           for j in range(region_num)]
 
     # Make inference panel share x axis of its incidence data
     for i in range(len(region_names)):
@@ -445,13 +454,21 @@ def plot_regions_inference(first_day_data,
             first_day_data_r = first_day_data
         data_times = [first_day_data_r + datetime.timedelta(days=int(i))
                       for i in range(len(local_cases[region]))]
-        top_axs[region].bar([x - width/2 for x in data_times],
-                            local_cases[region],
-                            width,
-                            label='Local cases',
-                            color='k',
-                            alpha=0.8)
-        top_axs[region].bar([x + width/2 for x in data_times],
+
+        if not separate_imported:
+            imported_ax = top_axs[region]
+        else:
+            imported_ax = imported_axs[region]
+
+        if bar:
+            top_axs[region].bar([x - width/2 for x in data_times],
+                                local_cases[region],
+                                width,
+                                label='Local cases',
+                                color='k',
+                                alpha=0.8)
+
+            imported_ax.bar([x + width/2 for x in data_times],
                             import_cases[region],
                             width,
                             hatch='/////',
@@ -460,8 +477,24 @@ def plot_regions_inference(first_day_data,
                             label='Imported cases',
                             color='deeppink',
                             zorder=10)
+        else:
+            top_axs[region].plot([x - width/2 for x in data_times],
+                                 local_cases[region],
+                                 lw=1.25,
+                                 label='Local cases',
+                                 color='k',
+                                 alpha=0.8,
+                                 zorder=9)
+            imported_ax.plot([x + width/2 for x in data_times],
+                             import_cases[region],
+                             lw=0.8,
+                             label='Imported cases',
+                             color='deeppink',
+                             zorder=10)
 
         top_axs[region].set_ylabel('Number of cases')
+        if separate_imported:
+            imported_ax.set_ylabel('Number of cases')
 
         # Plot a zoomed in part of the graph as an inset
         if not hkhn:
@@ -597,6 +630,9 @@ def plot_regions_inference(first_day_data,
         # Add the legend for epsilons
         top_axs[region].legend()
 
+        if separate_imported:
+            imported_axs[region].legend()
+
         if hkhn:
             if region == 1:
                 axs[region].legend([
@@ -637,6 +673,11 @@ def plot_regions_inference(first_day_data,
         top_axs[i].set_xlabel('Date (2020)')
         axs[i].set_xlabel('Date (2020)')
 
+        if separate_imported:
+            imported_axs[i].xaxis.set_major_formatter(
+                matplotlib.dates.DateFormatter('%b %d'))
+            imported_axs[i].set_xlabel('Date (2020)')
+
     # Set ticks once per week
     for j in range(region_num):
         if hkhn:
@@ -663,12 +704,21 @@ def plot_regions_inference(first_day_data,
         plt.sca(axs[i])
         plt.xticks(rotation=45, ha='center')
 
+        if separate_imported:
+            plt.sca(imported_axs[i])
+            plt.xticks(rotation=45, ha='center')
+
     for i in range(len(region_names)):
         top_axs[i].set_title(region_names[i], fontsize=14)
 
     # Add panel labels
-    fig.text(0.025, 0.965, '(a)', fontsize=14)
-    fig.text(0.025, 0.5, '(b)', fontsize=14)
+    if not separate_imported:
+        fig.text(0.025, 0.965, '(a)', fontsize=14)
+        fig.text(0.025, 0.5, '(b)', fontsize=14)
+    else:
+        fig.text(0.025, 0.965, '(a)', fontsize=14)
+        fig.text(0.025, 0.65, '(b)', fontsize=14)
+        fig.text(0.025, 0.35, '(c)', fontsize=14)
 
     fig.set_size_inches(4 * region_num, 6)
     fig.set_tight_layout(True)

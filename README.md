@@ -4,32 +4,39 @@
 [![Run Unit Tests on multiple python versions](https://github.com/SABS-R3-Epidemiology/branchpro/actions/workflows/python-version-unittests.yml/badge.svg)](https://github.com/SABS-R3-Epidemiology/branchpro/actions/workflows/python-version-unittests.yml)
 [![Documentation Status](https://readthedocs.org/projects/branchpro/badge/?version=latest)](https://branchpro.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/SABS-R3-Epidemiology/branchpro/branch/main/graph/badge.svg?token=UBJG0AICF9)](https://codecov.io/gh/SABS-R3-Epidemiology/branchpro/)
+[![DOI](https://zenodo.org/badge/305988905.svg)](https://doi.org/10.5281/zenodo.14166376)
 
 In this package, we use branching processes to model the time-dependent reproduction number (the number of cases each infected individual will subsequently cause) of an infectious disease.
 
 All features of our software are described in detail in our
 [full API documentation](https://branchpro.readthedocs.io/en/latest/).
 
-A web app for performing inference for branching process models can be found [here](https://sabs-r3-epidemiology.github.io/branchpro/).
+A web app for performing inference for branching process models is included in this package. Instructions for accessing the app are available [here](https://sabs-r3-epidemiology.github.io/branchpro/).
 
 More details on branching process models and inference can be found in these
 papers:
 
 ## References
+
 [1]
+R. Creswell,<sup>†</sup> D. Augustin,<sup>†</sup> I. Bouros,<sup>†</sup> H. J. Farm,<sup>†</sup> S. Miao,<sup>†</sup> A. Ahern,<sup>†</sup> M. Robinson, A. Lemenuel-Diot, D. J. Gavaghan, B. C. Lambert and R. N. Thompson: “Heterogeneity in the onwards transmission risk between local and imported cases affects practical estimates of the time-dependent reproduction number,” <em>Phil. Trans. R. Soc. A.</em> 380: 20210308 (2022).
+
+[2]
 Cori A, Ferguson NM, Fraser C, Cauchemez S. (2013). A new framework and
 software to estimate time-varying reproduction numbers during epidemics.
 American Journal of Epidemiology 178(9): 1505-12.
 
-[2]
+[3]
 Thompson RN, Stockwin JE, van Gaalen RD, Polonsky JA, Kamvar ZN, Demarsh PA,
 Dahlqwist E, Li S, Miguel E, Jombart T, Lessler J. (2019). Improved inference of
 time-varying reproduction numbers during infectious disease outbreaks.
 Epidemics 29: 100356.
 
 ## Installation procedure
+
 ***
 One way to install the module is to download the repositiory to your machine of choice and type the following commands in the terminal.
+
 ```bash
 git clone https://github.com/SABS-R3-Epidemiology/branchpro.git
 cd ../path/to/the/file
@@ -67,9 +74,11 @@ branchpro.BranchProPosteriorMultSI(
 More examples on how to use the classes and features included in this repository can be found [here](https://github.com/SABS-R3-Epidemiology/branchpro/tree/main/examples).
 
 ## Contributing
+
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
 ## License
+
 [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)

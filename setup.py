@@ -35,7 +35,7 @@ def get_readme():
     """
     Load README.md text for use as description.
     """
-    with open('README.md') as f:
+    with open('README.md', encoding='utf-8') as f:
         return f.read()
 
 
@@ -75,7 +75,7 @@ setup(
         'dash_bootstrap_components>=0.12',
         'dash_daq',
         'dash_defer_js_import',
-        'pandas',
+        'pandas<2.0.0',
         'plotly',
         'scipy>=1.6',
         'pints',
@@ -88,13 +88,11 @@ setup(
         'arviz',
         'seaborn'
     ],
-    python_requires='>3.8',
+    python_requires='>3.9',
     extras_require={
         'docs': [
             # Sphinx for doc generation. Version 1.7.3 has a bug:
             'sphinx>=1.5, !=1.7.3',
-            # Nice theme for docs
-            'karma-sphinx-theme',
         ],
         'dev': [
             # Flake8 for code style checking
