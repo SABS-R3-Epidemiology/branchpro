@@ -70,7 +70,7 @@ setup(
     install_requires=[
         # Dependencies go here!
         'matplotlib',
-        'numpy<1.23.0,>=1.16.5',
+        'numpy>=1.8',
         'dash>=2.0',
         'dash_bootstrap_components>=0.12',
         'dash_daq',
@@ -83,10 +83,10 @@ setup(
         'diskcache',
         'multiprocess',
         'psutil',
-        'fast_poibin',
-        'pystan',
-        'arviz',
-        'seaborn'
+        'fast_poibin==0.3.1',
+        'pystan==3.7',
+        'arviz==0.16.1',
+        'seaborn==0.13'
     ],
     python_requires='>3.9',
     extras_require={
