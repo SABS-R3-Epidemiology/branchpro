@@ -69,6 +69,7 @@ setup(
     # List of dependencies
     install_requires=[
         # Dependencies go here!
+        'setuptools==69.5.1',
         'matplotlib',
         'numpy<1.23.0,>=1.16.5',
         'dash>=2.0',
