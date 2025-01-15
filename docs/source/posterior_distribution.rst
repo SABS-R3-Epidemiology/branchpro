@@ -15,6 +15,8 @@ Overview:
   - MCMC Sampling-based Log-Posterior Classes
     - :class:`PoissonBranchProLogLik`
     - :class:`PoissonBranchProLogPosterior`
+    - :class:`MultiCatPoissonBranchProLogLik`
+    - :class:`MultiCatPoissonBranchProLogPosterior`
     - :class:`NegBinBranchProLogLik`
     - :class:`NegBinBranchProLogPosterior`
 
@@ -62,6 +64,20 @@ Log-posterior Class
 *******************
 
 .. autoclass:: PoissonBranchProLogPosterior
+  :members:
+
+Multiple Categories Branch Process with Poisson Noise
+*****************************************************
+Log-likelihood Class
+********************
+
+.. autoclass:: MultiCatPoissonBranchProLogLik
+  :members:
+
+Log-posterior Class
+*******************
+
+.. autoclass:: MultiCatPoissonBranchProLogPosterior
   :members:
 
 Branch Process with Negative Binomial Noise
