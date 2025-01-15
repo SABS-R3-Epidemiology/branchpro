@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "branchpro"
+dynamic = ["version"]
+description = "This is a software package for branching processes models used to estimate the time-dependent reproduction number of a disease."
+readme = "README.md"
+license = "BSD 3-Clause \"New\" or \"Revised\" License"
+requires-python = ">3.9"
+maintainers = [
+    { name = "", email = "" },
+]
+dependencies = [
+    "arviz",
+    "dash>=2.0",
+    "dash_bootstrap_components>=0.12",
+    "dash_daq",
+    "dash_defer_js_import",
+    "diskcache",
+    "fast_poibin",
+    "matplotlib",
+    "multiprocess",
+    "numexpr",
+    "numpy<1.23.0,>=1.16.5",
+    "pandas<2.0.0",
+    "pints",
+    "plotly",
+    "psutil",
+    "pystan",
+    "scipy>=1.6",
+    "seaborn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "flake8>=3",
+]
+docs = [
+    "sphinx>=1.5, !=1.7.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/SABS-R3-Epidemiology/branchpro.git"
+
+[tool.hatch.version]
+path = "branchpro/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/branchpro",
+]

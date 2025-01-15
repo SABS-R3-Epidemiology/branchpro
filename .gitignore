@@ -136,3 +136,6 @@ venv
 *.pyc
 .DS_Store
 .env
+
+# hatch-universal.pkg
+hatch-universal.pkg
