@@ -184,6 +184,55 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         # derivatives
         self._log_lik_precomp()
 
+    def get_serial_intervals(self):
+        """
+        Returns serial intervals for the model.
+
+        """
+        # Reverse inverting of order of serial intervals
+        return self._serial_interval[:, ::-1]
+
+    def set_serial_intervals(self, serial_intervals, multipleSI=False):
+        """
+        Updates serial intervals for the model.
+
+        Parameters
+        ----------
+        serial_intervals
+            New unnormalised probability distribution of that the recipient
+            first displays symptoms s days after the infector first displays
+            symptoms for each category.
+        multipleSI
+            (boolean) Different serial intervals used for categories.
+
+        """
+        # Invert order of serial intervals for ease in _effective_no_infectives
+        if multipleSI is False:
+            if np.asarray(serial_intervals).ndim != 1:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    1-dimensional')
+            if np.sum(serial_intervals) < 0:
+                raise ValueError('Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.tile(
+                np.asarray(serial_intervals)[::-1], (self._num_cat, 1))
+        else:
+            if np.asarray(serial_intervals).ndim != 2:
+                raise ValueError(
+                    'Serial interval values storage format must be\
+                    2-dimensional')
+            if np.asarray(serial_intervals).shape[0] != self._num_cat:
+                raise ValueError(
+                    'Serial interval values storage format must match\
+                    number of categories')
+            for _ in range(self._num_cat):
+                if np.sum(np.asarray(serial_intervals)[_, :]) < 0:
+                    raise ValueError(
+                        'Sum of serial interval values must be >= 0.')
+            self._serial_interval = np.asarray(serial_intervals)[:, ::-1]
+
+        self._normalizing_const = np.sum(self._serial_interval, axis=1)
+
     def n_parameters(self):
         """
         Returns number of parameters for log-likelihood object.

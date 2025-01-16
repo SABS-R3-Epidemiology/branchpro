@@ -10,8 +10,6 @@ Overview:
     - :class:`LocImpBranchProModel`
     - :class:`MultiCatPoissonBranchProModel`
     - :class:`LocImpMultiCatPoissonBranchProModel`
-    - :class:`AggMultiCatPoissonBranchProModel`
-    - :class:`LocImpAggMultiCatPoissonBranchProModel`
 
   - Negative Binomial Noise Branching Process Models
     - :class:`NegBinBranchProModel`
@@ -47,18 +45,6 @@ Local and Imported Multiple categories Poisson Branch Process model
 *******************************************************************
 
 .. autoclass:: LocImpMultiCatPoissonBranchProModel
-  :members:
-
-Aggregated Multiple categories Poisson Branch Process model
-***********************************************************
-
-.. autoclass:: AggMultiCatPoissonBranchProModel
-  :members:
-
-Local and Imported Aggregated Multiple categories Poisson Branch Process model
-******************************************************************************
-
-.. autoclass:: LocImpAggMultiCatPoissonBranchProModel
   :members:
 
 

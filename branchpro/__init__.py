@@ -52,9 +52,7 @@ import fast_posterior # noqa
 # Import main classes for poisson noise and multiple population categories
 from .multicat_models import (  # noqa
     MultiCatPoissonBranchProModel,
-    LocImpMultiCatPoissonBranchProModel,
-    AggMultiCatPoissonBranchProModel,
-    LocImpAggMultiCatPoissonBranchProModel)
+    LocImpMultiCatPoissonBranchProModel)
 
 # Import log-likelihood classes
 from .multicat_posterior import MultiCatPoissonBranchProLogLik  # noqa
