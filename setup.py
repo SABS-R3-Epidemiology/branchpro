@@ -88,7 +88,7 @@ setup(
         'arviz==0.16.1',
         'seaborn==0.13'
     ],
-    python_requires='>3.9',
+    python_requires='>=3.9',
     extras_require={
         'docs': [
             # Sphinx for doc generation. Version 1.7.3 has a bug:
