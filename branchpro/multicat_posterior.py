@@ -75,8 +75,6 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         if not issubclass(type(inc_data), pd.DataFrame):
             raise TypeError('Incidence data has to be a dataframe')
 
-        self._check_serial(daily_serial_interval)
-
         if time_key not in inc_data.columns:
             raise ValueError('No time column with this name in given data')
 
@@ -146,10 +144,7 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
         self._transm = np.asarray(transm)
 
         if multipleSI is False:
-            if np.asarray(daily_serial_interval).ndim != 1:
-                raise ValueError(
-                    'Serial interval values storage format must be\
-                    1-dimensional')
+            self._check_serial(daily_serial_interval)
             if np.sum(daily_serial_interval) < 0:
                 raise ValueError('Sum of serial interval values must be >= 0.')
             self._serial_interval = np.tile(
@@ -164,7 +159,8 @@ class MultiCatPoissonBranchProLogLik(bp.PoissonBranchProLogLik):
                     'Serial interval values storage format must match\
                     number of categories')
             for _ in range(num_cat):
-                if np.sum(daily_serial_interval[_, :]) < 0:
+                self._check_serial(np.asarray(daily_serial_interval)[_, :])
+                if np.sum(np.asarray(daily_serial_interval)[_, :]) < 0:
                     raise ValueError(
                         'Sum of serial interval values must be >= 0.')
             self._serial_interval = np.asarray(daily_serial_interval)[:, ::-1]

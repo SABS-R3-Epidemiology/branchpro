@@ -53,6 +53,21 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
                 '0', ser_int, 2, contact_matrix, transm, 2)
         self.assertTrue('Incidence data has to' in str(test_excep.exception))
 
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [1, -2], 2, contact_matrix, transm, 2)
+        self.assertTrue('Sum of serial interval' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, ser_int, 2, contact_matrix, transm, 2, time_key='t')
+        self.assertTrue('No time column' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, ser_int, 2, contact_matrix, transm, 2, inc_key='i')
+        self.assertTrue('No incidence column' in str(test_excep.exception))
+
         with self.assertRaises(TypeError) as test_excep:
             bp.MultiCatPoissonBranchProLogLik(
                 df, 0, 2, contact_matrix, transm, 2)
@@ -66,26 +81,21 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
 
         with self.assertRaises(ValueError) as test_excep:
             bp.MultiCatPoissonBranchProLogLik(
-                df, ser_int, 2, contact_matrix, transm, 2, time_key='t')
-        self.assertTrue('No time column' in str(test_excep.exception))
-
-        with self.assertRaises(ValueError) as test_excep:
-            bp.MultiCatPoissonBranchProLogLik(
-                df, ser_int, 2, contact_matrix, transm, 2, inc_key='i')
-        self.assertTrue('No incidence column' in str(test_excep.exception))
-
-        with self.assertRaises(ValueError) as test_excep:
-            bp.MultiCatPoissonBranchProLogLik(
-                df, [[1, 2], [1, 2]], 2, contact_matrix, transm, 6)
-        self.assertTrue(
-            'Serial interval values storage format'
-            in str(test_excep.exception))
-
-        with self.assertRaises(ValueError) as test_excep:
-            bp.MultiCatPoissonBranchProLogLik(
                 df, [1, -2], 2, contact_matrix, transm, 6)
         self.assertTrue(
             'Sum of serial interval' in str(test_excep.exception))
+
+        with self.assertRaises(TypeError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, 0, 2, contact_matrix, transm, 2)
+        self.assertTrue('must be iterable' in str(test_excep.exception))
+
+        with self.assertRaises(TypeError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [['zero'], ['zero']], 2, contact_matrix, transm,
+                2, multipleSI=True)
+        self.assertTrue(
+            'distribution must contain' in str(test_excep.exception))
 
         with self.assertRaises(ValueError) as test_excep:
             bp.MultiCatPoissonBranchProLogLik(
