@@ -86,7 +86,8 @@ setup(
         'fast_poibin==0.3.1',
         'pystan==3.7.0',
         'arviz==0.16.1',
-        'seaborn==0.13'
+        'seaborn==0.13',
+        'httpstan==4.10.1'
     ],
     python_requires='>=3.9',
     extras_require={
