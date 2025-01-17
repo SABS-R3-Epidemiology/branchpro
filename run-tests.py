@@ -143,13 +143,14 @@ def doctest_rst_and_public_interface():
     # this list.
     branchpro_submodules = [
         'branchpro.models',
-        'branchpro.new_models',
         'branchpro.version_info',
         'branchpro.simulation',
         'branchpro.apps',
         'branchpro.posterior',
-        'branchpro.new_posterior',
         'branchpro.figures',
+        'branchpro.negbin_models',
+        'branchpro.negbin_posterior',
+        'branchpro.poibin_models',
         'branchpro.multicat_models',
         'branchpro.multicat_posterior',
         'fast_posterior'

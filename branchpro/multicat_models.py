@@ -74,11 +74,11 @@ class MultiCatPoissonBranchProModel(BranchProModel):
                 'Wrong number of columns in contact matrix values storage')
         for c in np.asarray(contact_matrix):
             for _ in c:
-                if _ < 0:
-                    raise ValueError('Contact matrix values must be >= 0.')
                 if not isinstance(_, (int, float)):
                     raise TypeError(
                         'Contact matrix values must be integer or float.')
+                if _ < 0:
+                    raise ValueError('Contact matrix values must be >= 0.')
 
         if np.asarray(transm).ndim != 1:
             raise ValueError(
@@ -87,11 +87,11 @@ class MultiCatPoissonBranchProModel(BranchProModel):
             raise ValueError(
                 'Wrong number of categories in transmissibility storage')
         for _ in transm:
-            if _ < 0:
-                raise ValueError('Transmissiblity values must be >= 0.')
             if not isinstance(_, (int, float)):
                 raise TypeError(
                     'Transmissiblity values must be integer or float.')
+            if _ < 0:
+                raise ValueError('Transmissiblity values must be >= 0.')
 
         # Invert order of serial intervals for ease in _normalised_daily_mean
         self._num_cat = num_cat
@@ -142,11 +142,11 @@ class MultiCatPoissonBranchProModel(BranchProModel):
             raise ValueError(
                 'Wrong number of categories in transmissibility storage')
         for _ in transm:
-            if _ < 0:
-                raise ValueError('Transmissiblity values must be >= 0.')
             if not isinstance(_, (int, float)):
                 raise TypeError(
                     'Transmissiblity values must be integer or float.')
+            if _ < 0:
+                raise ValueError('Transmissiblity values must be >= 0.')
 
         self._transm = np.asarray(transm)
 
@@ -172,11 +172,11 @@ class MultiCatPoissonBranchProModel(BranchProModel):
                 'Wrong number of columns in contact matrix values storage')
         for c in np.asarray(contact_matrix):
             for _ in c:
-                if _ < 0:
-                    raise ValueError('Contact matrix values must be >= 0.')
                 if not isinstance(_, (int, float)):
                     raise TypeError(
                         'Contact matrix values must be integer or float.')
+                if _ < 0:
+                    raise ValueError('Contact matrix values must be >= 0.')
 
         self._contact_matrix = np.asarray(contact_matrix)
 

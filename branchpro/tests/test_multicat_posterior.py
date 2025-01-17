@@ -74,6 +74,41 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
                 df, ser_int, 2, contact_matrix, transm, 2, inc_key='i')
         self.assertTrue('No incidence column' in str(test_excep.exception))
 
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [[1, 2], [1, 2]], 2, contact_matrix, transm, 6)
+        self.assertTrue(
+            'Serial interval values storage format'
+            in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [1, -2], 2, contact_matrix, transm, 6)
+        self.assertTrue(
+            'Sum of serial interval' in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, ser_int, 2, contact_matrix, transm, 6, multipleSI=True)
+        self.assertTrue(
+            'Serial interval values storage format'
+            in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [[1, 2], [1, 2], [2, 0]], 2, contact_matrix, transm,
+                6, multipleSI=True)
+        self.assertTrue(
+            'Serial interval values storage format'
+            in str(test_excep.exception))
+
+        with self.assertRaises(ValueError) as test_excep:
+            bp.MultiCatPoissonBranchProLogLik(
+                df, [[1, -2], [1, 2]], 2, contact_matrix, transm,
+                6, multipleSI=True)
+        self.assertTrue(
+            'Sum of serial interval' in str(test_excep.exception))
+
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],
             'Incidence Number Cat 1': [10, 3, 4, 6, 9],
@@ -228,7 +263,8 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
         })
         ser_int = [1, 2]
         new_ser_int = [1, 2, 1]
-        wrong_ser_int = (1)
+
+        new_ser_int_multipleSI = [[1, 2, 1], [0, 3, 0]]
 
         contact_matrix = 0.5 * np.ones((2, 2))
         transm = [1, 1]
@@ -241,8 +277,30 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
             log_lik.get_serial_intervals(),
             np.array([[1, 2, 1], [1, 2, 1]]))
 
+        log_lik.set_serial_intervals(
+            new_ser_int_multipleSI, True)
+
+        npt.assert_array_equal(
+            log_lik.get_serial_intervals(),
+            np.array([[1, 2, 1], [0, 3, 0]]))
+
         with self.assertRaises(ValueError):
-            log_lik.set_serial_intervals(wrong_ser_int)
+            log_lik.set_serial_intervals((1))
+
+        with self.assertRaises(ValueError):
+            log_lik.set_serial_intervals([1, -2])
+
+        with self.assertRaises(ValueError):
+            log_lik.set_serial_intervals(
+                new_ser_int, True)
+
+        with self.assertRaises(ValueError):
+            log_lik.set_serial_intervals(
+                [[1, 2, 1], [1, 2, 1], [1, 2, 1]], True)
+
+        with self.assertRaises(ValueError):
+            log_lik.set_serial_intervals(
+                [[1, 2, 1], [0, -3, 2]], True)
 
         local_df = pd.DataFrame({
             'Time': [1, 2, 3, 5, 6],

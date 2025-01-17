@@ -141,7 +141,7 @@ class TestMultiCatPoissonBranchProModelClass(unittest.TestCase):
             multicat_model.set_contact_matrix([[1., 2.]])
 
         with self.assertRaises(ValueError):
-            multicat_model.set_contact_matrix([[1., 2.], [.1, 1.], [0., 2.]])
+            multicat_model.set_contact_matrix([[1., 2., .1], [1., 0., 2.]])
 
         with self.assertRaises(ValueError):
             multicat_model.set_contact_matrix([[1., 2.], [-.1, 1.]])
@@ -254,6 +254,15 @@ class TestMultiCatPoissonBranchProModelClass(unittest.TestCase):
         self.assertEqual(simulated_sample_model_4.shape, (2, 2))
         self.assertEqual(new_simulated_sample_model_4.shape, (3, 2))
 
+        multicat_model_5 = bp.MultiCatPoissonBranchProModel(
+            1, np.array([1, 2, 3, 2, 1]), 2, [[1., 1.], [1., 1.]], [1, 1])
+        simulated_sample_model_5 = multicat_model_5.simulate(
+            [10, 10], np.array([2, 4]))
+        new_simulated_sample_model_5 = multicat_model_5.simulate(
+            [10, 10], [0, 2, 4], var_contacts=True, neg_binom=True, niu=0.2)
+        self.assertEqual(simulated_sample_model_5.shape, (2, 2))
+        self.assertEqual(new_simulated_sample_model_5.shape, (3, 2))
+
 
 class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
     """
@@ -320,3 +329,14 @@ class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
         simulated_sample_model_4 = limulticat_model_4.simulate(
             10, [2, 4, 7], neg_binom=True, niu=0.2)
         self.assertEqual(simulated_sample_model_4.shape, (3, 2))
+
+        limulticat_model_5 = bp.LocImpMultiCatPoissonBranchProModel(
+            0, [1, 2], 0, 2, [[1., 1.], [1., 1.]], [1, 1])
+        limulticat_model_5.set_r_profile(
+            [2, 0], [1, 2], 3)
+        limulticat_model_5.set_imported_cases(
+            [1, 2, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+        simulated_sample_model_5 = limulticat_model_5.simulate(
+            10, [2, 4, 7], var_contacts=True, neg_binom=True, niu=0.2)
+        self.assertEqual(simulated_sample_model_5.shape, (3, 2))
