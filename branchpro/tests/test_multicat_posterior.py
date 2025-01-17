@@ -36,6 +36,10 @@ class TestMultiCatPoissonBranchProLogLik(unittest.TestCase):
         bp.MultiCatPoissonBranchProLogLik(
             df, ser_int, 2, contact_matrix, transm, 6)
 
+        bp.MultiCatPoissonBranchProLogLik(
+            df, [ser_int, [1, 3]], 2, contact_matrix, transm,
+            6, multipleSI=True)
+
         with self.assertRaises(TypeError) as test_excep:
             bp.MultiCatPoissonBranchProLogLik(
                 df, ser_int, '2', contact_matrix, transm, 2)

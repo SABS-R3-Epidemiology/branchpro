@@ -285,6 +285,36 @@ class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
             bp.LocImpMultiCatPoissonBranchProModel(
                 0, [[1], [1]], -13, 2, [[1., 1.], [1., 1.]], [1, 1], True)
 
+    def test_set_imported_cases(self):
+        limulticat_model_1 = bp.LocImpMultiCatPoissonBranchProModel(
+            1, np.array([1, 2, 3, 2, 1]), 0, 2, [[1., 1.], [1., 1.]], [1, 1])
+        limulticat_model_1.set_imported_cases(
+            [1, 2.0, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+
+        npt.assert_array_equal(
+            limulticat_model_1._imported_times,
+            np.array([1, 2, 4, 8]))
+
+        npt.assert_array_equal(
+            limulticat_model_1._imported_cases,
+            np.array([[5, 2], [10, 8], [9, 1], [2, 10]]))
+
+        with self.assertRaises(ValueError):
+            limulticat_model_1.set_imported_cases(
+                [[1, 2.0], [4, 8]],
+                [[5, 2], [10, 8], [9, 1], [2, 10]])
+
+        with self.assertRaises(ValueError):
+            limulticat_model_1.set_imported_cases(
+                [1, 2.0, 4, 8],
+                [5, 10, 2, 4])
+
+        with self.assertRaises(ValueError):
+            limulticat_model_1.set_imported_cases(
+                [1, 2.0, 4],
+                [[5, 2], [10, 8], [9, 1], [2, 10]])
+
     def test_simulate(self):
         limulticat_model_1 = bp.LocImpMultiCatPoissonBranchProModel(
             1, np.array([1, 2, 3, 2, 1]), 0, 2, [[1., 1.], [1., 1.]], [1, 1])
