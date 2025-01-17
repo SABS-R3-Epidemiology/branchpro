@@ -302,7 +302,7 @@ class TestStochasticLocImpNegBinBranchProModelClass(unittest.TestCase):
 
     def test_simulate(self):
         linbbr_model_1 = bp.StochasticLocImpNegBinBranchProModel(
-            2, np.array([1, 2, 3, 2, 1]), 0, 0.05)
+            2, np.array([1, 2, 3, 2, 1]), 1, 0.05)
         linbbr_model_1.set_imported_cases([1, 2.0, 4, 8], [5, 10, 9, 2])
         simulated_sample_model_1 = linbbr_model_1.simulate(1, np.array([2, 4]))
         new_simulated_sample_model_1 = linbbr_model_1.simulate(10, [0, 2, 4])

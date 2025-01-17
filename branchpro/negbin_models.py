@@ -652,10 +652,14 @@ class StochasticLocImpNegBinBranchProModel(LocImpNegBinBranchProModel):
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            norm_daily_mean = (
-                self._effective_no_infectives(t, incidences) +
-                self._effective_no_infectives(
-                    t, imported_incidences, self.epsilon))
+            if self.epsilon != 0:
+                norm_daily_mean = (
+                    self._effective_no_infectives(t, incidences) +
+                    self._effective_no_infectives(
+                        t, imported_incidences, self.epsilon))
+            else:
+                norm_daily_mean = (
+                    self._effective_no_infectives(t, incidences))
             incidences[t] = np.random.poisson(lam=norm_daily_mean, size=1)
 
         mask = np.in1d(np.append(np.asarray(0), simulation_times), times)

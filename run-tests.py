@@ -150,6 +150,8 @@ def doctest_rst_and_public_interface():
         'branchpro.posterior',
         'branchpro.new_posterior',
         'branchpro.figures',
+        'branchpro.multicat_models',
+        'branchpro.multicat_posterior',
         'fast_posterior'
         ]
 
