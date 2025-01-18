@@ -29,18 +29,14 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: Install C++ Compiler (macOS and Windows)
+      run: |
+        brew install gcc
+
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install .
-
-    - name: Install C++ Compiler (macOS and Windows)
-      run: |
-        brew install gcc
-    - name: Reinstall Pystan 
-      run: |
-        pip uninstall -y pystan 
-        pip install pystan
 
     - name: Test with unittest
       run: |
