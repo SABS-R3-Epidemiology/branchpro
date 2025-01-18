@@ -25,7 +25,7 @@ jobs:
 
     - name: Install Python 3.10 in WSL
       run: |
-        wsl --distribution Ubuntu --install python3.10 python3.10-pip
+        wsl --distribution Ubuntu-18.04 --install python3.10 python3.10-pip
 
     - name: Use WSL as default shell
       run: |
