@@ -20,18 +20,8 @@ jobs:
 
     - name: Install WSL
       uses: Vampire/setup-wsl@v4
-
-    - name: Install Ubuntu Distribution
-      run: |
-        wsl --install -d Ubuntu 
-
-    - name: Verify Ubuntu Installation
-      run: |
-        wsl --list --verbose 
-
-    - name: Update Ubuntu Distribution
-      run: |
-        wsl --distribution Ubuntu --update
+      with:
+        distribution: Ubuntu-18.04
 
     - name: Install Python 3.10 in WSL
       run: |
