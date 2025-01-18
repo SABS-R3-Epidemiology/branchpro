@@ -18,8 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: macos-latest
-        platform: x64
+        os: [macos-latest]
+        platform: [x64]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
