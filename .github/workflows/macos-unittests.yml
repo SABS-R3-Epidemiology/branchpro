@@ -16,8 +16,8 @@ jobs:
   build:
     runs-on: macos-latest
     env:
-      PIP_ARCH: 'x86_64'  # Set the desired architecture
-      PIP_TARGET_PLATFORM: 'darwin'  # Set the platform (macOS)
+      PIP_ARCH: "x86_64"  # Set the desired architecture
+      PIP_TARGET_PLATFORM: "darwin"  # Set the platform (macOS)
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
