@@ -33,6 +33,15 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install .
+
+    - name: Install C++ Compiler (macOS and Windows)
+      run: |
+        brew install gcc
+    - name: Reinstall Pystan 
+        run: |
+          pip uninstall -y pystan 
+          pip install pystan
+
     - name: Test with unittest
       run: |
         python3 run-tests.py --unit

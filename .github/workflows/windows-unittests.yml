@@ -35,6 +35,14 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install .  # Install your project dependencies
+    
+    - name: Install C++ Compiler (macOS and Windows)
+      run: |
+        choco install gcc
+    - name: Reinstall Pystan 
+        run: |
+          pip uninstall -y pystan 
+          pip install pystan 
 
     - name: Test with unittest
       run: |
