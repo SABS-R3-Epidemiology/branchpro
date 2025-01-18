@@ -22,22 +22,9 @@ jobs:
       uses: Vampire/setup-wsl@v4
       with:
         distribution: Ubuntu-18.04
-
-    - name: Verify WSL Installation
-      run: |
-        wsl --list --verbose
-
-    - name: Update Package Lists in WSL
-      run: |
-        wsl --exec "sudo apt update"
-
-    - name: Install Python 3.10 and pip in WSL
-      run: |
-        wsl --exec "sudo apt install -y python3.10 python3.10-pip"
-
-    - name: Use WSL as default shell
-      run: |
-        wsl --default-shell
+        set-as-default: 'true'
+        wsl-shell-user: wsl
+        additional-packages: bash
 
     - name: Install dependencies
       run: |
