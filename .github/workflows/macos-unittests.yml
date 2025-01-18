@@ -29,10 +29,13 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install C++ Compiler (macOS and Windows)
+    - name: Create Virtual Environment
       run: |
-        brew install gcc
-
+        python -m venv .venv
+        source .venv/bin/activate
+    - name: Clear Pip Cache
+      run: |
+        pip cache purge
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
