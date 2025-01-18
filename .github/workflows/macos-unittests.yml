@@ -14,7 +14,12 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: macos-latest
+        platform: x64
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
