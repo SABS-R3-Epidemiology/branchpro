@@ -33,7 +33,7 @@ jobs:
 
     - name: Create Virtual Environment
       run: |
-        python -m venv .venv
+        python3 -m venv .venv
         source .venv/bin/activate
     - name: Clear Pip Cache
       run: |
