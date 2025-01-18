@@ -26,7 +26,7 @@ jobs:
     - name: Install WSL (Ubuntu)
       uses: Vampire/setup-wsl@v4
       with:
-        distribution: Ubuntu-18.04
+        distribution: Ubuntu-24.04
         set-as-default: 'true'
         wsl-shell-user: wsl
         additional-packages: bash
