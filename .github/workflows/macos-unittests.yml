@@ -26,7 +26,7 @@ jobs:
 
     - name: Set multibuild environment variables
       run: |
-        echo "PLAT=x86_64" >> $GITHUB_ENV;
+        echo "PLAT=x86_64" >> $GITHUB_ENV
         echo "ARCHFLAGS=-arch x86_64" >> $GITHUB_ENV
         then echo "MB_PYTHON_OSX_VER=10.9" >> $GITHUB_ENV
     - name: Install dependencies
