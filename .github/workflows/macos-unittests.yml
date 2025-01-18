@@ -28,7 +28,25 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         pip install --no-binary :all: numpy 
-        pip install .[pystan]
+        pip install 'pystan[test]'  # Install pystan with test dependencies
+
+    - name: Install httpstan from source (if necessary)
+      run: |
+        if ! command -v g++ &> /dev/null; then
+          brew install gcc  # Install GCC if not available
+        fi
+        cd /tmp  # Temporary directory for building httpstan
+        git clone https://github.com/stan-dev/httpstan.git
+        cd httpstan
+        mkdir build
+        cd build
+        cmake ..
+        make -j $(nproc)  # Use all available cores for faster build
+        sudo make install  # Install httpstan to the system
+
+    - name: Re-install pystan (after httpstan build)
+      run: |
+        pip install --force-reinstall pystan
     - name: Test with unittest
       run: |
         python3 run-tests.py --unit
