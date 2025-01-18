@@ -189,7 +189,8 @@ class TestPlotRInference(unittest.TestCase):
             inference.run_inference(tau=tau)
             intervals = inference.get_intervals(central_prob=.95)
             intervals['Epsilon'] = [epsilon] * len(intervals.index)
-            all_intervals = pd.concat([all_intervals, intervals], ignore_index=True)
+            all_intervals = pd.concat(
+                [all_intervals, intervals], ignore_index=True)
 
         prior_dist = scipy.stats.gamma(a, scale=1/b)
         median = prior_dist.median()
@@ -283,7 +284,8 @@ class TestPlotRegionsInference(unittest.TestCase):
             inference.run_inference(tau=tau)
             intervals = inference.get_intervals(central_prob=.95)
             intervals['Epsilon'] = [epsilon] * len(intervals.index)
-            all_intervals = pd.concat([all_intervals, intervals], ignore_index=True)
+            all_intervals = pd.concat(
+                [all_intervals, intervals], ignore_index=True)
 
         cls.locally_infected_cases = locally_infected_cases
         cls.imported_cases = imported_cases
@@ -450,7 +452,8 @@ class TestPlotHeatmap(unittest.TestCase):
             inference.run_inference(tau=tau)
             intervals = inference.get_intervals(central_prob=.95)
             intervals['Epsilon'] = [epsilon] * len(intervals.index)
-            all_intervals = pd.concat([all_intervals, intervals], ignore_index=True)
+            all_intervals = pd.concat(
+                [all_intervals, intervals], ignore_index=True)
 
         cls.epsilon_range = epsilon_range
         cls.all_intervals = all_intervals
