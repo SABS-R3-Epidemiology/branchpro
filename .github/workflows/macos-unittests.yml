@@ -31,7 +31,7 @@ jobs:
 
       - name: Build for x86_64
         run: |
-          arch -x86_64 /bin/bash -c "python3 setup.py build"
+          arch -x86_64 /bin/bash -c "pip install .[test]" 
       - name: Test with unittest
         run: |
           python3 run-tests.py --unit
