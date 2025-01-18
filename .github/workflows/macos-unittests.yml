@@ -38,9 +38,9 @@ jobs:
       run: |
         brew install gcc
     - name: Reinstall Pystan 
-        run: |
-          pip uninstall -y pystan 
-          pip install pystan
+      run: |
+        pip uninstall -y pystan 
+        pip install pystan
 
     - name: Test with unittest
       run: |
