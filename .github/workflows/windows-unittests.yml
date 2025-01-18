@@ -12,35 +12,29 @@ on:
       - '**'
 
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Install WSL
-        uses: SABS-R3-Epidemiology/setup-wsl@v2
-        with:
-          distro: Ubuntu-22.04 # Or your preferred distro
+    - name: Install WSL
+      uses: microsoft/setup-wsl@v2
 
-      - name: Install Python in WSL
-        run: |
-          wsl --exec "sudo apt update"
-          wsl --exec "sudo apt install -y python3.10 python3.10-dev python3.10-venv"
+    - name: Install Python 3.10 in WSL
+      run: |
+        wsl --distribution Ubuntu --update
+        wsl --distribution Ubuntu --install python3.10 python3.10-pip
 
-      - name: Create a virtual environment
-        run: |
-          wsl --exec "python3.10 -m venv .venv"
+    - name: Use WSL as default shell
+      run: |
+        wsl --default-shell
 
-      - name: Activate virtual environment
-        run: |
-          wsl --exec ". .venv/bin/activate"
+    - name: Install dependencies
+      run: |
+        python3.10 -m pip install --upgrade pip
+        python3.10 -m pip install .  # Install your project dependencies
 
-      - name: Install dependencies in WSL
-        run: |
-          pip install --upgrade pip
-          pip install .
-
-      - name: Test with unittest
-        run: |
-          python3 run-tests.py --unit
+    - name: Test with unittest
+      run: |
+        python3.10 run-tests.py --unit
