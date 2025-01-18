@@ -21,11 +21,11 @@ jobs:
     - name: Install WSL
       uses: Vampire/setup-wsl@v4
       with:
-        distribution: Ubuntu
+        distribution: Ubuntu-18.04
 
     - name: Install Python 3.10 in WSL
       run: |
-        wsl --install python3.10 python3.10-pip  # No need for additional distribution specification
+        wsl --exec "sudo apt update && sudo apt install -y python3.10 python3.10-pip"
 
     - name: Use WSL as default shell
       run: |
