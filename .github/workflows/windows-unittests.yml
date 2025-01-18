@@ -21,7 +21,7 @@ jobs:
     - name: Install WSL
       uses: Vampire/setup-wsl@v4
       with:
-        distribution: Ubuntu-18.04
+        distribution: Ubuntu
 
     - name: Install Python 3.10 in WSL
       run: |
