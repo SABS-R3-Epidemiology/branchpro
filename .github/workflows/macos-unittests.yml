@@ -24,13 +24,11 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Create Virtual Environment
+    - name: Set multibuild environment variables
       run: |
-        python3 -m venv .venv
-        source .venv/bin/activate
-    - name: Clear Pip Cache
-      run: |
-        pip cache purge
+        echo "PLAT=x86_64" >> $GITHUB_ENV;
+        echo "ARCHFLAGS=-arch x86_64" >> $GITHUB_ENV
+        then echo "MB_PYTHON_OSX_VER=10.9" >> $GITHUB_ENV
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
