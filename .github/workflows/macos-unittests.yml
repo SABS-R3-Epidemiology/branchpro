@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install . --only-binary :all:
+        python3 -m pip install .
 
     - name: Test with unittest
       run: |

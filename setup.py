@@ -84,7 +84,7 @@ setup(
         'multiprocess',
         'psutil',
         'fast_poibin',
-        'pystan',
+        'pystan>=3.7',
         'arviz',
         'seaborn'
     ],
