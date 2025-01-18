@@ -26,13 +26,21 @@ jobs:
       - name: Install Python in WSL
         run: |
           wsl --exec "sudo apt update"
-          wsl --exec "sudo apt install -y python3-pip"
+          wsl --exec "sudo apt install -y python3.10 python3.10-dev python3.10-venv"
+
+      - name: Create a virtual environment
+        run: |
+          wsl --exec "python3.10 -m venv .venv"
+
+      - name: Activate virtual environment
+        run: |
+          wsl --exec ". .venv/bin/activate"
 
       - name: Install dependencies in WSL
         run: |
-          wsl --exec "python3.10 -m pip install --upgrade pip"
-          wsl --exec "python3.10 -m pip install -r ."
+          pip install --upgrade pip
+          pip install .
 
       - name: Test with unittest
         run: |
-          wsl --exec "python3.10 run-tests.py --unit"
+          python3 run-tests.py --unit
