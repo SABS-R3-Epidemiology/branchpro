@@ -18,15 +18,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python 3.9
+    - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.10'
 
     - name: Install WSL (Ubuntu)
       uses: Vampire/setup-wsl@v4
       with:
-        distribution: Ubuntu-24.04
+        distribution: Ubuntu-22.04
         set-as-default: 'true'
         wsl-shell-user: wsl
         additional-packages: bash
