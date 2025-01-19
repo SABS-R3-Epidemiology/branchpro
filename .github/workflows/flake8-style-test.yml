@@ -28,7 +28,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install flake8
           python3 -m pip install .
-          python3 -m install_cmdstan
+  
       - name: run style tests
         run: |
           python3 -m flake8
