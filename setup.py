@@ -84,7 +84,7 @@ setup(
         'multiprocess',
         'psutil',
         'fast_poibin',
-        'httpstan>=4.10',
+        'httpstan',
         'pystan>=3.7',
         'Cython',
         'arviz',

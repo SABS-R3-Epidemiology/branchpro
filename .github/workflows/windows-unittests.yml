@@ -28,7 +28,7 @@ jobs:
       with:
         distribution: Ubuntu-22.04
         set-as-default: 'true'
-        wsl-shell-user: wsl
+        wsl-version: '2'
         additional-packages: bash
 
     - name: Install dependencies
