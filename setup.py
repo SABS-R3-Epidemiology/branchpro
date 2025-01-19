@@ -70,14 +70,14 @@ setup(
     install_requires=[
         # Dependencies go here!
         'matplotlib',
-        'numpy>=1.8',
-        'dash>=2.0',
-        'dash_bootstrap_components>=0.12',
+        'numpy',
+        'dash',
+        'dash_bootstrap_components',
         'dash_daq',
         'dash_defer_js_import',
         'pandas',
         'plotly',
-        'scipy>=1.6',
+        'scipy',
         'pints',
         'numexpr',
         'diskcache',
