@@ -86,6 +86,7 @@ setup(
         'fast_poibin',
         'pystan>=3.7',
         'httpstan>=4.10',
+        'Cython',
         'arviz',
         'seaborn'
     ],
