@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-latest-large
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
