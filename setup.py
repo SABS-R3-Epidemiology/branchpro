@@ -84,8 +84,8 @@ setup(
         'multiprocess',
         'psutil',
         'fast_poibin',
-        'pystan>=3.7',
         'httpstan>=4.10',
+        'pystan>=3.7',
         'Cython',
         'arviz',
         'seaborn'
