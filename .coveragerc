@@ -2,6 +2,7 @@
 source = branchpro
 omit =
     branchpro/tests/*
+    branchpro/stan_models/*
     branchpro/data_library/*
     branchpro/apps/_dash_app.py
     branchpro/apps/_simulation.py

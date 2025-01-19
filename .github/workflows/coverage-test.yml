@@ -27,6 +27,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install .
+          python3 -m install_cmdstan
           python3 -m pip install coverage codecov
       - name: run coverage
         run: |

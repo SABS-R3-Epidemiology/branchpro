@@ -25,6 +25,7 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install .[docs]
+        python3 -m install_cmdstan
     - name: Checks documentation
       run: |
         python3 run-tests.py --doctest
