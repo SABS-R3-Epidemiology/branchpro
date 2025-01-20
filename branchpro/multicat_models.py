@@ -536,15 +536,11 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
                     contact_matrix = np.random.negative_binomial(
                         self._contact_matrix, niu)
                 self.exact_contact_matrix.append(contact_matrix)
-            norm_daily_mean = self._r_profile[t-1] * np.matmul(
-                self._contact_matrix,
-                np.multiply(
-                    self._transm,
-                    self._effective_no_infectives(
-                        t, incidences, contact_matrix) +
-                    self.epsilon * self._effective_no_infectives(
-                        t, imported_incidences, contact_matrix)
-                ))
+            norm_daily_mean = self._r_profile[t-1] * \
+                (self._effective_no_infectives(
+                    t, incidences, contact_matrix) +
+                 self.epsilon * self._effective_no_infectives(
+                    t, imported_incidences, contact_matrix))
             incidences[t, :] = np.random.poisson(
                 lam=norm_daily_mean, size=self._num_cat)
 
