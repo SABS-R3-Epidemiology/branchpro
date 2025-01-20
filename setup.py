@@ -6,7 +6,11 @@
 # under the BSD 3-clause license. See accompanying LICENSE.md for copyright
 # notice and full license details.
 #
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+import os
+
+ext = Extension(
+    'fast_posterior', [os.path.join('branchpro', 'fast_posterior.c')])
 
 
 def get_version():
@@ -66,21 +70,25 @@ setup(
     install_requires=[
         # Dependencies go here!
         'matplotlib',
-        'numpy>=1.8',
-        'dash>=2.0',
-        'dash_bootstrap_components>=0.12',
+        'numpy',
+        'dash',
+        'dash_bootstrap_components',
         'dash_daq',
         'dash_defer_js_import',
-        'pandas<2.0.0',
+        'pandas',
         'plotly',
-        'scipy>=1.6',
+        'scipy',
         'pints',
         'numexpr',
         'diskcache',
         'multiprocess',
         'psutil',
+        'fast_poibin',
+        'cmdstanpy',
+        'arviz',
+        'seaborn'
     ],
-    python_requires='>3.9',
+    python_requires='>=3.9',
     extras_require={
         'docs': [
             # Sphinx for doc generation. Version 1.7.3 has a bug:
@@ -91,4 +99,5 @@ setup(
             'flake8>=3',
         ],
     },
+    ext_modules=[ext],
 )
