@@ -1,3 +1,20 @@
 # Requirements for readthedocs.io
 numpy>=1.8
 sphinx>=1.5, !=1.7.3
+matplotlib
+dash
+dash_bootstrap_components
+dash_daq
+dash_defer_js_import
+pandas
+plotly
+scipy
+pints
+numexpr
+diskcache
+multiprocess
+psutil
+fast_poibin
+cmdstanpy
+arviz
+seaborn
