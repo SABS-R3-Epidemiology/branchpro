@@ -90,11 +90,12 @@ def change_age_groups(matrix: np.array, pop_freq: np.array):
         New contact matrix with correct age groups.
 
     """
-    new_matrix = np.empty((2, 2))
+    new_matrix = np.empty((3, 3))
 
     ind_old = [
         np.array(range(0, 4)),
-        np.array(range(4, 16))]
+        np.array(range(4, 12)),
+        np.array(range(12, 16))]
 
     pop_freq = pop_freq.to_numpy()[0, :]
     frac_pop_over75 = pop_freq[:15].tolist()
@@ -103,8 +104,8 @@ def change_age_groups(matrix: np.array, pop_freq: np.array):
 
     print(frac_pop_over75.shape, matrix.shape)
 
-    for i in range(2):
-        for j in range(2):
+    for i in range(3):
+        for j in range(3):
             new_matrix[i, j] = np.average(
                 np.sum(
                     matrix[ind_old[i][:, None], ind_old[j]], axis=0),
@@ -137,7 +138,7 @@ def main():
     # Transform recorded matrix of serial intervals to csv file
     path_ = os.path.join(
         os.path.dirname(__file__), 'final_contact_matrices/')
-    path6 = os.path.join(path_, 'BASE_Japan.csv')
+    path6 = os.path.join(path_, 'BASE_Japan_3.csv')
 
     np.savetxt(
         path6, change_age_groups(baseline_contact_matrix, pop_freq),

@@ -279,7 +279,7 @@ class MultiCatPoissonBranchProModel(BranchProModel):
 
     def simulate(
             self, parameters, times, var_contacts=False, neg_binom=False,
-            niu=0.1):
+            niu=0.1, interventions=None, time_interventions=None):
         """
         Runs a forward simulation with the given ``parameters`` and returns a
         time-series with incidence numbers per population category
@@ -301,6 +301,11 @@ class MultiCatPoissonBranchProModel(BranchProModel):
             Binomial distributed.
         niu
             (float) Accepance probability.
+        interventions
+            List of matrix multipliers describing interventions applied to
+            reduce number of contacts.
+        time_interventions
+            Times of implementation of interventions to reduce contacts.
 
         """
         initial_cond = parameters
@@ -322,18 +327,43 @@ class MultiCatPoissonBranchProModel(BranchProModel):
 
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
-        self.exact_contact_matrix = [np.random.poisson(self._contact_matrix)]
+        if var_contacts is False:
+            self.exact_contact_matrix = [self._contact_matrix]
+        else:
+            if neg_binom is False:
+                self.exact_contact_matrix = [np.random.poisson(
+                    self._contact_matrix)]
+            else:
+                self.exact_contact_matrix = [np.random.negative_binomial(
+                        self._contact_matrix, niu)]
 
         for t in simulation_times:
-            if var_contacts is False:
-                contact_matrix = self._contact_matrix
-            else:
-                if neg_binom is False:
-                    contact_matrix = np.random.poisson(self._contact_matrix)
+            if interventions is not None:
+                # Identify the current time and region NPIs levels
+                pos = np.where(np.asarray(time_interventions) <= t+1)
+                current_npi = interventions[pos[-1][-1]]
+                if var_contacts is False:
+                    contact_matrix = np.matmul(
+                        current_npi, self._contact_matrix)
                 else:
-                    contact_matrix = np.random.negative_binomial(
-                        self._contact_matrix, niu)
+                    if neg_binom is False:
+                        contact_matrix = np.random.poisson(
+                            np.matmul(current_npi, self._contact_matrix))
+                    else:
+                        contact_matrix = np.random.negative_binomial(
+                            np.matmul(current_npi, self._contact_matrix), niu)
                 self.exact_contact_matrix.append(contact_matrix)
+            else:
+                if var_contacts is False:
+                    contact_matrix = self._contact_matrix
+                else:
+                    if neg_binom is False:
+                        contact_matrix = np.random.poisson(
+                            self._contact_matrix)
+                    else:
+                        contact_matrix = np.random.negative_binomial(
+                            self._contact_matrix, niu)
+                    self.exact_contact_matrix.append(contact_matrix)
             norm_daily_mean = self._r_profile[t-1] * \
                 self._effective_no_infectives(t, incidences, contact_matrix)
             incidences[t, :] = np.random.poisson(
@@ -467,7 +497,7 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
 
     def simulate(
             self, parameters, times, var_contacts=False, neg_binom=False,
-            niu=0.1):
+            niu=0.1, interventions=None, time_interventions=None):
         """
         Runs a forward simulation with the given ``parameters`` and returns a
         time-series with incidence numbers per population category
@@ -489,6 +519,11 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
             Binomial distributed.
         niu
             (float) Accepance probability.
+        interventions
+            List of matrix multipliers describing interventions applied to
+            reduce number of contacts.
+        time_interventions
+            Times of implementation of interventions to reduce contacts.
 
         """
         initial_cond = parameters
@@ -522,20 +557,45 @@ class LocImpMultiCatPoissonBranchProModel(MultiCatPoissonBranchProModel):
 
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
-        self.exact_contact_matrix = [np.random.poisson(self._contact_matrix)]
+        if var_contacts is False:
+            self.exact_contact_matrix = [self._contact_matrix]
+        else:
+            if neg_binom is False:
+                self.exact_contact_matrix = [np.random.poisson(
+                    self._contact_matrix)]
+            else:
+                self.exact_contact_matrix = [np.random.negative_binomial(
+                        self._contact_matrix, niu)]
 
         # Compute normalised daily means for full timespan
         # and draw samples for the incidences
         for t in simulation_times:
-            if var_contacts is False:
-                contact_matrix = self._contact_matrix
-            else:
-                if neg_binom is False:
-                    contact_matrix = np.random.poisson(self._contact_matrix)
+            if interventions is not None:
+                # Identify the current time and region NPIs levels
+                pos = np.where(np.asarray(time_interventions) <= t+1)
+                current_npi = interventions[pos[-1][-1]]
+                if var_contacts is False:
+                    contact_matrix = np.matmul(
+                        current_npi, self._contact_matrix)
                 else:
-                    contact_matrix = np.random.negative_binomial(
-                        self._contact_matrix, niu)
+                    if neg_binom is False:
+                        contact_matrix = np.random.poisson(
+                            np.matmul(current_npi, self._contact_matrix))
+                    else:
+                        contact_matrix = np.random.negative_binomial(
+                            np.matmul(current_npi, self._contact_matrix), niu)
                 self.exact_contact_matrix.append(contact_matrix)
+            else:
+                if var_contacts is False:
+                    contact_matrix = self._contact_matrix
+                else:
+                    if neg_binom is False:
+                        contact_matrix = np.random.poisson(
+                            self._contact_matrix)
+                    else:
+                        contact_matrix = np.random.negative_binomial(
+                            self._contact_matrix, niu)
+                    self.exact_contact_matrix.append(contact_matrix)
             norm_daily_mean = self._r_profile[t-1] * \
                 (self._effective_no_infectives(
                     t, incidences, contact_matrix) +
