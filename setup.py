@@ -83,7 +83,7 @@ setup(
         'diskcache',
         'multiprocess',
         'psutil',
-        'fast_poibin',
+        'fast_poibin==0.3.2',
         'cmdstanpy==1.2',
         'arviz==0.20',
         'seaborn'
