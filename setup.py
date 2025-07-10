@@ -84,7 +84,7 @@ setup(
         'multiprocess',
         'psutil',
         'fast_poibin',
-        'cmdstanpy==1.25',
+        'cmdstanpy==1.2',
         'arviz==0.20',
         'seaborn'
     ],
