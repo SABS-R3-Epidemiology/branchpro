@@ -443,7 +443,7 @@ class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
             [1, 2, 4, 8],
             [[5, 2], [10, 8], [9, 1], [2, 10]])
         simulated_sample_model_8 = limulticat_model_8.simulate(
-            10, [2, 4, 7], var_contacts=True, neg_binom=True, niu=0.2,
+            10, [2, 4, 7], var_contacts=True,
             interventions=[red*np.identity(2) for red in [1, 0.5, 0.4]],
             time_interventions=[0, 2, 5])
         self.assertEqual(simulated_sample_model_8.shape, (3, 2))
