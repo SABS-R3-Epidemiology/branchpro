@@ -290,6 +290,17 @@ class TestMultiCatPoissonBranchProModelClass(unittest.TestCase):
             time_interventions=[0, 2, 5])
         self.assertEqual(simulated_sample_model_8.shape, (3, 2))
 
+        multicat_model_9 = bp.MultiCatPoissonBranchProModel(
+            1, np.array([1, 2, 3, 2, 1]), 2, [[1., 1.], [1., 1.]], [1, 1])
+        simulated_sample_model_9 = multicat_model_9.simulate(
+            [10, 10], np.array([2, 4]))
+        new_simulated_sample_model_9 = multicat_model_9.simulate(
+            [10, 10], [0, 2, 4], var_contacts=True, neg_binom=True, niu=0.2,
+            interventions=[red*np.identity(2) for red in [1, 0.5, 0.4]],
+            time_interventions=[0, 2, 5])
+        self.assertEqual(simulated_sample_model_9.shape, (2, 2))
+        self.assertEqual(new_simulated_sample_model_9.shape, (3, 2))
+
 
 class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
     """
@@ -436,3 +447,16 @@ class TestLocImpMultiCatPoissonBranchProModelClass(unittest.TestCase):
             interventions=[red*np.identity(2) for red in [1, 0.5, 0.4]],
             time_interventions=[0, 2, 5])
         self.assertEqual(simulated_sample_model_8.shape, (3, 2))
+
+        limulticat_model_9 = bp.LocImpMultiCatPoissonBranchProModel(
+            0, [1, 2], 0, 2, [[1., 1.], [1., 1.]], [1, 1])
+        limulticat_model_9.set_r_profile(
+            [2, 0], [1, 2], 3)
+        limulticat_model_9.set_imported_cases(
+            [1, 2, 4, 8],
+            [[5, 2], [10, 8], [9, 1], [2, 10]])
+        simulated_sample_model_9 = limulticat_model_9.simulate(
+            10, [2, 4, 7], var_contacts=True, neg_binom=True, niu=0.2,
+            interventions=[red*np.identity(2) for red in [1, 0.5, 0.4]],
+            time_interventions=[0, 2, 5])
+        self.assertEqual(simulated_sample_model_9.shape, (3, 2))
