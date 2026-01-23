@@ -233,7 +233,7 @@ class PoissonBranchProLogLik(pints.LogPDF):
             return eff_num
 
         eff_num = (
-            (cases_data[:(t-1)] * self._serial_interval[-(t-1):()]).sum() /
+            (cases_data[:(t-1)] * self._serial_interval[-(t-1):]).sum() /
             self._normalizing_const)
 
         return eff_num
