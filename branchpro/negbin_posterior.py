@@ -16,7 +16,7 @@ import pints
 import branchpro
 
 
-class PoissonBranchProLogLik(pints.LogPDF):
+class PoissonBranchProLogLik(pints.LogLikelihood):
     """PoissonBranchProLogLik Class:
     Controller class to construct the log-likelihood needed for optimisation or
     inference in a PINTS framework of Poisson branching process.
