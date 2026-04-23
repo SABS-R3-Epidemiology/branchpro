@@ -77,7 +77,7 @@ More examples on how to use the classes and features included in this repository
 
 In their most basic form, the branching processes modelling approach assume that all previous infections occurring on the same day contribute in equal measure to the present incidence of infection. However, this assumption is not generally true for most epidemic scenarios, where different population groups share different epidemic burdens. 
 
-Therefore, we have now extendend the branchpro package to offer users the possibility to run both running forward simulation and perform Rt inference for both the overall and group-specific reproduction numbers using a multiple-group population branching process. The approach implemented bypasses the need to use the next-generation matrix approach, as detailed in our [preprint]().
+Therefore, we have now extendend the branchpro package to offer users the possibility to run both running forward simulation and perform Rt inference for both the overall and group-specific reproduction numbers using a multiple-group population branching process. The approach implemented bypasses the need to use the next-generation matrix approach, as detailed in our [paper](https://royalsocietypublishing.org/rsif/article/22/228/20250095/235500/The-time-dependent-reproduction-number-for).
 
 To recreate our analyses for the suitability of multiple group renewal equations and Rt inference, please rerun the notebooks found [here](https://github.com/SABS-R3-Epidemiology/branchpro/tree/main/branchpro/results/heterogeneity).
 
